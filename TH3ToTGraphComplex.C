@@ -1,167 +1,127 @@
 TGraphErrors* GetGraph(TH3F* histo3D, TString axis, int bin1, int bin2);
+void CustomizeGraphsRanges(std::vector<TGraphErrors*> v_graph);
 void SetGraphProperties(TGraphErrors* graph, int color, int line_width, int line_style, int marker_size, int marker_style);
 void SetAxesNames(TGraphErrors* graph, TString xaxisname, TString yaxisname);
 std::string StringBinNumber(int number);
 
 
 void TH3ToTGraphComplex()
-{
+{  
   const int marker_size = 2;
   const int line_width = 2;
   
   TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
   TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
   TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
+   
+  struct axis
+  {
+    std::string name_;
+    std::string letter_;
+    std::string title_;
+    std::string id_;
+    int another_first_;
+    int another_second_;
+    int nbins_;
+  };
   
-  TH3F* h_fit = file_fit -> Get<TH3F>("parameters/hsignal");
-  TH3F* h_mcfit = file_mcfit -> Get<TH3F>("parameters/hsignal");
-  TH3F* h_mcv1 = file_mcv1 -> Get<TH3F>("hv1_mc");
+  std::vector<axis> axes
+  {
+    {"centrality", "C",  "Centrality, %", "x", 1, 2, -1},
+    {"rapidity",   "y",  "y_{LAB}",       "y", 0, 2, -1},
+    {"pT",         "pT", "p_{T}, GeV/c",  "z", 0, 1, -1}
+  };
   
-  const int C_nbins = h_fit->GetXaxis()->GetNbins();
-  const int y_nbins = h_fit->GetYaxis()->GetNbins();
-  const int pT_nbins = h_fit->GetZaxis()->GetNbins();
+  struct infotype
+  {
+    std::string name_;
+    std::string folder_;
+    bool is_mcfitter_;
+    bool is_mcv1_;
+  };
   
-  TFile* fileOut = TFile::Open("out.th3totgrphcplx.root", "recreate");
-    
+  std::vector<infotype> infotypes
+  {
+    {"hsignal",        "sgnl",            true,  true},
+    {"hbckgr_0",       "bckgr/intercept", true,  false},
+    {"hbckgr_1",       "bckgr/slope",     true,  false},
+    {"hentries_sgnl",  "Nentries/sgnl",   false, false},
+    {"hentries_bckgr", "Nentries/bckgr",  false, false}
+  };
+  
+  TH3F* h_fit;
+  TH3F* h_mcfit;
+  TH3F* h_mcv1;
+  
   TGraphErrors* graph_fit;
   TGraphErrors* graph_mcfit;
   TGraphErrors* graph_mcv1;
+      
+  TFile* fileOut = TFile::Open("out.th3totgrphcplx.root", "recreate");
   
-  //************ centrality ******************************************
-  fileOut->mkdir("centrality/graphs");
-  fileOut->mkdir("centrality/canvas");
+  for(auto it : infotypes)
+  {
   
-  for(int i_y=1; i_y<=y_nbins; i_y++)
-    for(int i_pT=1; i_pT<=pT_nbins; i_pT++)
+                        h_fit = file_fit -> Get<TH3F>(("parameters/" + it.name_).c_str());
+    if(it.is_mcfitter_) h_mcfit = file_mcfit -> Get<TH3F>(("parameters/" + it.name_).c_str());
+    if(it.is_mcv1_)     h_mcv1 = file_mcv1 -> Get<TH3F>("hv1_mc");
+    
+    axes.at(0).nbins_ = h_fit->GetXaxis()->GetNbins();
+    axes.at(1).nbins_ = h_fit->GetYaxis()->GetNbins();
+    axes.at(2).nbins_ = h_fit->GetZaxis()->GetNbins();
+                
+    for(auto ax : axes)
     {
-      graph_fit = GetGraph(h_fit, "x", i_y, i_pT);
-      graph_mcfit = GetGraph(h_mcfit, "x", i_y, i_pT);
-      graph_mcv1 = GetGraph(h_mcv1, "x", i_y, i_pT);
-      
-      SetAxesNames(graph_fit, "Centrality, %", "v_{1x}");
-      SetAxesNames(graph_mcfit, "Centrality, %", "v_{1x}");
-      SetAxesNames(graph_mcv1, "Centrality, %", "v_{1x}");
-      
-      SetGraphProperties(graph_fit,   kBlue,     line_width, 1, marker_size, 8);
-      SetGraphProperties(graph_mcfit, kGreen+2,  line_width, 1, marker_size, 8);
-      SetGraphProperties(graph_mcv1,  kRed,      line_width, 1, marker_size, 8);
-      
-      TString graphname = "y" + StringBinNumber(i_y) + "_pT" + StringBinNumber(i_pT);
-      
-      fileOut -> cd("centrality/graphs");
-      graph_fit -> Write(graphname + "_fit");
-      graph_mcfit -> Write(graphname + "_mcfit");
-      graph_mcv1 -> Write(graphname + "_mcv1");
-      
-      TCanvas cc(graphname, graphname, 1500, 900);
-      cc.cd();
-      
-      graph_fit -> Draw("APL");
-      graph_mcfit -> Draw("PL");
-      graph_mcv1 -> Draw("PL");
-      
-      TLegend* leg = new TLegend(0.35, 0.68, 0.55, 0.88);
-      leg -> SetBorderSize(0);
-      leg -> AddEntry(graph_mcv1,  "MC",                "PL");
-      leg -> AddEntry(graph_mcfit, "RECO, MC-match",    "PL");
-      leg -> AddEntry(graph_fit,   "RECO, invmass-fit", "PL");
-      leg -> Draw("same");
-      
-      fileOut -> cd("centrality/canvas");
-      cc.Write();
+      const int first_nbins = axes.at(ax.another_first_).nbins_;
+      const int second_nbins =  axes.at(ax.another_second_).nbins_;
+          
+      for(int i_first=1; i_first<=first_nbins; i_first++)
+        for(int i_second=1; i_second<=second_nbins; i_second++)
+        {
+          std::string binname = axes.at(ax.another_first_).letter_ + StringBinNumber(i_first) + "_" + axes.at(ax.another_second_).letter_ + StringBinNumber(i_second);
+          std::string dirname = it.folder_ +"/" + ax.name_ + "/" + binname;
+          fileOut -> mkdir(dirname.c_str());
+          fileOut -> cd(dirname.c_str());
+          
+                              graph_fit = GetGraph(h_fit, ax.id_, i_first, i_second);
+          if(it.is_mcfitter_) graph_mcfit = GetGraph(h_mcfit, ax.id_, i_first, i_second);
+          if(it.is_mcv1_)     graph_mcv1 = GetGraph(h_mcv1, ax.id_, i_first, i_second);
+          
+                              SetAxesNames(graph_fit, ax.title_, "v_{1x}");
+          if(it.is_mcfitter_) SetAxesNames(graph_mcfit, ax.title_, "v_{1x}");
+          if(it.is_mcv1_)     SetAxesNames(graph_mcv1, ax.title_, "v_{1x}"); 
+          
+                              SetGraphProperties(graph_fit,   kBlue,     line_width, 1, marker_size, 8);
+          if(it.is_mcfitter_) SetGraphProperties(graph_mcfit, kGreen+2,  line_width, 1, marker_size, 8);
+          if(it.is_mcv1_)     SetGraphProperties(graph_mcv1,  kRed,      line_width, 1, marker_size, 8);
+          
+                              graph_fit -> Write("fit");
+          if(it.is_mcfitter_) graph_mcfit -> Write("mcfit");
+          if(it.is_mcv1_)     graph_mcv1 -> Write("mcv1");
+          
+          if(! it.is_mcfitter_) continue;
+          
+          TCanvas cc("canvas", "canvas", 1500, 900);
+          cc.cd();
+          
+                          graph_fit -> Draw("APL");
+                          graph_mcfit -> Draw("PL");
+          if(it.is_mcv1_) graph_mcv1 -> Draw("PL");
+            
+          TLegend* leg = new TLegend(0.35, 0.68, 0.55, 0.88);
+          leg -> SetBorderSize(0);
+          if(it.is_mcv1_) leg -> AddEntry(graph_mcv1,  "MC",                "PL");
+                          leg -> AddEntry(graph_mcfit, "RECO, MC-match",    "PL");
+                          leg -> AddEntry(graph_fit,   "RECO, invmass-fit", "PL");
+          leg -> Draw("same");
+          
+          cc.Write();
+            
+        }
     }
-  //******************************************************************
   
-  //************ rapidity ******************************************
-  fileOut->mkdir("rapidity/graphs");
-  fileOut->mkdir("rapidity/canvas");
-  
-  for(int i_C=1; i_C<=C_nbins; i_C++)
-    for(int i_pT=1; i_pT<=pT_nbins; i_pT++)
-    {
-      graph_fit = GetGraph(h_fit, "y", i_C, i_pT);
-      graph_mcfit = GetGraph(h_mcfit, "y", i_C, i_pT);
-      graph_mcv1 = GetGraph(h_mcv1, "y", i_C, i_pT);
-      
-      SetAxesNames(graph_fit, "y_{LAB}", "v_{1x}");
-      SetAxesNames(graph_mcfit, "y_{LAB}", "v_{1x}");
-      SetAxesNames(graph_mcv1, "y_{LAB}", "v_{1x}");
-      
-      SetGraphProperties(graph_fit,   kBlue,     line_width, 1, marker_size, 8);
-      SetGraphProperties(graph_mcfit, kGreen+2,  line_width, 1, marker_size, 8);
-      SetGraphProperties(graph_mcv1,  kRed,      line_width, 1, marker_size, 8);
-      
-      TString graphname = "C" + StringBinNumber(i_C) + "_pT" + StringBinNumber(i_pT);
-      
-      fileOut -> cd("rapidity/graphs");
-      graph_fit -> Write(graphname + "_fit");
-      graph_mcfit -> Write(graphname + "_mcfit");
-      graph_mcv1 -> Write(graphname + "_mcv1");
-      
-      TCanvas cc(graphname, graphname, 1500, 900);
-      cc.cd();
-      
-      graph_fit -> Draw("APL");
-      graph_mcfit -> Draw("PL");
-      graph_mcv1 -> Draw("PL");
-      
-      TLegend* leg = new TLegend(0.35, 0.68, 0.55, 0.88);
-      leg -> SetBorderSize(0);
-      leg -> AddEntry(graph_mcv1,  "MC",                "PL");
-      leg -> AddEntry(graph_mcfit, "RECO, MC-match",    "PL");
-      leg -> AddEntry(graph_fit,   "RECO, invmass-fit", "PL");
-      leg -> Draw("same");
-      
-      fileOut -> cd("rapidity/canvas");
-      cc.Write();
-    }
-  //******************************************************************
-  
-  //************ pT **************************************************
-  fileOut->mkdir("pT/graphs");
-  fileOut->mkdir("pT/canvas");
-  
-  for(int i_C=1; i_C<=C_nbins; i_C++)
-    for(int i_y=1; i_y<=y_nbins; i_y++)
-    {
-      graph_fit = GetGraph(h_fit, "z", i_C, i_y);
-      graph_mcfit = GetGraph(h_mcfit, "z", i_C, i_y);
-      graph_mcv1 = GetGraph(h_mcv1, "z", i_C, i_y);
-      
-      SetAxesNames(graph_fit, "p_{T}, GeV/c", "v_{1x}");
-      SetAxesNames(graph_mcfit, "p_{T}, GeV/c", "v_{1x}");
-      SetAxesNames(graph_mcv1, "p_{T}, GeV/c", "v_{1x}");
-      
-      SetGraphProperties(graph_fit,   kBlue,     line_width, 1, marker_size, 8);
-      SetGraphProperties(graph_mcfit, kGreen+2,  line_width, 1, marker_size, 8);
-      SetGraphProperties(graph_mcv1,  kRed,      line_width, 1, marker_size, 8);
-      
-      TString graphname = "C" + StringBinNumber(i_C) + "_y" + StringBinNumber(i_y);
-      
-      fileOut -> cd("pT/graphs");
-      graph_fit -> Write(graphname + "_fit");
-      graph_mcfit -> Write(graphname + "_mcfit");
-      graph_mcv1 -> Write(graphname + "_mcv1");
-      
-      TCanvas cc(graphname, graphname, 1500, 900);
-      cc.cd();
-      
-      graph_fit -> Draw("APL");
-      graph_mcfit -> Draw("PL");
-      graph_mcv1 -> Draw("PL");
-      
-      TLegend* leg = new TLegend(0.35, 0.68, 0.55, 0.88);
-      leg -> SetBorderSize(0);
-      leg -> AddEntry(graph_mcv1,  "MC",                "PL");
-      leg -> AddEntry(graph_mcfit, "RECO, MC-match",    "PL");
-      leg -> AddEntry(graph_fit,   "RECO, invmass-fit", "PL");
-      leg -> Draw("same");
-      
-      fileOut -> cd("pT/canvas");
-      cc.Write();
-    }
-  //******************************************************************
-  
+  }
+   
   fileOut -> Close();
 }
 
@@ -240,4 +200,30 @@ std::string StringBinNumber(int number)
     return "0" + std::to_string(number);
   else
     return std::to_string(number);
+}
+
+void CustomizeGraphsRanges(std::vector<TGraphErrors*> v_graph)
+{
+  float min =  999.;
+  float max = -999.;
+  
+  for(auto g : v_graph)
+  {
+    min = std::min(min, (float)g->GetYaxis()->GetXmin());
+    max = std::max(max, (float)g->GetYaxis()->GetXmax());
+  }
+  
+  if(min>0)
+    min = 0.3*min;
+  else
+    min = 1.2*min;
+  
+  if(max>0)
+    max = 1.2*max;
+  else
+    max=0.3*max;
+  
+  for(auto g : v_graph)
+    g->GetYaxis()->SetRangeUser(min, max);
+  
 }
