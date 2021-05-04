@@ -4,7 +4,7 @@ std::string StringBinNumber(int number);
 
 void TH3ToTH2ShapeFits()
 {
-  TFile* fileIn = TFile::Open("shapetensor_fit.apr20.dcmqgsm.nopid.lightcuts1.set4.pol4.root");
+  TFile* fileIn = TFile::Open("shapetensor_fit.apr20.dcmqgsm.nopid.lightcuts1.set4.pol2.root");
   
   struct axis
   {
@@ -49,16 +49,16 @@ void TH3ToTH2ShapeFits()
       for(int ibin=1; ibin<=ax.nbins_; ibin++)
       {
         std::string layername = StringBinNumber(ibin);
-        std::string dirname = ax.name_ + "/" + layername;
+        std::string dirname = histo + "/" + ax.name_ ;
         if(fileOut->GetDirectory(dirname.c_str()) == nullptr)
           fileOut -> mkdir(dirname.c_str());
-        fileOut -> cd(dirname.c_str()); 
+        fileOut -> cd(dirname.c_str());
         
         h2Out   = Get2DLayerFromTH3(hIn  , ax.id_, ibin);
         
         SetAxesNames(h2Out  , axes.at(ax.another_first_).title_, axes.at(ax.another_second_).title_);  
         
-        h2Out   -> Write(("h2_" + histo).c_str());
+        h2Out   -> Write(layername.c_str());
       }      
     }   
   }
