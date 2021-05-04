@@ -4,7 +4,7 @@ std::string StringBinNumber(int number);
 
 void TH3ToTH2ShapeFits()
 {
-  TFile* fileIn = TFile::Open("shapetensor_fit.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
+  TFile* fileIn = TFile::Open("shapetensor_fit.apr20.dcmqgsm.nopid.lightcuts1.set4.pol4.root");
   
   struct axis
   {
@@ -23,13 +23,17 @@ void TH3ToTH2ShapeFits()
     {"pT",         "p_{T}, GeV/c",  "z", 0, 1, -1}
   };
   
-  std::vector<std::string> histos{"chi2_bckgr_fit", "chi2_bckgr_func_histo"};
+  std::vector<std::string> histos{"chi2_bckgr_rec_fit",
+                                  "chi2_bckgr_mc_and_bckgr_rec_fit",
+                                  "chi2_sgnl_mc_fit",
+                                  "chi2_sgnl_rec_fit",
+                                  "chi2_sgnl_mc_and_sgnl_rec_fit"};
     
   TH3F* hIn;
   
   TH2F* h2Out;
       
-  TFile* fileOut = TFile::Open("out.th3toth2chi2bckgrfit.root", "recreate");  
+  TFile* fileOut = TFile::Open("out.th3toth2shapefits.root", "recreate");  
   
   for(auto& histo : histos)
   {
@@ -54,7 +58,7 @@ void TH3ToTH2ShapeFits()
         
         SetAxesNames(h2Out  , axes.at(ax.another_first_).title_, axes.at(ax.another_second_).title_);  
         
-        h2Out   -> Write(("h2_" + histo).c_str());        
+        h2Out   -> Write(("h2_" + histo).c_str());
       }      
     }   
   }
