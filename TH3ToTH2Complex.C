@@ -38,6 +38,7 @@ void TH3ToTH2Complex()
     {"hsignal",        "sgnl",            true,  true},
     {"hbckgr_0",       "bckgr/intercept", true,  false},
     {"hbckgr_1",       "bckgr/slope",     true,  false},
+    {"hfit_chi2ndf",   "chi2ndf",         false, false},
     {"hentries_sgnl",  "Nentries/sgnl",   false, false},
     {"hentries_bckgr", "Nentries/bckgr",  false, false}
   };
