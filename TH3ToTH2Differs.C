@@ -4,7 +4,7 @@ std::string StringBinNumber(int number);
 
 void TH3ToTH2Differs()
 {
-  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.root");
+  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.half2_half1.root");
   
   struct axis
   {

@@ -9,7 +9,7 @@ void TH3ToTGraphDiffers()
   const int marker_size = 2;
   const int line_width = 2;
   
-  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.root");
+  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.pol3.root");
   
   struct axis
   {

@@ -10,9 +10,9 @@ void TH3ToTGraphComplex()
   const int marker_size = 2;
   const int line_width = 2;
   
-  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
-  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
-  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
+  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.half2.root");
+  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.half1.root");
+  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.half1.root");
    
   struct axis
   {
@@ -45,6 +45,7 @@ void TH3ToTGraphComplex()
     {"hsignal",        "sgnl",            true,  true},
     {"hbckgr_0",       "bckgr/intercept", true,  false},
     {"hbckgr_1",       "bckgr/slope",     true,  false},
+    {"hfit_chi2ndf",   "chi2ndf",         false, false},
     {"hentries_sgnl",  "Nentries/sgnl",   false, false},
     {"hentries_bckgr", "Nentries/bckgr",  false, false}
   };
