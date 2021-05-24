@@ -1,18 +1,18 @@
 TGraphErrors* GetGraph(TH3F* histo3D, TString axis, int bin1, int bin2);
+std::string GetGraphCell(TH3F* histo3D, std::string axis, std::string letter1, std::string letter2, int bin1, int bin2);
 void CustomizeGraphsRanges(std::vector<TGraphErrors*> v_graph);
 void SetGraphProperties(TGraphErrors* graph, int color, int line_width, int line_style, int marker_size, int marker_style);
 void SetAxesNames(TGraphErrors* graph, TString xaxisname, TString yaxisname);
 std::string StringBinNumber(int number);
-
 
 void TH3ToTGraphComplex()
 {  
   const int marker_size = 2;
   const int line_width = 2;
   
-  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.half2.root");
-  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.half1.root");
-  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.half1.root");
+  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.third1.root");
+  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.third2.root");
+  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.third3.root");
    
   struct axis
   {
@@ -58,7 +58,9 @@ void TH3ToTGraphComplex()
   TGraphErrors* graph_mcfit;
   TGraphErrors* graph_mcv1;
       
-  TFile* fileOut = TFile::Open("out.th3totgrphcplx.root", "recreate");
+  TFile* fileOut = TFile::Open("out.tgraph.cplx.root", "recreate");
+  
+  bool is_first_canvas = true;
   
   for(auto it : infotypes)
   {
@@ -84,13 +86,15 @@ void TH3ToTGraphComplex()
           fileOut -> mkdir(dirname.c_str());
           fileOut -> cd(dirname.c_str());
           
-                              graph_fit = GetGraph(h_fit, ax.id_, i_first, i_second);
+                              graph_fit =   GetGraph(h_fit,   ax.id_, i_first, i_second);
           if(it.is_mcfitter_) graph_mcfit = GetGraph(h_mcfit, ax.id_, i_first, i_second);
-          if(it.is_mcv1_)     graph_mcv1 = GetGraph(h_mcv1, ax.id_, i_first, i_second);
+          if(it.is_mcv1_)     graph_mcv1 =  GetGraph(h_mcv1,  ax.id_, i_first, i_second);
           
-                              SetAxesNames(graph_fit, ax.title_, "v_{1x}");
+          graph_fit -> SetTitle((it.name_+ ", " + GetGraphCell(h_fit, ax.id_, axes.at(ax.another_first_).letter_, axes.at(ax.another_second_).letter_, i_first, i_second)).c_str());
+          
+                              SetAxesNames(graph_fit,   ax.title_, "v_{1x}");
           if(it.is_mcfitter_) SetAxesNames(graph_mcfit, ax.title_, "v_{1x}");
-          if(it.is_mcv1_)     SetAxesNames(graph_mcv1, ax.title_, "v_{1x}"); 
+          if(it.is_mcv1_)     SetAxesNames(graph_mcv1,  ax.title_, "v_{1x}"); 
           
                               SetGraphProperties(graph_fit,   kBlue,     line_width, 1, marker_size, 8);
           if(it.is_mcfitter_) SetGraphProperties(graph_mcfit, kGreen+2,  line_width, 1, marker_size, 8);
@@ -105,23 +109,34 @@ void TH3ToTGraphComplex()
           TCanvas cc("canvas", "canvas", 1500, 900);
           cc.cd();
           
+          if(it.is_mcv1_) CustomizeGraphsRanges({graph_fit, graph_mcfit, graph_mcv1});
+          else            CustomizeGraphsRanges({graph_fit, graph_mcfit});
+          
                           graph_fit -> Draw("APL");
                           graph_mcfit -> Draw("PL");
           if(it.is_mcv1_) graph_mcv1 -> Draw("PL");
             
-          TLegend* leg = new TLegend(0.35, 0.68, 0.55, 0.88);
-          leg -> SetBorderSize(0);
+          TLegend* leg = new TLegend(0.85, 0.85, 1, 1);
+//           leg -> SetBorderSize(0);
           if(it.is_mcv1_) leg -> AddEntry(graph_mcv1,  "MC",                "PL");
                           leg -> AddEntry(graph_mcfit, "RECO, MC-match",    "PL");
                           leg -> AddEntry(graph_fit,   "RECO, invmass-fit", "PL");
           leg -> Draw("same");
           
           cc.Write();
-            
+          if(is_first_canvas)
+            cc.Print("out.tgraph.cplx.pdf(", "pdf");
+          else
+            cc.Print("out.tgraph.cplx.pdf", "pdf");
+
+          is_first_canvas = false;
         }
     }
   
   }
+  
+  TCanvas emptycanvas("", "", 1500, 900);
+  emptycanvas.Print("out.tgraph.cplx.pdf)", "pdf");
    
   fileOut -> Close();
 }
@@ -227,4 +242,45 @@ void CustomizeGraphsRanges(std::vector<TGraphErrors*> v_graph)
   for(auto g : v_graph)
     g->GetYaxis()->SetRangeUser(min, max);
   
+}
+
+std::string GetGraphCell(TH3F* histo3D, std::string axis, std::string letter1, std::string letter2, int bin1, int bin2)
+{
+  float lo1;
+  float lo2;
+  float hi1;
+  float hi2;
+  
+  if(axis=="x" || axis=="X")
+  {
+    lo1 = histo3D -> GetYaxis() -> GetBinLowEdge(bin1);
+    hi1 = histo3D -> GetYaxis() -> GetBinUpEdge(bin1);
+    lo2 = histo3D -> GetZaxis() -> GetBinLowEdge(bin2);
+    hi2 = histo3D -> GetZaxis() -> GetBinUpEdge(bin2);
+  }
+  
+  if(axis=="y" || axis=="Y")
+  {
+    lo1 = histo3D -> GetXaxis() -> GetBinLowEdge(bin1);
+    hi1 = histo3D -> GetXaxis() -> GetBinUpEdge(bin1);
+    lo2 = histo3D -> GetZaxis() -> GetBinLowEdge(bin2);
+    hi2 = histo3D -> GetZaxis() -> GetBinUpEdge(bin2);
+  }
+  
+  if(axis=="z" || axis=="Z")
+  {
+    lo1 = histo3D -> GetXaxis() -> GetBinLowEdge(bin1);
+    hi1 = histo3D -> GetXaxis() -> GetBinUpEdge(bin1);
+    lo2 = histo3D -> GetYaxis() -> GetBinLowEdge(bin2);
+    hi2 = histo3D -> GetYaxis() -> GetBinUpEdge(bin2);
+  }
+  
+  std::string cell = letter1 + "#in[" +
+                     std::to_string(lo1).substr(0, std::to_string(lo1).find(".")+3) + ", " +
+                     std::to_string(hi1).substr(0, std::to_string(hi1).find(".")+3) + "], " +
+                     letter2 + "#in[" +
+                     std::to_string(lo2).substr(0, std::to_string(lo2).find(".")+3) + ", " +
+                     std::to_string(hi2).substr(0, std::to_string(hi2).find(".")+3) + "]";
+                                          
+  return cell;
 }

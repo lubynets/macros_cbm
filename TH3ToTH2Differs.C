@@ -4,7 +4,9 @@ std::string StringBinNumber(int number);
 
 void TH3ToTH2Differs()
 {
-  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.half2_half1.root");
+  gStyle -> SetOptStat(0);
+  
+  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.third123.root");
   
   struct axis
   {
@@ -47,7 +49,9 @@ void TH3ToTH2Differs()
   
   TFile* fileOut = TFile::Open("out.th3toth2differs.root", "recreate");
   
- for(auto it : infotypes)
+  bool is_first_canvas = true; 
+  
+  for(auto it : infotypes)
   {
                       h_fit_mcfit = fileIn -> Get<TH3F>((it.folder_ + "/diff_fit_mcfit").c_str());
     if(it.is_mcv1_) { h_fit_mcv1 = fileIn -> Get<TH3F>((it.folder_ + "/diff_fit_mcv1").c_str());
@@ -77,9 +81,46 @@ void TH3ToTH2Differs()
                           h2_fit_mcfit  -> Write("fit_mcfit");
         if(it.is_mcv1_) { h2_fit_mcv1   -> Write("fit_mcv1");
                           h2_mcfit_mcv1 -> Write("mcfit_mcv1"); }
+                          
+        if(it.folder_ != "sgnl") continue;
+        
+        TCanvas cc_fit_mcfit("canvas_fit_mcfit", "canvas_fit_mcfit", 1500, 900);
+        cc_fit_mcfit.cd();
+        cc_fit_mcfit.SetLeftMargin(0.08);
+        cc_fit_mcfit.SetRightMargin(0.12);
+        h2_fit_mcfit -> GetZaxis() -> SetTitle("#chi^{2}");
+        h2_fit_mcfit -> SetTitle(("fit_mcfit, " + std::string(h2_fit_mcfit->GetTitle())).c_str());
+        h2_fit_mcfit -> Draw("colz+text");
+        if(is_first_canvas)
+          cc_fit_mcfit.Print("out.th2.diff.pdf(", "pdf");
+        else
+          cc_fit_mcfit.Print("out.th2.diff.pdf", "pdf");
+        
+        if(it.is_mcv1_) { TCanvas cc_fit_mcv1("canvas_fit_mcv1", "canvas_fit_mcv1", 1500, 900);
+                          cc_fit_mcv1.cd();
+                          cc_fit_mcv1.SetLeftMargin(0.08);
+                          cc_fit_mcv1.SetRightMargin(0.12);
+                          h2_fit_mcv1 -> GetZaxis() -> SetTitle("#chi^{2}");
+                          h2_fit_mcv1 -> SetTitle(("fit_mcv1, " + std::string(h2_fit_mcv1->GetTitle())).c_str());
+                          h2_fit_mcv1 -> Draw("colz+text");
+                          cc_fit_mcv1.Print("out.th2.diff.pdf", "pdf");
+                              
+                          TCanvas cc_mcfit_mcv1("canvas_mcfit_mcv1", "canvas_mcfit_mcv1", 1500, 900);
+                          cc_mcfit_mcv1.cd();
+                          cc_mcfit_mcv1.SetLeftMargin(0.08);
+                          cc_mcfit_mcv1.SetRightMargin(0.12);
+                          h2_mcfit_mcv1 -> GetZaxis() -> SetTitle("#chi^{2}");
+                          h2_mcfit_mcv1 -> SetTitle(("mcfit_mcv1, " + std::string(h2_mcfit_mcv1->GetTitle())).c_str());
+                          h2_mcfit_mcv1 -> Draw("colz+text");
+                          cc_mcfit_mcv1.Print("out.th2.diff.pdf", "pdf");
+        }
+        is_first_canvas = false;                          
       }
     }
-  } 
+  }
+  TCanvas emptycanvas("", "", 1500, 900);
+  emptycanvas.Print("out.th2.diff.pdf)", "pdf");
+  
   fileOut -> Close();
 }
 

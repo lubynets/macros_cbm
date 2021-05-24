@@ -1,4 +1,5 @@
 TGraphErrors* GetGraph(TH3F* histo3D, TString axis, int bin1, int bin2);
+std::string GetGraphCell(TH3F* histo3D, std::string axis, std::string letter1, std::string letter2, int bin1, int bin2);
 void CustomizeGraphsRanges(std::vector<TGraphErrors*> v_graph);
 void SetGraphProperties(TGraphErrors* graph, int color, int line_width, int line_style, int marker_size, int marker_style);
 void SetAxesNames(TGraphErrors* graph, TString xaxisname, TString yaxisname);
@@ -9,7 +10,7 @@ void TH3ToTGraphDiffers()
   const int marker_size = 2;
   const int line_width = 2;
   
-  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.pol3.root");
+  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.third123.root");
   
   struct axis
   {
@@ -52,6 +53,8 @@ void TH3ToTGraphDiffers()
       
   TFile* fileOut = TFile::Open("out.th3totgrphdiffers.root", "recreate");
   
+  bool is_first_canvas = true;
+  
   for(auto it : infotypes)
   {
                       h_fit_mcfit = fileIn -> Get<TH3F>((it.folder_ + "/diff_fit_mcfit").c_str());
@@ -78,6 +81,8 @@ void TH3ToTGraphDiffers()
                             graph_fit_mcfit =  GetGraph(h_fit_mcfit,  ax.id_, i_first, i_second);
           if(it.is_mcv1_) { graph_fit_mcv1 =   GetGraph(h_fit_mcv1,   ax.id_, i_first, i_second);
                             graph_mcfit_mcv1 = GetGraph(h_mcfit_mcv1, ax.id_, i_first, i_second); }
+                            
+          graph_fit_mcfit -> SetTitle((GetGraphCell(h_fit_mcfit, ax.id_, axes.at(ax.another_first_).letter_, axes.at(ax.another_second_).letter_, i_first, i_second)).c_str());
                             
                             SetAxesNames(graph_fit_mcfit,  ax.title_, "#chi^{2}");
           if(it.is_mcv1_) { SetAxesNames(graph_fit_mcv1,   ax.title_, "#chi^{2}");
@@ -107,18 +112,26 @@ void TH3ToTGraphDiffers()
           lineUp           -> Draw("same");
           lineDown         -> Draw("same");
                       
-          TLegend* leg = new TLegend(0.35, 0.74, 0.75, 0.88);
-          leg -> SetBorderSize(0);
+          TLegend* leg = new TLegend(0.75, 0.80, 1, 1);
+//           leg -> SetBorderSize(0);
           leg -> AddEntry(graph_fit_mcfit,  "invmass fit - RECO with MC-match", "PL");
           leg -> AddEntry(graph_fit_mcv1,   "invmass fit - MC",                 "PL");
           leg -> AddEntry(graph_mcfit_mcv1, "RECO with MC-match - MC",          "PL");
           leg -> Draw("same");
           
           cc.Write();
-            
+          if(is_first_canvas)
+            cc.Print("out.tgraph.diff.pdf(", "pdf");
+          else
+            cc.Print("out.tgraph.diff.pdf", "pdf");
+
+          is_first_canvas = false;            
         }
     }      
   }
+  
+  TCanvas emptycanvas("", "", 1500, 900);
+  emptycanvas.Print("out.tgraph.diff.pdf)", "pdf");
   
   fileOut -> Close();
   
@@ -225,4 +238,45 @@ void CustomizeGraphsRanges(std::vector<TGraphErrors*> v_graph)
   for(auto g : v_graph)
     g->GetYaxis()->SetRangeUser(min, max);
   
+}
+
+std::string GetGraphCell(TH3F* histo3D, std::string axis, std::string letter1, std::string letter2, int bin1, int bin2)
+{
+  float lo1;
+  float lo2;
+  float hi1;
+  float hi2;
+  
+  if(axis=="x" || axis=="X")
+  {
+    lo1 = histo3D -> GetYaxis() -> GetBinLowEdge(bin1);
+    hi1 = histo3D -> GetYaxis() -> GetBinUpEdge(bin1);
+    lo2 = histo3D -> GetZaxis() -> GetBinLowEdge(bin2);
+    hi2 = histo3D -> GetZaxis() -> GetBinUpEdge(bin2);
+  }
+  
+  if(axis=="y" || axis=="Y")
+  {
+    lo1 = histo3D -> GetXaxis() -> GetBinLowEdge(bin1);
+    hi1 = histo3D -> GetXaxis() -> GetBinUpEdge(bin1);
+    lo2 = histo3D -> GetZaxis() -> GetBinLowEdge(bin2);
+    hi2 = histo3D -> GetZaxis() -> GetBinUpEdge(bin2);
+  }
+  
+  if(axis=="z" || axis=="Z")
+  {
+    lo1 = histo3D -> GetXaxis() -> GetBinLowEdge(bin1);
+    hi1 = histo3D -> GetXaxis() -> GetBinUpEdge(bin1);
+    lo2 = histo3D -> GetYaxis() -> GetBinLowEdge(bin2);
+    hi2 = histo3D -> GetYaxis() -> GetBinUpEdge(bin2);
+  }
+  
+  std::string cell = letter1 + "#in[" +
+                     std::to_string(lo1).substr(0, std::to_string(lo1).find(".")+3) + ", " +
+                     std::to_string(hi1).substr(0, std::to_string(hi1).find(".")+3) + "], " +
+                     letter2 + "#in[" +
+                     std::to_string(lo2).substr(0, std::to_string(lo2).find(".")+3) + ", " +
+                     std::to_string(hi2).substr(0, std::to_string(hi2).find(".")+3) + "]";
+                                          
+  return cell;
 }

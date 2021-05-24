@@ -4,6 +4,8 @@ std::string StringBinNumber(int number);
 
 void TH3ToTH2Complex()
 {
+  gStyle -> SetOptStat(0);
+  
   TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
   TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
   TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
@@ -51,7 +53,9 @@ void TH3ToTH2Complex()
   TH2F* h2_mcfit;
   TH2F* h2_mcv1;
       
-  TFile* fileOut = TFile::Open("out.th3toth2cplx.root", "recreate");  
+  TFile* fileOut = TFile::Open("out.th3toth2cplx.root", "recreate");
+
+  bool is_first_canvas = true;  
   
   for(auto it : infotypes)
   {
@@ -83,10 +87,50 @@ void TH3ToTH2Complex()
         
                             h2_fit   -> Write("fit");
         if(it.is_mcfitter_) h2_mcfit -> Write("mcfit");
-        if(it.is_mcv1_)     h2_mcv1  -> Write("mcv1");         
+        if(it.is_mcv1_)     h2_mcv1  -> Write("mcv1");
+        
+        if(it.name_ != "hsignal") continue;
+        
+        TCanvas cc_fit("canvas_fit", "canvas_fit", 1500, 900);
+        cc_fit.cd();
+        cc_fit.SetLeftMargin(0.08);
+        cc_fit.SetRightMargin(0.12);
+        h2_fit -> GetZaxis() -> SetTitle("v_{1x}");
+        h2_fit -> SetTitle(("fit, " + std::string(h2_fit->GetTitle())).c_str());
+        h2_fit -> Draw("colz+text");
+        if(is_first_canvas)
+          cc_fit.Print("out.th2.cplx.pdf(", "pdf");
+        else
+          cc_fit.Print("out.th2.cplx.pdf", "pdf");
+        
+        if(it.is_mcfitter_) { TCanvas cc_mcfit("canvas_mcfit", "canvas_mcfit", 1500, 900);
+                              cc_mcfit.cd();
+                              cc_mcfit.SetLeftMargin(0.08);
+                              cc_mcfit.SetRightMargin(0.12);
+                              h2_mcfit -> GetZaxis() -> SetTitle("v_{1x}");
+                              h2_mcfit -> SetTitle(("mcfit, " + std::string(h2_mcfit->GetTitle())).c_str());
+                              h2_mcfit -> Draw("colz+text");
+                              cc_mcfit.Print("out.th2.cplx.pdf", "pdf");
+        }
+                              
+        if(it.is_mcv1_)     { TCanvas cc_mcv1("canvas_mcv1", "canvas_mcv1", 1500, 900);
+                              cc_mcv1.cd();
+                              cc_mcv1.SetLeftMargin(0.08);
+                              cc_mcv1.SetRightMargin(0.12);
+                              h2_mcv1 -> GetZaxis() -> SetTitle("v_{1x}");
+                              h2_mcv1 -> SetTitle(("mcv1, " + std::string(h2_mcv1->GetTitle())).c_str());
+                              h2_mcv1 -> Draw("colz+text");
+                              cc_mcv1.Print("out.th2.cplx.pdf", "pdf");
+        }
+                                      
+        is_first_canvas = false;
       }      
     }    
   } 
+  
+  TCanvas emptycanvas("", "", 1500, 900);
+  emptycanvas.Print("out.th2.cplx.pdf)", "pdf");
+  
   fileOut -> Close();
 }
 
