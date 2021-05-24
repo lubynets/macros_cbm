@@ -6,7 +6,7 @@ void TH3ToTH2Differs()
 {
   gStyle -> SetOptStat(0);
   
-  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.third123.root");
+  TFile* fileIn = TFile::Open("/home/user/cbmdir/working/qna/fits/dirivatives/out.difference.set4.AVE.third111.root");
   
   struct axis
   {

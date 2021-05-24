@@ -6,9 +6,11 @@ void TH3ToTH2Complex()
 {
   gStyle -> SetOptStat(0);
   
-  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
-  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
-  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.root");
+  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.XX.root");
+  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.XX.root");
+  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.XX.root");
+  
+  bool is_ave = false;
   
   struct axis
   {
@@ -33,16 +35,17 @@ void TH3ToTH2Complex()
     std::string folder_;
     bool is_mcfitter_;
     bool is_mcv1_;
+    bool not4ave_;
   };
   
   std::vector<infotype> infotypes
   {
-    {"hsignal",        "sgnl",            true,  true},
-    {"hbckgr_0",       "bckgr/intercept", true,  false},
-    {"hbckgr_1",       "bckgr/slope",     true,  false},
-    {"hfit_chi2ndf",   "chi2ndf",         false, false},
-    {"hentries_sgnl",  "Nentries/sgnl",   false, false},
-    {"hentries_bckgr", "Nentries/bckgr",  false, false}
+    {"hsignal",        "sgnl",            true,  true , false},
+    {"hbckgr_0",       "bckgr/intercept", true,  false, false},
+    {"hbckgr_1",       "bckgr/slope",     true,  false, false},
+    {"hfit_chi2ndf",   "chi2ndf",         false, false, true },
+    {"hentries_sgnl",  "Nentries/sgnl",   false, false, true },
+    {"hentries_bckgr", "Nentries/bckgr",  false, false, true }
   };
   
   TH3F* h_fit;
@@ -59,6 +62,7 @@ void TH3ToTH2Complex()
   
   for(auto it : infotypes)
   {
+    if(it.not4ave_&&is_ave == true) continue;
   
                         h_fit   = file_fit   -> Get<TH3F>(("parameters/" + it.name_).c_str());
     if(it.is_mcfitter_) h_mcfit = file_mcfit -> Get<TH3F>(("parameters/" + it.name_).c_str());

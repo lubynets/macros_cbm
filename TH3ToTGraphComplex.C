@@ -10,9 +10,11 @@ void TH3ToTGraphComplex()
   const int marker_size = 2;
   const int line_width = 2;
   
-  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.third1.root");
-  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.third2.root");
-  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.third3.root");
+  TFile* file_fit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.fitter.apr20.dcmqgsm.nopid.lightcuts1.set4.AVE.third1.root");
+  TFile* file_mcfit = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcfitter.apr20.dcmqgsm.nopid.lightcuts1.set4.AVE.third2.root");
+  TFile* file_mcv1 = TFile::Open("/home/user/cbmdir/working/qna/fits/out.mcv1.apr20.dcmqgsm.nopid.lightcuts1.set4.AVE.third3.root");
+  
+  bool is_ave = true;
    
   struct axis
   {
@@ -38,16 +40,17 @@ void TH3ToTGraphComplex()
     std::string folder_;
     bool is_mcfitter_;
     bool is_mcv1_;
+    bool not4ave_;
   };
   
   std::vector<infotype> infotypes
   {
-    {"hsignal",        "sgnl",            true,  true},
-    {"hbckgr_0",       "bckgr/intercept", true,  false},
-    {"hbckgr_1",       "bckgr/slope",     true,  false},
-    {"hfit_chi2ndf",   "chi2ndf",         false, false},
-    {"hentries_sgnl",  "Nentries/sgnl",   false, false},
-    {"hentries_bckgr", "Nentries/bckgr",  false, false}
+    {"hsignal",        "sgnl",            true,  true , false},
+    {"hbckgr_0",       "bckgr/intercept", true,  false, false},
+    {"hbckgr_1",       "bckgr/slope",     true,  false, false},
+    {"hfit_chi2ndf",   "chi2ndf",         false, false, true },
+    {"hentries_sgnl",  "Nentries/sgnl",   false, false, true },
+    {"hentries_bckgr", "Nentries/bckgr",  false, false, true }
   };
   
   TH3F* h_fit;
@@ -64,6 +67,7 @@ void TH3ToTGraphComplex()
   
   for(auto it : infotypes)
   {
+    if(it.not4ave_&&is_ave == true) continue;
   
                         h_fit = file_fit -> Get<TH3F>(("parameters/" + it.name_).c_str());
     if(it.is_mcfitter_) h_mcfit = file_mcfit -> Get<TH3F>(("parameters/" + it.name_).c_str());
@@ -92,9 +96,9 @@ void TH3ToTGraphComplex()
           
           graph_fit -> SetTitle((it.name_+ ", " + GetGraphCell(h_fit, ax.id_, axes.at(ax.another_first_).letter_, axes.at(ax.another_second_).letter_, i_first, i_second)).c_str());
           
-                              SetAxesNames(graph_fit,   ax.title_, "v_{1x}");
-          if(it.is_mcfitter_) SetAxesNames(graph_mcfit, ax.title_, "v_{1x}");
-          if(it.is_mcv1_)     SetAxesNames(graph_mcv1,  ax.title_, "v_{1x}"); 
+                              SetAxesNames(graph_fit,   ax.title_, "v_{1}");
+          if(it.is_mcfitter_) SetAxesNames(graph_mcfit, ax.title_, "v_{1}");
+          if(it.is_mcv1_)     SetAxesNames(graph_mcv1,  ax.title_, "v_{1}"); 
           
                               SetGraphProperties(graph_fit,   kBlue,     line_width, 1, marker_size, 8);
           if(it.is_mcfitter_) SetGraphProperties(graph_mcfit, kGreen+2,  line_width, 1, marker_size, 8);
