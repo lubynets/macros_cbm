@@ -52,8 +52,8 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 
 int main()
 {
-  TString sgnlfilename="/home/user/cbmdir/working/qna/OLD/shapes/out.mass3D.apr20.dcmqgsm.nopid.lightcuts1.set4.sgnl_12.root";
-//   TString sgnlfilename="/home/user/cbmdir/working/qna/OLD/shapes/out.mass3D.apr20.dcmqgsm.nopid.lightcuts1.set4.sgnl_12.reduced.root";
+//   TString sgnlfilename="/home/user/cbmdir/working/qna/OLD/shapes/out.mass3D.apr20.dcmqgsm.nopid.lightcuts1.set4.sgnl_12.root";
+  TString sgnlfilename="/home/user/cbmdir/working/qna/OLD/shapes/out.mass3D.apr20.dcmqgsm.nopid.lightcuts1.set4.sgnl_12.reduced.root";
   TFile* sgnlfile = TFile::Open(sgnlfilename, "read");
   
   TH1F* histosgnl = nullptr;
@@ -70,15 +70,17 @@ int main()
   double* y_edges = &y_edges_array[0];
   double* pT_edges = &pT_edges_array[0];
   
-  TH3F hchi2_root("hchi2_root", "", C_nbins, C_edges, y_nbins, y_edges, pT_nbins, pT_edges);
-  SetAxesNames(&hchi2_root);
-  
-  TH3F hchi2_alice("hchi2_alice", "", C_nbins, C_edges, y_nbins, y_edges, pT_nbins, pT_edges);
-  SetAxesNames(&hchi2_alice);  
+//   TH3F hchi2_root("hchi2_root", "", C_nbins, C_edges, y_nbins, y_edges, pT_nbins, pT_edges);
+//   SetAxesNames(&hchi2_root);
+//   
+//   TH3F hchi2_alice("hchi2_alice", "", C_nbins, C_edges, y_nbins, y_edges, pT_nbins, pT_edges);
+//   SetAxesNames(&hchi2_alice);  
   
   bool is_first_canvas = true;
   
   TFile* fileOut = TFile::Open("fileOut.root", "recreate");
+  fileOut->mkdir("fit");
+  fileOut->mkdir("ratio");
 
   for(int iC=0; iC<C_nbins; iC++)
     for(int iy=0; iy<y_nbins; iy++)
@@ -86,6 +88,7 @@ int main()
       {
         std::string binname = "C" + StringBinNumber(iC+1) + "_y" + StringBinNumber(iy+1) + "_pT" + StringBinNumber(ipT+1);
                 
+//         histosgnl = (TH1F*)((TH1F*)sgnlfile->Get(binname.c_str()));
         histosgnl = (TH1F*)((TH1F*)sgnlfile->Get(binname.c_str())) -> Rebin(5);
         
         const double intest = (double)histosgnl->GetEntries()*histosgnl->GetBinWidth(1);
@@ -97,7 +100,8 @@ int main()
         f2->SetParameters(intest,1.1156,0.001,0.2,0.0009);
         
         std::cout << "\n\n\t\t------------------------- Started ROOT fitting bin\t" << binname << "\t\t------------------------\n";
-        histosgnl->Fit(f2,"MNRI","L",minMassForFit0,maxMassForFit0);     
+//         histosgnl->Fit(f2,"MNRI","L",minMassForFit0,maxMassForFit0);     
+        histosgnl->Fit(f2,"R,L,E,+,0", "",minMassForFit0,maxMassForFit0);     
         std::cout << "\n\n\t\t------------------------- Finished ROOT fitting bin\t" << binname << "\t\t------------------------\n";
         
         AliHFInvMassFitter* fitter0 = new AliHFInvMassFitter(histosgnl, minMassForFit0, maxMassForFit0, 3, 1);
@@ -113,10 +117,12 @@ int main()
           std::cout << binname << " is not ok\n";
         
         TF1 *sig_func = fitter0->GetSignalFunc();
+//         TF1 *tot_func = fitter0->GetMassFunc();
         
         f2->SetLineColor(kRed);
         sig_func->SetLineColor(kGreen+2);
         sig_func->SetLineStyle(2);
+//         tot_func->SetLineColor(kMagenta);
         
         TLegend leg(0.15, 0.75, 0.3, 0.85);
         leg.AddEntry(f2, "ROOT", "L");
@@ -142,26 +148,45 @@ int main()
         histosgnl->Draw("PE,X0");
         f2->Draw("same");
         sig_func->Draw("same");
+//         tot_func->Draw("same");
         leg.Draw("same");
         pt.Draw("same");
+        fileOut->cd("fit");
         cc.Write(binname.c_str());
         
-        if(is_first_canvas)
-          cc.Print("fileOut.pdf(", "pdf");
-        else
-          cc.Print("fileOut.pdf", "pdf");
+        TCanvas cratio("", "", 1500, 900);
+        cratio.cd();
+        histosgnl->Sumw2();
+        histosgnl->Divide(f2);
+        histosgnl->GetYaxis()->SetRangeUser(0.5,2);
+//         cratio.SetLogy();
+        histosgnl->Draw("PE,X0");
+        TF1 one("one", "1", minMassForFit0-histosgnl->GetRMS(), maxMassForFit0+histosgnl->GetRMS());
+        one.Draw("same");
+        fileOut->cd("ratio");
+        cratio.Write(binname.c_str());
+        
+        if(is_first_canvas) {
+          cc.Print("fit.pdf(", "pdf");
+          cratio.Print("ratio.pdf(", "pdf");
+        }
+        else {
+          cc.Print("fit.pdf", "pdf");
+          cratio.Print("ratio.pdf", "pdf");
+        }
         
         is_first_canvas = false;
         
-        hchi2_root.SetBinContent(iC+1, iy+1, ipT+1, chi2root);
-        hchi2_alice.SetBinContent(iC+1, iy+1, ipT+1, chi2alice);
+//         hchi2_root.SetBinContent(iC+1, iy+1, ipT+1, chi2root);
+//         hchi2_alice.SetBinContent(iC+1, iy+1, ipT+1, chi2alice);
       }
       
   TCanvas emptycanvas("", "", 1500, 900);
-  emptycanvas.Print("fileOut.pdf)", "pdf");
+  emptycanvas.Print("fit.pdf)", "pdf");
+  emptycanvas.Print("ratio.pdf)", "pdf");
       
-  hchi2_root.Write();
-  hchi2_alice.Write();
+//   hchi2_root.Write();
+//   hchi2_alice.Write();
   fileOut -> Close();
   
   return 0;
