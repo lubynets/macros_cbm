@@ -7,9 +7,12 @@ void recmap_pt_y_phi(std::string filelist, float pbeam=12.)
   const TString y_name = "y_{LAB}";
   const TString pT_name = "pT, GeV/c";
   const TString phi_name = "#varphi, rad";
-  const int y_nbins = 22;
-  const int pT_nbins = 26;
-  const int phi_nbins = 30;
+//   const int y_nbins = 22;
+//   const int pT_nbins = 26;
+//   const int phi_nbins = 30;
+  const int y_nbins = 11;
+  const int pT_nbins = 13;
+  const int phi_nbins = 15;
   const float midrapidity = MidRapidityByPbeam(pbeam);
   const float y_low = midrapidity - 0.8;
   const float y_up = midrapidity + 1.4;
@@ -18,9 +21,11 @@ void recmap_pt_y_phi(std::string filelist, float pbeam=12.)
   const float phi_low = -TMath::Pi();
   const float phi_up = TMath::Pi();
   
-  std::vector<int> pdgs{3122, 310};
+//   std::vector<int> pdgs{3312};
+  std::vector<int> pdgs{3334};
+//   std::vector<int> pdgs{3122, 310};
 
-  AnalysisTree::Chain* reco_tree = new AnalysisTree::Chain(std::vector<std::string>({filelist}), std::vector<std::string>({"pTree"}));
+  AnalysisTree::Chain* reco_tree = new AnalysisTree::Chain(std::vector<std::string>({filelist}), std::vector<std::string>({"aTree"}));
   
   auto* reco_tracks = new AnalysisTree::Particles();
   
@@ -56,7 +61,8 @@ void recmap_pt_y_phi(std::string filelist, float pbeam=12.)
       std::cout << iEvent << std::endl;
     for(const auto& recotrack : *(reco_tracks->GetChannels()))
     {
-      if(recotrack.GetField<int>(generation_id)==0) continue;
+      const int generation = recotrack.GetField<int>(generation_id);
+      if(generation != 1) continue;
       const int pid = recotrack.GetPid();
       const int index = std::find(pdgs.begin(), pdgs.end(), pid)-pdgs.begin();
       if (index>=pdgs.size()) continue;

@@ -15,19 +15,21 @@ void mass3D(const TString& infile)
   
   int centrality_id_ = config->GetBranchConfig("AnaEventHeader").GetFieldId("tracks_centrality");
   int is_signal_id_ = config->GetBranchConfig("RecParticlesMcPid").GetFieldId("is_signal");
+  int mass_err_id_ = config->GetBranchConfig("RecParticlesMcPid").GetFieldId("masserr");
+  int mass_pull_id_ = config->GetBranchConfig("RecParticlesMcPid").GetFieldId("masspull");
   
 //   std::cout << centrality_id_ << "\t" << is_signal_id_ << "\n";
   
   const float y_beam = 1.62179;
   
-  const int   y_nbins = 5;
-  const float y_low = y_beam-0.45;
-  const float y_up = y_beam+1.05;
+  const int   y_nbins = 4;
+  const float y_low = y_beam-0.6;
+  const float y_up = y_beam+1.0;
   const float y_bin_width = (y_up-y_low)/y_nbins;
 
-  const int   pT_nbins = 5;
-  const float pT_low = 0.3;
-  const float pT_up = 1.3;
+  const int   pT_nbins = 4;
+  const float pT_low = 0.2;
+  const float pT_up = 1.4;
   const float pT_bin_width = (pT_up-pT_low)/pT_nbins;
   
   std::vector<double> C_binranges {0, 20, 40, 100};
@@ -68,8 +70,10 @@ void mass3D(const TString& infile)
         std::string histoname = "C" + StringBinNumber(iC) + "_y" + StringBinNumber(iy) + "_pT" + StringBinNumber(ipT);
         int binnumber = hframe.GetBin(iC, iy, ipT);
         std::string histotitle = std::to_string(binnumber);
-        hmass.at(binnumber) = new TH1F(histoname.c_str(), histotitle.c_str(), 600, 1.08, 1.15);
-        hmass.at(binnumber) -> GetXaxis() -> SetTitle("m_{inv}, GeV");
+//         hmass.at(binnumber) = new TH1F(histoname.c_str(), histotitle.c_str(), 1200, 1.045, 1.185);
+        hmass.at(binnumber) = new TH1F(histoname.c_str(), histotitle.c_str(), 200, -20, 20);
+//         hmass.at(binnumber) -> GetXaxis() -> SetTitle("m_{inv}, GeV");
+        hmass.at(binnumber) -> GetXaxis() -> SetTitle("(m_{inv} - m_{#Lambda})/#sigma_{m}");
         histo_is_inside.at(binnumber) = true;
       }
   
@@ -82,13 +86,17 @@ void mass3D(const TString& infile)
     const float centrality = event_header->GetField<float>(centrality_id_);
     for(const auto& reco_track : *(reco_tracks->GetChannels()) )
     {
-      if(!(reco_track.GetField<int>(is_signal_id_)==1 || reco_track.GetField<int>(is_signal_id_)==2)) continue;
+      if(reco_track.GetField<float>(mass_err_id_)>100.) continue;
+      
+//       if(!(reco_track.GetField<int>(is_signal_id_)==1 || reco_track.GetField<int>(is_signal_id_)==2)) continue; // ONLY signal
+//       if(!(reco_track.GetField<int>(is_signal_id_)==0)) continue;                                               // ONLY background
       const float pT_reco = reco_track.GetPt();
       const float y_reco = reco_track.GetRapidity();
       
       const int binnumber = hframe.FindBin(centrality, y_reco, pT_reco);
       if(histo_is_inside.at(binnumber) == true)
-        hmass.at(binnumber) -> Fill(reco_track.GetMass());
+//         hmass.at(binnumber) -> Fill(reco_track.GetMass());
+        hmass.at(binnumber) -> Fill(reco_track.GetField<float>(mass_pull_id_));
     }    
   }  
   
