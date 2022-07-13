@@ -8,14 +8,21 @@ void multiplicity_qa(std::vector<std::string> filelist)
   auto* vtx_tracks = new AnalysisTree::TrackDetector();
   treeIn->SetBranchAddress("VtxTracks", &vtx_tracks);
   
-  AnalysisTree::SimpleCut vtx_chi2_track_cut = AnalysisTree::RangeCut("VtxTracks.vtx_chi2", 0, 3);
-  AnalysisTree::SimpleCut nhits_cut          = AnalysisTree::RangeCut("VtxTracks.nhits", 4, 100);
-  AnalysisTree::SimpleCut chi2_cut({"VtxTracks.chi2", "VtxTracks.ndf"},
-                                   [](std::vector<double> par) { return par[0] / par[1] < 3; });
-  AnalysisTree::SimpleCut eta_cut = AnalysisTree::RangeCut("VtxTracks.eta", 0.2, 6);
-
+// //------------------- CbmGoodVertexTrack ------------------------------------------------------------  
+//   AnalysisTree::SimpleCut vtx_chi2_track_cut = AnalysisTree::RangeCut("VtxTracks.vtx_chi2", 0, 3);
+//   AnalysisTree::SimpleCut nhits_cut          = AnalysisTree::RangeCut("VtxTracks.nhits", 4, 100);
+//   AnalysisTree::SimpleCut chi2_cut({"VtxTracks.chi2", "VtxTracks.ndf"},
+//                                    [](std::vector<double> par) { return par[0] / par[1] < 3; });
+//   AnalysisTree::SimpleCut eta_cut = AnalysisTree::RangeCut("VtxTracks.eta", 0.2, 6);
+// 
+//   auto* vertex_tracks_cuts =
+//     new AnalysisTree::Cuts("VtxTracks", {vtx_chi2_track_cut, nhits_cut, chi2_cut, eta_cut});
+// //----------------------------------------------------------------------------------------------------
+  
+  AnalysisTree::SimpleCut vtx_chi2_track_cut = AnalysisTree::RangeCut("VtxTracks.vtx_chi2", 0, 18);
+  
   auto* vertex_tracks_cuts =
-    new AnalysisTree::Cuts("VtxTracks", {vtx_chi2_track_cut, nhits_cut, chi2_cut, eta_cut});
+    new AnalysisTree::Cuts("VtxTracks", {vtx_chi2_track_cut});
     
   vertex_tracks_cuts->Init(*conf);
     
