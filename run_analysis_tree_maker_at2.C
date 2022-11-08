@@ -24,6 +24,8 @@ void run_analysis_tree_maker_at2(TString path     = "",
   TString parFile = path + dataSet + "/" + dataSet + ".par.root";
   const std::string outFile =
     dataSet.Data() + std::string(".analysistree.root");
+    
+//   TString unigenFile = "/lustre/cbm/users/ogolosov/mc/generators/dcmqgsm_smm/auau/pbeam12agev/mbias/root/dcmqgsm_" + dataSet + ".root";
   // ------------------------------------------------------------------------
 
 //   // -----   In- and output file names   ------------------------------------
@@ -95,6 +97,7 @@ void run_analysis_tree_maker_at2(TString path     = "",
 
   // ---   STS track matching   ----------------------------------------------
   auto* matchTask = new CbmMatchRecoToMC();
+  matchTask -> SetIncludeMvdHitsInStsTrack(true);
   run->AddTask(matchTask);
   // ------------------------------------------------------------------------
 
@@ -138,6 +141,7 @@ void run_analysis_tree_maker_at2(TString path     = "",
 
   man->AddTask(new CbmSimEventHeaderConverter("SimEventHeader"));
   man->AddTask(new CbmRecEventHeaderConverter("RecEventHeader"));
+//   man->AddTask(new CbmSimTracksConverter("SimParticles", "", std::string(unigenFile)));
   man->AddTask(new CbmSimTracksConverter("SimParticles"));
 
   CbmStsTracksConverter* taskCbmStsTracksConverter =
