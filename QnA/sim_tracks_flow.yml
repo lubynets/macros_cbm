@@ -1,0 +1,236 @@
+# midrapidity=1.62179      12agev
+
+_layouts:
+  - &layout-psd1
+    [ 18,19,24,25 ]
+  - &layout-psd2
+    [ 11,12,13,14,17,20,23,26,29,30,31,32 ]
+  - &layout-psd3
+    [ 0,1,2,3,4,5,6,7,8,9,10,15,16,21,22,27,28,33,34,35,36,37,38,39,40,41,42,43 ]
+  - &layout-psdall
+    [ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43 ]
+    
+_axes:
+  - &sim_axis_pT
+    name: SimParticles/pT
+    nb: 10
+    lo: 0.0
+    hi: 2.0
+  - &sim_axis_rapidity
+    name: SimParticles/rapidity
+    nb: 10
+    lo: 0.62179005 # midrapidity-1.0
+    hi: 2.6217901 # midrapidity+1.0
+    
+cbm_analysis:
+  event-variables:
+    - SimEventHeader/centrality_impactpar
+  axes:
+    - { name: SimEventHeader/centrality_impactpar, bin-edges: [0, 10, 20, 30, 40, 50, 60, 70]}
+  q-vectors:
+    - name: u_sim_lambda
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 3122 }
+        SimParticles/mother_id: { equals: -1 }
+    - name: u_sim_kshort
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 310 }
+        SimParticles/mother_id: { equals: -1 }
+    - name: u_sim_pipos
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 211 }
+        SimParticles/mother_id: { equals: -1 }
+    - name: u_sim_pineg
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: -211 }
+        SimParticles/mother_id: { equals: -1 }    
+    - name: psd1
+      _from: &reference-base-detector
+        type: channel
+        phi: PsdModules/phi
+        weight: PsdModules/signal
+        norm: m
+        corrections:
+          - recentering
+      channel-ids: *layout-psd1
+    - name: psd2
+      _from: *reference-base-detector
+      channel-ids: *layout-psd2
+    - name: psd3
+      _from: *reference-base-detector
+      channel-ids: *layout-psd3  
+    - name: psdall
+      _from: *reference-base-detector
+      channel-ids: *layout-psdall  
+    - name: spec1_prim
+      type: track
+      phi: SimParticles/phi
+      weight: SimParticles/mass
+      norm: m
+      cuts:
+        SimParticles/eta: { range: [4.16, 10] }
+        SimParticles/mother_id: { equals: -1 }
+        expr: >
+          {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && ({{SimParticles/pid}}%10000000)/10000 != 0)
+    - name: spec2_prim
+      type: track
+      phi: SimParticles/phi
+      weight: SimParticles/mass
+      norm: m
+      cuts:
+        SimParticles/eta: { range: [3.47, 4.16] }
+        SimParticles/mother_id: { equals: -1 }
+        expr: >
+          {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && ({{SimParticles/pid}}%10000000)/10000 != 0)
+    - name: spec3_prim
+      type: track
+      phi: SimParticles/phi
+      weight: SimParticles/mass
+      norm: m
+      cuts:
+        SimParticles/eta: { range: [2.94, 3.47] }
+        SimParticles/mother_id: { equals: -1 }
+        expr: >
+          {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && ({{SimParticles/pid}}%10000000)/10000 != 0)
+    - name: Q_psi
+      type: psi
+      phi:  SimEventHeader/psi_RP
+      weight: Ones
+      norm: m
+      
+#=========================================================================================
+
+_detectors: &detectors
+  - name: u_sim_lambda
+    tags: [ un_vector ]
+  - name: u_sim_kshort
+    tags: [ un_vector ]
+  - name: u_sim_pipos
+    tags: [ un_vector ]
+  - name: u_sim_pineg
+    tags: [ un_vector ]
+  - name: psd1
+    tags: [ psd ]
+  - name: psd2
+    tags: [ psd ]
+  - name: psd3
+    tags: [ psd ]  
+  - name: psdall
+    tags: [ psd ]  
+  - name: spec1_prim
+    tags: [ spec_prim ]
+  - name: spec2_prim
+    tags: [ spec_prim ]
+  - name: spec3_prim
+    tags: [ spec_prim ]
+  - name: Q_psi
+    tags: [ psi ]
+    
+_axes:
+  - &centrality
+    name: SimEventHeader_centrality_impactpar
+    bin-edges: [0, 10, 20, 30, 40, 50, 60, 70]
+_components:
+  - &sp_components
+    [ x1,y1 ]
+    
+_queries:
+  - &query_usim
+    tags: { any-in: [un_vector] }
+  - &query_psd
+    tags: { any-in: [psd] }
+  - &query_spec_prim
+    tags: { any-in: [spec_prim] }
+  - &query_psi
+    name: { equals: Q_psi }
+    
+_task_args:
+  - &ta_usim
+    query: *query_usim
+    query-list: *detectors
+    correction-steps: [plain]
+    components: *sp_components
+    weight: sumw
+  - &ta_psd
+    query: *query_psd
+    query-list: *detectors
+    correction-steps: [recentered]
+    components: *sp_components
+    weight: ones
+  - &ta_spec_prim
+    query: *query_spec_prim
+    query-list: *detectors
+    correction-steps: [plain]
+    components: *sp_components
+    weight: ones
+  - &ta_psi
+    query: *query_psi
+    query-list: *detectors
+    correction-steps: [plain]
+    components: *sp_components
+    weight: ones
+    
+_tasks:
+  - args: [*ta_usim, *ta_psd ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uQ"
+    axes: [ *centrality ]
+  - args: [*ta_usim, *ta_spec_prim ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uQ"
+    axes: [ *centrality ]
+  - args: [*ta_usim, *ta_psi ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uPsi"
+    axes: [ *centrality ]
+  - args: [*ta_psd, *ta_psi ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QPsi"
+    axes: [ *centrality ]
+  - args: [*ta_spec_prim, *ta_psi ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QPsi"
+    axes: [ *centrality ]
+  - args: [*ta_psd, *ta_psd ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]
+  - args: [*ta_spec_prim, *ta_spec_prim ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]
