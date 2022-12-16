@@ -1,0 +1,80 @@
+# y_beam=1.62179
+_layouts:
+
+_axes:
+  - &rec_axis_pT
+    name: RecParticlesMcPid/pT
+    nb: 4
+    lo: 0.2
+    hi: 1.4
+  - &rec_axis_rapidity
+    name: RecParticlesMcPid/rapidity
+    nb: 4
+    lo: 1.02179 # y_beam-0.6
+    hi: 2.62179 # y_beam+1.0
+  - &sim_axis_pT
+    name: SimParticles/pT
+    nb: 4
+    lo: 0.2
+    hi: 1.4
+  - &sim_axis_rapidity
+    name: SimParticles/rapidity
+    nb: 4
+    lo: 1.02179 # y_beam-0.6
+    hi: 2.62179 # y_beam+1.0
+  - &axis_mass
+    name: RecParticlesMcPid/mass
+    bin-edges: [1.095, 1.101, 1.107, 1.113, 1.115, 1.117, 1.119, 1.125, 1.131, 1.137]
+    #name: RecParticlesMcPid/masspull
+    #bin-edges: [-17, -11, -5, -3, -1, 1, 3, 5, 11, 17]
+    
+lambda_analysis:
+  event-variables:
+    - AnaEventHeader/tracks_centrality
+  axes:
+    - { name: AnaEventHeader/tracks_centrality, bin-edges: [0, 20, 40, 100]}
+  q-vectors:
+    - name: u_rec
+      type: track
+      phi:  RecParticlesMcPid/phi
+      weight: RecParticlesMcPid/weight
+      #weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      axes:
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+        - *axis_mass
+      cuts:
+        RecParticlesMcPid/pid: { equals: 3122 }
+        RecParticlesMcPid/is_signal: { range: [-0.1, 2.1] }
+      #qa:
+        #- {name: mdc_vtx_tracks/phi, nb: 100, lo: -4., hi: 4.}
+        #- *axis_pT
+        #- *axis_rapidity
+        #- [*axis_rapidity, *axis_pT]
+    - name: u_sim
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      #corrections:
+        #- recentering
+        #- twist-and-rescale
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 3122 }
+      #qa:
+        #- {name: mdc_vtx_tracks/phi, nb: 100, lo: -4., hi: 4.}
+        #- *axis_pT
+        #- *axis_rapidity
+        #- [*axis_rapidity, *axis_pT]
+    - name: Q_psi
+      type: psi
+      phi:  SimEventHeader/psi_RP
+      weight: Ones
+      norm: m

@@ -1,5 +1,3 @@
-# midrapidity=1.62179      12agev
-
 _layouts:
   - &layout-psd1
     [ 18,19,24,25 ]
@@ -96,30 +94,29 @@ cbm_analysis:
       weight: SimParticles/mass
       norm: m
       cuts:
-        SimParticles/eta: { range: [4.16, 10] }
-        SimParticles/mother_id: { equals: -1 }
-        expr: >
-          {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && ({{SimParticles/pid}}%10000000)/10000 != 0)
-    - name: spec2_prim
+        - { variable:  SimParticles/eta, range: [4.16, 10] }
+        - { variable:  SimParticles/mother_id, equals: -1 }
+        - expr: >
+            {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
       type: track
       phi: SimParticles/phi
       weight: SimParticles/mass
       norm: m
       cuts:
-        SimParticles/eta: { range: [3.47, 4.16] }
-        SimParticles/mother_id: { equals: -1 }
-        expr: >
-          {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && ({{SimParticles/pid}}%10000000)/10000 != 0)
+        - { variable:  SimParticles/eta, range: [3.47, 4.16] }
+        - { variable:  SimParticles/mother_id, equals: -1 }
+        - expr: >
+            {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
     - name: spec3_prim
       type: track
       phi: SimParticles/phi
       weight: SimParticles/mass
       norm: m
       cuts:
-        SimParticles/eta: { range: [2.94, 3.47] }
-        SimParticles/mother_id: { equals: -1 }
-        expr: >
-          {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && ({{SimParticles/pid}}%10000000)/10000 != 0)
+        - { variable:  SimParticles/eta, range: [2.94, 3.47] }
+        - { variable:  SimParticles/mother_id, equals: -1 }
+        - expr: >
+            {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP

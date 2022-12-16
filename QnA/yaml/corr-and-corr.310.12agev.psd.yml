@@ -1,0 +1,270 @@
+# midrapidity=1.62179      12agev
+# midrapidity=0.985344     3.3agev
+
+_layouts:
+  - &layout-psd1
+    [ 18,19,24,25 ]
+  - &layout-psd2
+    [ 11,12,13,14,17,20,23,26,29,30,31,32 ]
+  - &layout-psd3
+    [ 0,1,2,3,4,5,6,7,8,9,10,15,16,21,22,27,28,33,34,35,36,37,38,39,40,41,42,43 ]
+    
+_axes:
+  - &rec_axis_pT
+    name: ReconstructedParticles/pT
+    nb: 5
+    lo: 0
+    hi: 1.5
+  - &rec_axis_rapidity
+    name: ReconstructedParticles/rapidity
+    nb: 4
+    lo: 1.02179005 # midrapidity-0.6
+    hi: 2.6217901 # midrapidity+1.0
+  - &rec_axis_mass
+    name: ReconstructedParticles/mass
+    bin-edges: [0.434, 0.452, 0.470, 0.488, 0.494, 0.500, 0.506, 0.524, 0.542, 0.560]    
+  - &sim_axis_pT
+    name: SimParticles/pT
+    nb: 5
+    lo: 0
+    hi: 1.5
+  - &sim_axis_rapidity
+    name: SimParticles/rapidity
+    nb: 4
+    lo: 1.02179005 # midrapidity-0.6
+    hi: 2.6217901 # midrapidity+1.0
+    
+cbm_analysis:
+  event-variables:
+    - AnaEventHeader/centrality_tracks
+  axes:
+    - { name: AnaEventHeader/centrality_tracks, bin-edges: [0, 10, 20, 30, 40, 70, 100]}
+  q-vectors:
+    - name: u_rec
+      type: track
+      phi:  ReconstructedParticles/phi
+      weight: ReconstructedParticles/weight
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      axes:
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+        - *rec_axis_mass
+      cuts:
+        ReconstructedParticles/pid: { equals: 310 }
+        ReconstructedParticles/generation: { range: [-0.1, 2.1] }  #all
+      #qa:
+        #- {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+        #- *rec_axis_pT
+        #- *rec_axis_rapidity
+        #- *rec_axis_mass
+        #- [ *rec_axis_rapidity, *rec_axis_pT ]
+    - name: u_rec_sgnl
+      type: track
+      phi:  ReconstructedParticles/phi
+      weight: ReconstructedParticles/weight
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      axes:
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+      cuts:
+        ReconstructedParticles/pid: { equals: 310 }
+        ReconstructedParticles/generation: { range: [0.9, 2.1] }   #sgnl only
+      #qa:
+        #- {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+        #- *rec_axis_pT
+        #- *rec_axis_rapidity
+        #- [ *rec_axis_rapidity, *rec_axis_pT ]
+    - name: u_sim
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 310 }
+        SimParticles/z: { range: [-10, 100] }
+    - name: psd1
+      _from: &reference-base-detector
+        type: channel
+        phi: PsdModules/phi
+        weight: PsdModules/signal
+        norm: m
+        corrections:
+          - recentering
+        #qa:
+          #- {name: PsdModules/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+          #- {name: PsdModules/signal, nb: 100, lo: 0, hi: 100}
+      channel-ids: *layout-psd1
+    - name: psd2
+      _from: *reference-base-detector
+      channel-ids: *layout-psd2
+    - name: psd3
+      _from: *reference-base-detector
+      channel-ids: *layout-psd3
+    - name: sts_p
+      type: track
+      phi: RecParticles/phi
+      weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      cuts:
+        RecParticles/pid: { equals: 2212 }
+        RecParticles/pT: { range: [0, 3] }
+        RecParticles/rapidity: { range: [1.02179, 1.42179] }
+    - name: sts_pipos
+      type: track
+      phi: RecParticles/phi
+      weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      cuts:
+        RecParticles/pid: { equals: 211 }
+        RecParticles/pT: { range: [0, 1.4] }
+        RecParticles/rapidity: { range: [2.42179, 2.82179] }        
+    - name: Q_psi
+      type: psi
+      phi:  SimEventHeader/psi_RP
+      weight: Ones
+      norm: m
+
+#=========================================================================================
+
+_detectors: &detectors
+  - name: u_rec
+    tags: [ un_vector ]
+  - name: u_rec_sgnl
+    tags: [ un_vector ]
+  - name: u_sim
+    tags: [ un_vector ]
+  - name: psd1
+    tags: [ psd ]
+  - name: psd2
+    tags: [ psd ]
+  - name: psd3
+    tags: [ psd ]
+  - name: sts_p
+    tags: [ sts ]
+  - name: sts_pipos
+    tags: [ sts ]    
+  - name: Q_psi
+    tags: [ psi ]
+    
+_axes:
+  - &centrality
+    name: AnaEventHeader_centrality_tracks
+    bin-edges: [0, 10, 20, 30, 40, 70, 100]
+_components:
+  - &sp_components
+    [ x1,y1 ]
+    
+_queries:
+  - &query_urec
+    name: { equals: u_rec }
+  - &query_urec_sgnl
+    name: { equals: u_rec_sgnl }
+  - &query_usim
+    name: { equals: u_sim }
+  - &query_psd
+    tags: { any-in: [psd] }
+  - &query_sts
+    tags: { any-in: [sts] }
+  - &query_psi
+    name: { equals: Q_psi }
+    
+_task_args:
+  - &ta_urec
+    query: *query_urec
+    query-list: *detectors
+    correction-steps: [rescaled]
+    components: *sp_components
+    weight: sumw
+  - &ta_urec_sgnl
+    query: *query_urec_sgnl
+    query-list: *detectors
+    correction-steps: [rescaled]
+    components: *sp_components
+    weight: sumw
+  - &ta_usim
+    query: *query_usim
+    query-list: *detectors
+    correction-steps: [plain]
+    components: *sp_components
+    weight: sumw
+  - &ta_psd
+    query: *query_psd
+    query-list: *detectors
+    correction-steps: [recentered]
+    components: *sp_components
+    weight: ones
+  - &ta_sts
+    query: *query_sts
+    query-list: *detectors
+    correction-steps: [rescaled]
+    components: *sp_components
+    weight: ones    
+  - &ta_psi
+    query: *query_psi
+    query-list: *detectors
+    correction-steps: [plain]
+    components: *sp_components
+    weight: ones
+    
+_tasks:
+  - args: [*ta_urec, *ta_psd ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uQ"
+    axes: [ *centrality ]
+  - args: [*ta_urec, *ta_psi ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uPsi"
+    axes: [ *centrality ]
+  - args: [*ta_urec_sgnl, *ta_psd ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uQ"
+    axes: [ *centrality ]
+  - args: [*ta_urec_sgnl, *ta_psi ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uPsi"
+    axes: [ *centrality ]
+  - args: [*ta_psd, *ta_psd ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]
+  - args: [*ta_psd, *ta_sts ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]
+  - args: [*ta_sts, *ta_psd ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]    
+  - args: [*ta_psd, *ta_psi ]
+    n-samples: 50
+    weights-type: reference
+    folder: "/QPsi"
+    axes: [ *centrality ]    
+  - args: [*ta_usim, *ta_psi ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/uPsi"
+    axes: [ *centrality ]
+  
