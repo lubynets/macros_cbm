@@ -6,21 +6,21 @@ void v1_stf() {
   
   TFile* fileIn = TFile::Open(fileName.c_str());
   
-  std::vector<std::string> particles{"lambda", "kshort", "pipos", "pineg"};
+  std::vector<std::string> particles{"lambda", "kshort", "xi", "pipos", "pineg"};
   std::vector<std::string> components{"x1x1", "y1y1", "x1y1", "y1x1"};
   std::vector<std::string> components_same{"x1x1", "y1y1"};
   std::vector<std::string> components_cross{"x1y1", "y1x1"};
   std::vector<std::string> subevents{"psd1_RECENTERED",
                                      "psd2_RECENTERED",
                                      "psd3_RECENTERED",
-//                                      "psdall_RECENTERED",
-                                     "spec1_prim_PLAIN",
-                                     "spec2_prim_PLAIN",
-                                     "spec3_prim_PLAIN",
-//                                      "spec1_all_PLAIN",
-//                                      "spec2_all_PLAIN",
-//                                      "spec3_all_PLAIN"
-                                    };
+                                     "etacut_1_charged_PLAIN",
+                                     "etacut_2_charged_PLAIN",
+                                     "etacut_3_charged_PLAIN",
+                                     "etacut_1_all_PLAIN",
+                                     "etacut_2_all_PLAIN",
+                                     "etacut_3_all_PLAIN"
+                                     };
+  std::vector<std::pair<int, int>> sub_indices{{0, 3}, {3, 6}, {6, 9}};
   
   TFile* fileOut = TFile::Open(("v1andR1.stf." + evegen + ".root").c_str(), "recreate");
   fileOut->cd();
@@ -49,30 +49,22 @@ void v1_stf() {
   }
 
   fileOut->cd("R1R1");
-  for(int i=0; i<3; i++) {
-    for(int j=0; j<3; j++) {
-      auto R1R1 = R1.at(i) * R1.at(j);
-      R1R1.Save("r1r1." + subevents.at(i) + "_" + subevents.at(j));
-    }
-  }
-  for(int i=3; i<6; i++) {
-    for(int j=3; j<6; j++) {
-      auto R1R1 = R1.at(i) * R1.at(j);
-      R1R1.Save("r1r1." + subevents.at(i) + "_" + subevents.at(j));
+  for(auto& si : sub_indices) {
+    for(int i=si.first; i<si.second; i++) {
+      for(int j=si.first; j<si.second; j++) {
+        auto R1R1 = R1.at(i) * R1.at(j);
+        R1R1.Save("r1r1." + subevents.at(i) + "_" + subevents.at(j));
+      }
     }
   }
 
   fileOut->cd("QQ");
-  for(int i=0; i<3; i++) {
-    for(int j=0; j<3; j++) {
-      auto QQ = Correlation(fileIn, "QQ", {subevents.at(i), subevents.at(j)}, components_same) * 2.;
-      QQ.Save("qq." + subevents.at(i) + "_" + subevents.at(j));
-    }
-  }
-  for(int i=3; i<6; i++) {
-    for(int j=3; j<6; j++) {
-      auto QQ = Correlation(fileIn, "QQ", {subevents.at(i), subevents.at(j)}, components_same) * 2.;
-      QQ.Save("qq." + subevents.at(i) + "_" + subevents.at(j));
+  for(auto& si : sub_indices) {
+    for(int i=si.first; i<si.second; i++) {
+      for(int j=si.first; j<si.second; j++) {
+        auto QQ = Correlation(fileIn, "QQ", {subevents.at(i), subevents.at(j)}, components_same) * 2.;
+        QQ.Save("qq." + subevents.at(i) + "_" + subevents.at(j));
+      }
     }
   }
 

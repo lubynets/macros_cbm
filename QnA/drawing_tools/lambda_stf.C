@@ -3,15 +3,24 @@
 void lambda_stf() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+//   std::string evegen = "dcmqgsm";
+  std::string evegen = "urqmd";
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
   
-  std::vector<std::string> particles{"lambda", "kshort", "pipos", "pineg"};
-  std::vector<std::string> subevents{"psd1", "psd2", "psd3", "spec1_prim", "spec2_prim", "spec3_prim"};
+  std::vector<std::string> particles{
+                                     "lambda",
+                                     "kshort",
+                                     "xi",
+//                                      "pipos",
+//                                      "pineg"
+                                    };
+  std::vector<std::string> subevents{"psd1", "psd2", "psd3",
+                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
+                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"};
   std::string step;
   bool average_comp;
+  float y_lo, y_hi;
 
   SetAxis("centrality", "select");
   SetAxis("rapidity", "projection");
@@ -19,8 +28,6 @@ void lambda_stf() {
 
   std::string uQ_R1 = "uQ_R1"; std::string y_axis_title = "v_{1}";
 //   std::string uQ_R1 = "uQ_R1_even"; std::string y_axis_title = "v_{1}^{even}";
-
-  std::vector<std::string> components{"x1x1", "y1y1"};
   
   axes.at(0).sim_name_ = "SimParticles_pT";
   axes.at(1).sim_name_ = "SimParticles_rapidity";
@@ -48,15 +55,48 @@ void lambda_stf() {
 
   for(auto& particle : particles) {
     if(evegen == "dcmqgsm") {
-      if(particle == "lambda") SetSliceAxisBinEdges({0, 0.4, 0.8, 1.2, 1.6});
-      if(particle == "kshort") SetSliceAxisBinEdges({0, 0.4, 0.8, 1.6});
-      if(particle == "pipos" || particle == "pineg") SetSliceAxisBinEdges({0, 0.4, 0.6, 1.0, 1.4, 2.0});
+      if(particle == "lambda") {
+        SetSliceAxisBinEdges({0, 0.4, 0.8, 1.2, 1.6});
+        y_lo = -0.3;
+        y_hi = 0.3;
+      }
+      if(particle == "kshort") {
+        SetSliceAxisBinEdges({0, 0.4, 0.8, 1.6});
+        y_lo = -0.1;
+        y_hi = 0.1;
+      }
+      if(particle == "pipos" || particle == "pineg") {
+        SetSliceAxisBinEdges({0, 0.4, 0.6, 1.0, 1.4, 2.0});
+        y_lo = -0.3;
+        y_hi = 0.3;
+      }
+      if(particle == "xi") {
+        SetSliceAxisBinEdges({0, 0.4, 0.8, 1.2, 1.6});
+        y_lo = -0.3;
+        y_hi = 0.3;
+      }
     }
-
     if(evegen == "urqmd") {
-      if(particle == "lambda") SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
-      if(particle == "kshort") SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
-      if(particle == "pipos" || particle == "pineg") SetSliceAxisBinEdges({0, 1.0, 1.4, 2.0});
+      if(particle == "lambda") {
+        SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
+        y_lo = -0.2;
+        y_hi = 0.2;
+      }
+      if(particle == "kshort") {
+        SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
+        y_lo = -0.2;
+        y_hi = 0.2;
+      }
+      if(particle == "pipos" || particle == "pineg") {
+        SetSliceAxisBinEdges({0, 1.0, 1.4, 2.0});
+        y_lo = -0.15;
+        y_hi = 0.15;
+      }
+      if(particle == "xi") {
+        SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
+        y_lo = -0.2;
+        y_hi = 0.2;
+      }
     }
 
     for(auto& subevent : subevents) {
@@ -64,7 +104,7 @@ void lambda_stf() {
         step = "_RECENTERED";
         average_comp = false;
       }
-      if(subevent[0] == 's') {
+      if(subevent[0] == 'e') {
         step = "_PLAIN";
         average_comp = true;
       }
@@ -115,7 +155,7 @@ void lambda_stf() {
         v1_PsiRP.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         v1_PsiRP.SetMarker(-1);
         v1_PsiRP.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                            kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+                             kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
         v1_PsiRP.SetBiasPalette(false);
         v1_PsiRP.Rebin({{axes.at(kSelect).sim_name_.c_str(),
                         {axes.at(kSelect).bin_edges_.at(iEdge), axes.at(kSelect).bin_edges_.at(iEdge+1)}}});
@@ -126,7 +166,7 @@ void lambda_stf() {
         v1_PsiRP.ShiftProjectionAxis(axes.at(kProjection).shift_);
 
         HeapPicture pic( (axes.at(kSelect).name_ + "_" + std::to_string(iEdge)).c_str(), {1000, 1000});
-        pic.SetRelErrorThreshold(0.2);
+//         pic.SetRelErrorThreshold(0.2);
 
         pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
         if(evegen == "dcmqgsm") {
@@ -175,6 +215,7 @@ void lambda_stf() {
 
         pic.CustomizeXRange();
         pic.CustomizeYRange();
+//         pic.SetYRange({y_lo, y_hi});
         pic.AddLegend(leg1);
         pic.CustomizeLegend(leg1);
         pic.Draw();

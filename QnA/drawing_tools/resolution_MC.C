@@ -6,17 +6,20 @@ void resolution_MC() {
     
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
     
-  std::vector<std::string> correls{"psd1_RECENTERED", "psd2_RECENTERED", "psd3_RECENTERED"};
-//   std::vector<std::string> correls{"spec1_prim_PLAIN", "spec2_prim_PLAIN", "spec3_prim_PLAIN"};
+//   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
+//   std::vector<std::string> correls{"etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
+  std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
+
+  std::string step;
 
   std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res";
 //   std::vector<std::string> components{"x1y1", "y1x1"}; std::string L_or_P = "P"; std::string same_or_cross = "res_cross";
 
   std::string fileOutName;
-  if(correls.at(0)[0] == 'p' && components.at(0) == "x1x1") fileOutName = "res.psd";
-  if(correls.at(0)[0] == 'p' && components.at(0) == "x1y1") fileOutName = "res_cross.psd";
-  if(correls.at(0)[0] == 's' && components.at(0) == "x1x1") fileOutName = "res.spec_prim";
-  if(correls.at(0)[0] == 's' && components.at(0) == "x1y1") fileOutName = "res_cross.spec_prim";
+  if(correls.at(0)[0] == 'p' && components.at(0) == "x1x1") { step = "_RECENTERED"; fileOutName = "res.psd"; }
+  if(correls.at(0)[0] == 'p' && components.at(0) == "x1y1") { step = "_RECENTERED"; fileOutName = "res_cross.psd"; }
+  if(correls.at(0)[0] == 'e' && components.at(0) == "x1x1") { step = "_PLAIN"; fileOutName = "res.spec_prim"; }
+  if(correls.at(0)[0] == 'e' && components.at(0) == "x1y1") { step = "_PLAIN"; fileOutName = "res_cross.spec_prim"; }
 
   MultiCorrelation multicor_mc;
   multicor_mc.SetPalette( {kBlue, kBlue, kRed, kRed, kGreen+2, kGreen+2} );
@@ -25,7 +28,7 @@ void resolution_MC() {
 
   for(auto& corr : correls) {
     for(auto& comp : components) {
-      multicor_mc.AddCorrelation(fileName, {"R1/" + same_or_cross + "." + corr + "." + comp}, "mc_" + corr + "_" + comp);
+      multicor_mc.AddCorrelation(fileName, {"R1/" + same_or_cross + "." + corr + step + "." + comp}, "mc_" + corr + step + "_" + comp);
     }
   }
 
@@ -65,9 +68,9 @@ void resolution_MC() {
   
   leg1->AddEntry(grx, components.at(0).c_str(), L_or_P.c_str());
   leg1->AddEntry(gry, components.at(1).c_str(), L_or_P.c_str());
-  leg1->AddEntry(multicor_mc.GetCorrelations().at(0)->GetPoints(), correls.at(0).c_str(), L_or_P.c_str());
-  leg1->AddEntry(multicor_mc.GetCorrelations().at(2)->GetPoints(), correls.at(1).c_str(), L_or_P.c_str());
-  leg1->AddEntry(multicor_mc.GetCorrelations().at(4)->GetPoints(), correls.at(2).c_str(), L_or_P.c_str());
+  leg1->AddEntry(multicor_mc.GetCorrelations().at(0)->GetPoints(), (correls.at(0) + step).c_str(), L_or_P.c_str());
+  leg1->AddEntry(multicor_mc.GetCorrelations().at(2)->GetPoints(), (correls.at(1) + step).c_str(), L_or_P.c_str());
+  leg1->AddEntry(multicor_mc.GetCorrelations().at(4)->GetPoints(), (correls.at(2) + step).c_str(), L_or_P.c_str());
   
   pic.SetAxisTitles( {"Centrality, %", "R_{1}"} );
   pic.CustomizeXRange();
