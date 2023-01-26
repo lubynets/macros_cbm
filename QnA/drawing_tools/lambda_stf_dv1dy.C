@@ -3,10 +3,14 @@
 void lambda_stf_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm";
-  std::string evegen = "urqmd";
+//   bool is_draw_difference = false;
+  bool is_draw_difference = true;
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
+  std::string evegen = "dcmqgsm";
+//   std::string evegen = "urqmd";
+
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
 
   std::vector<std::string> particles{
                                      "lambda",
@@ -55,6 +59,9 @@ void lambda_stf_dv1dy() {
     delete dc;
 
     for(auto& subevent : subevents) {
+      TPaveText pt(0.1, 0.1, 0.9, 0.9);
+      pt.SetTextSize(0.04);
+
       if(subevent[0] == 'p') {
         step = "_RECENTERED";
         average_comp = false;
@@ -65,11 +72,18 @@ void lambda_stf_dv1dy() {
       }
 
       bool is_first_canvas = true;
-      std::string fileOutName = "dv1dy." + particle + "." + subevent;
+      std::string fileOutName;
+      if(!is_draw_difference) {
+        fileOutName = "dv1dy." + particle + "." + subevent;
+      } else {
+        fileOutName = "chi2.dv1dy." + particle + "." + subevent;
+      }
+
       //       TFile* fileOut = TFile::Open("fileOut.root", "recreate");
 
 
       for(auto fc : fitcoeffs) {
+        pt.AddText(fc.c_str());
 
         if(evegen == "dcmqgsm") {
           if(particle == "lambda") {
@@ -108,9 +122,9 @@ void lambda_stf_dv1dy() {
           }
         }
 
-
         if(fc == "slope") y_axis_title = "dv_{1}/dy";
         if(fc == "intercept") y_axis_title = "v_{1}|_{y=0}";
+        if(is_draw_difference) y_axis_title = "#chi^{2} of " + y_axis_title;
 
         std::vector<DoubleDifferentialCorrelation> v1_R_MC;
         if(average_comp) {
@@ -142,24 +156,11 @@ void lambda_stf_dv1dy() {
           v1_R_MC.at(1).SlightShiftProjectionAxis(1, 0.5);
         }
 
-//         auto v1_R_MC = DoubleDifferentialCorrelation( fileName.c_str(), correlnames );
-//         v1_R_MC.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
-//         v1_R_MC.SetMarker(kFullSquare);
-//         v1_R_MC.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-//                             kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-//         v1_R_MC.SetBiasPalette(false);
-//         v1_R_MC.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
-//         v1_R_MC.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
-//         v1_R_MC.ShiftSliceAxis(axes.at(kSlice).shift_);
-//         v1_R_MC.Calculate();
-//         v1_R_MC.ShiftProjectionAxis(axes.at(kProjection).shift_);
-//         v1_R_MC.SlightShiftProjectionAxis(1);
-//
         auto v1_PsiRP = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
         v1_PsiRP.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         v1_PsiRP.SetMarker(-1);
         v1_PsiRP.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                              kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+                             kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
         v1_PsiRP.SetBiasPalette(false);
         v1_PsiRP.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
         v1_PsiRP.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
@@ -202,20 +203,58 @@ void lambda_stf_dv1dy() {
           entry->SetMarkerStyle(kOpenSquare);
         }
 
-        for(int i=0; i<v1_R_MC.size(); i++) {
-          for( auto obj : v1_R_MC.at(i).GetProjections() ){
-            pic.AddDrawable( obj );
-            if(i==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
+        if(!is_draw_difference) {
+          for(int i=0; i<v1_R_MC.size(); i++) {
+            for( auto obj : v1_R_MC.at(i).GetProjections() ){
+              pic.AddDrawable( obj );
+              if(i==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
+            }
           }
-        }
-        for( auto obj : v1_PsiRP.GetProjections() ){
-          pic.AddDrawable( obj );
+          for( auto obj : v1_PsiRP.GetProjections() ){
+            pic.AddDrawable( obj );
+          }
+        } else {
+          pic.DrawZeroLine(false);
+          pic.AddHorizontalLine(-1);
+          pic.AddHorizontalLine(1);
+          for(int i=0; i<v1_R_MC.size(); i++) { // i: X, Y, ave
+            int j{0}; // j: slice axis
+            for( auto obj_R_MC : v1_R_MC.at(i).GetProjections() ) {
+              std::string string_values;
+              string_values = ("p_{T}^{" + std::to_string(j+1) + "}  ").c_str();
+              auto obj_psiRP = v1_PsiRP.GetProjections().at(j);
+              GraphSubtractor gr_sub;
+              gr_sub.SetMinuend(obj_R_MC);
+              gr_sub.SetSubtrahend(obj_psiRP);
+              gr_sub.Calculate();
+              auto obj_R_MC_psiRP = gr_sub.GetResult();
+              pic.AddDrawable(obj_R_MC_psiRP);
+              if(v1_R_MC.size() == 2) {
+                if(i==0) {
+                  string_values += ", X:  ";
+                } else {
+                  string_values += ", Y:  ";
+                }
+              }
+              auto vec_values = gr_sub.GetPointsValues();
+              for(auto& vv : vec_values) {
+                vv = std::round(vv);
+                string_values += (to_string_with_precision(vv, 0) + "   ").c_str();
+              }
+              pt.AddText(string_values.c_str());
+              if(i==0) leg1->AddEntry( obj_R_MC->GetPoints(), obj_R_MC->GetTitle().c_str(), "P" );
+              j++;
+            } // j
+          } // i
         }
         pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
 
         pic.CustomizeXRange();
-//         pic.CustomizeYRange();
-        pic.SetYRange({y_lo, y_hi});
+        if(is_draw_difference) {
+          pic.CustomizeYRange();
+        } else {
+          pic.SetYRange({y_lo, y_hi});
+        }
         pic.AddLegend(leg1);
         pic.CustomizeLegend(leg1);
         pic.Draw();
@@ -231,6 +270,8 @@ void lambda_stf_dv1dy() {
       }
 
       TCanvas emptycanvas("", "", 1000, 1000);
+      emptycanvas.cd();
+      pt.Draw();
       emptycanvas.Print((fileOutName + ".pdf)").c_str(), "pdf");
 
 //       fileOut->Close();
