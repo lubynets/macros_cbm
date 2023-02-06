@@ -1,27 +1,33 @@
 #include "lambda.h"
 
 void lambda_stf_dv1dy() {
+  gStyle->SetCanvasPreferGL(kTRUE);
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   bool is_draw_difference = false;
-  bool is_draw_difference = true;
+  bool is_draw_difference = false;
+//   bool is_draw_difference = true;
+
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
 
   std::vector<std::string> particles{
                                      "lambda",
-                                     "kshort",
-                                     "xi",
-                                     "pipos",
-                                     "pineg"
+//                                      "kshort",
+//                                      "xi",
+//                                      "pipos",
+//                                      "pineg"
                                     };
-  std::vector<std::string> subevents{"psd1", "psd2", "psd3",
-                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"};
+  std::vector<std::string> subevents{
+                                     "psd1"/*, "psd2", "psd3",*/
+//                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
+//                                      "etacut_1_all", "etacut_2_all", "etacut_3_all"
+                                    };
   std::string step;
   bool average_comp;
   float y_lo, y_hi;
@@ -33,7 +39,7 @@ void lambda_stf_dv1dy() {
   std::string y_axis_title;
 
   std::vector<std::string> components{"x1x1", "y1y1"};
-  std::vector<std::string> fitcoeffs{"slope", "intercept"};
+  std::vector<std::string> fitcoeffs{"slope"/*, "intercept"*/};
 
   axes.at(kSlice).sim_name_ = "SimParticles_pT";
   axes.at(kProjection).sim_name_ = "SimEventHeader_centrality_impactpar";
@@ -41,6 +47,7 @@ void lambda_stf_dv1dy() {
   axes.at(kProjection).reco_name_ = "SimEventHeader_centrality_impactpar";
 
   TFile* fileIn = TFile::Open(fileName.c_str(), "open");
+  TFile* fileOut{nullptr};
 
   for(auto& particle : particles) {
 
@@ -79,8 +86,7 @@ void lambda_stf_dv1dy() {
         fileOutName = "chi2.dv1dy." + particle + "." + subevent;
       }
 
-      //       TFile* fileOut = TFile::Open("fileOut.root", "recreate");
-
+      if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
 
       for(auto fc : fitcoeffs) {
         pt.AddText(fc.c_str());
@@ -159,6 +165,7 @@ void lambda_stf_dv1dy() {
         auto v1_PsiRP = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
         v1_PsiRP.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         v1_PsiRP.SetMarker(-1);
+        v1_PsiRP.SetIsFillLine();
         v1_PsiRP.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
                              kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
         v1_PsiRP.SetBiasPalette(false);
@@ -259,8 +266,11 @@ void lambda_stf_dv1dy() {
         pic.CustomizeLegend(leg1);
         pic.Draw();
 
-//           fileOut->cd();
-//           pic.GetCanvas()->Write();
+        if(is_write_rootfile) {
+          fileOut->cd();
+          pic.GetCanvas()->Write();
+          pic.GetCanvas()->SaveAs("cc.C");
+        }
 
         if(is_first_canvas)
           pic.GetCanvas()->Print((fileOutName + ".pdf(").c_str(), "pdf");
@@ -274,7 +284,7 @@ void lambda_stf_dv1dy() {
       pt.Draw();
       emptycanvas.Print((fileOutName + ".pdf)").c_str(), "pdf");
 
-//       fileOut->Close();
+      if(is_write_rootfile) fileOut->Close();
     }
   }
 }

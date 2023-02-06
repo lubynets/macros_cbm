@@ -3,15 +3,18 @@
 void lambda_stf() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm";
-  std::string evegen = "urqmd";
+  std::string evegen = "dcmqgsm";
+//   std::string evegen = "urqmd";
+
+  //   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
   
   std::vector<std::string> particles{
                                      "lambda",
-                                     "kshort",
-                                     "xi",
+//                                      "kshort",
+//                                      "xi",
 //                                      "pipos",
 //                                      "pineg"
                                     };
@@ -45,6 +48,8 @@ void lambda_stf() {
       ax.bin_edges_.push_back(qnaxis.GetLowerBinEdge(i));
     }
   }
+
+  TFile* fileOut{nullptr};
   
 //   SetProjectionAxisBinEdges({-1.0-axes.at(kProjection).shift_,
 //                              -0.6-axes.at(kProjection).shift_,
@@ -113,7 +118,8 @@ void lambda_stf() {
       std::string fileOutName;
       if(uQ_R1 == "uQ_R1") fileOutName = "v1_res." + particle + "." + subevent;
       if(uQ_R1 == "uQ_R1_even") fileOutName = "v1_res_even." + particle + "." + subevent;
-      //       TFile* fileOut = TFile::Open("fileOut.root", "recreate");
+
+      if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
 
       for(int iEdge=0; iEdge<axes.at(kSelect).bin_edges_.size()-1; iEdge++){
 
@@ -154,6 +160,7 @@ void lambda_stf() {
                                                                           ("v1/" + particle + "/uPsi/v1.uPsi.y1y1").c_str()} );
         v1_PsiRP.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         v1_PsiRP.SetMarker(-1);
+        v1_PsiRP.SetIsFillLine();
         v1_PsiRP.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
                              kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
         v1_PsiRP.SetBiasPalette(false);
@@ -220,8 +227,10 @@ void lambda_stf() {
         pic.CustomizeLegend(leg1);
         pic.Draw();
 
-//           fileOut->cd();
-//           pic.GetCanvas()->Write();
+        if(is_write_rootfile) {
+          fileOut->cd();
+          pic.GetCanvas()->Write();
+        }
 
         if(is_first_canvas)
           pic.GetCanvas()->Print((fileOutName + ".pdf(").c_str(), "pdf");
@@ -235,7 +244,7 @@ void lambda_stf() {
       TCanvas emptycanvas("", "", 1000, 1000);
       emptycanvas.Print((fileOutName + ".pdf)").c_str(), "pdf");
 
-//       fileOut->Close();
+      if(is_write_rootfile) fileOut->Close();
     }
   }
 }

@@ -1,14 +1,17 @@
 void resolution_MC() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm";
-  std::string evegen = "urqmd";
+  std::string evegen = "dcmqgsm";
+//   std::string evegen = "urqmd";
+
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
     
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
-    
-//   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
+
+  std::vector<std::string> correls{"psd1", "psd2", "psd3"};
 //   std::vector<std::string> correls{"etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
-  std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
+//   std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
 
   std::string step;
 
@@ -22,6 +25,7 @@ void resolution_MC() {
   if(correls.at(0)[0] == 'e' && components.at(0) == "x1y1") { step = "_PLAIN"; fileOutName = "res_cross.spec_prim"; }
 
   MultiCorrelation multicor_mc;
+  multicor_mc.SetIsFillSysErrors(false);
   multicor_mc.SetPalette( {kBlue, kBlue, kRed, kRed, kGreen+2, kGreen+2} );
   if(components.at(0) == "x1x1") multicor_mc.SetMarkers( {-1, -2, -1, -2, -1, -2} );
   if(components.at(0) == "x1y1") multicor_mc.SetMarkers( {kFullSquare, kOpenSquare, kFullSquare, kOpenSquare, kFullSquare, kOpenSquare} );
@@ -82,10 +86,12 @@ void resolution_MC() {
   pic.Draw();
 //   pic.Save("fileOut", "png");
   
-//   TFile* fileOut = TFile::Open("fileOut.root", "recreate");
-//   fileOut->cd();
-//   pic.GetCanvas()->Write();
-//   fileOut->Close();
+  if(is_write_rootfile) {
+    TFile* fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
+    fileOut->cd();
+    pic.GetCanvas()->Write();
+    fileOut->Close();
+  }
     
   pic.GetCanvas()->Print((fileOutName + ".pdf").c_str(), "pdf");
 }
