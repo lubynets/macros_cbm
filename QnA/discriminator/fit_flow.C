@@ -5,13 +5,13 @@ void fit_flow() {
 
   gROOT->Macro("/home/oleksii/cbmdir/flow_drawing_tools/example/style_1.cc");
 
-//   std::string shapefilename = "/home/oleksii/cbmdir/working/qna/shapes/shape_fit.dcmqgsm.12agev.recpid.3122.root";
-//   std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/v1andR1.dcmqgsm.apr20.recpid.lightcuts1.3122.set4.all.root";
-//   const float mu = 1.115683;
+  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/shapes/shape_fit.dcmqgsm.12agev.recpid.3122.root";
+  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/v1andR1.dcmqgsm.apr20.recpid.lightcuts1.3122.set4.all.root";
+  const float mu = 1.115683;
 
-  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/shapes/shape_fit.dcmqgsm.12agev.recpid.310.root";
-  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/v1andR1.dcmqgsm.apr20.recpid.lightcuts1.310.set4.root";
-  const float mu = 0.497611;
+//   std::string shapefilename = "/home/oleksii/cbmdir/working/qna/shapes/shape_fit.dcmqgsm.12agev.recpid.310.root";
+//   std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/v1andR1.dcmqgsm.apr20.recpid.lightcuts1.310.set4.root";
+//   const float mu = 0.497611;
 
   TFile* shapefile = TFile::Open(shapefilename.c_str(), "read");
   Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>* shcntr = (Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>*) shapefile->Get("ReFit");

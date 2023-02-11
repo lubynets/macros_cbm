@@ -1,6 +1,6 @@
 void v1_stf() {
-//   std::string evegen = "dcmqgsm";
-  std::string evegen = "urqmd";
+  std::string evegen = "dcmqgsm";
+//   std::string evegen = "urqmd";
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/cl.stf." + evegen + ".root";
   
@@ -40,12 +40,12 @@ void v1_stf() {
     uPsi.Save("v1.uPsi");
   }
   
+  fileOut->cd("R1");
   std::vector<Correlation> R1;
   R1.resize(subevents.size());
-  fileOut->cd("R1");
   for(int i=0; i<subevents.size(); i++) {
     R1.at(i) = Correlation(fileIn, "QPsi", {subevents.at(i), "Q_psi_PLAIN"}, components_same) * 2.;
-    R1.at(i).Save("res." + subevents.at(i));
+    R1.at(i).Save("res.mc." + subevents.at(i));
   }
 
   fileOut->cd("R1R1");
@@ -58,13 +58,26 @@ void v1_stf() {
     }
   }
 
-  fileOut->cd("QQ");
   for(auto& si : sub_indices) {
+    std::vector<std::vector<Correlation>> QQ;
+    QQ.resize(si.second - si.first);
+    for(auto& qq : QQ) {
+      qq.resize(si.second - si.first);
+    }
+    fileOut->cd("QQ");
     for(int i=si.first; i<si.second; i++) {
       for(int j=si.first; j<si.second; j++) {
-        auto QQ = Correlation(fileIn, "QQ", {subevents.at(i), subevents.at(j)}, components_same) * 2.;
-        QQ.Save("qq." + subevents.at(i) + "_" + subevents.at(j));
+        if(i>j) continue;
+        int I = i - si.first;
+        int J = j - si.first;
+        QQ.at(I).at(J) = Correlation(fileIn, "QQ", {subevents.at(i), subevents.at(j)}, components_same) * 2.;
+        QQ.at(I).at(J).Save("qq." + subevents.at(i) + "_" + subevents.at(j));
       }
+    }
+    fileOut->cd("R1");
+    std::vector<Correlation> R1_3sub = Functions::VectorResolutions3S(QQ.at(1).at(2), QQ.at(0).at(2), QQ.at(0).at(1));
+    for(int i=0; i<3; i++) {
+      R1_3sub.at(i).Save("res.sub3." + subevents.at(si.first + i));
     }
   }
 
@@ -89,7 +102,6 @@ void v1_stf() {
       fileOut->cd(("v1/" + pa + "/uQ_R1").c_str());
       uQ_R1.Save("v1.uQ_R1." + subevents.at(i));
       auto uQ_R1_mirrored = Mirror(uQ_R1, "SimParticles_rapidity");
-//       uQ_R1_mirrored.Save("v1.uQ_R1_mirrored." + subevents.at(i));
       auto uQ_R1_even = (uQ_R1 - uQ_R1_mirrored) / 2.;
       uQ_R1_even.Save("v1.uQ_R1_even." + subevents.at(i));
       auto uQ_R1_odd = (uQ_R1 + uQ_R1_mirrored) / 2.;
