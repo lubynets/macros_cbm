@@ -4,29 +4,38 @@ void lambda_stf_dv1dy() {
   gStyle->SetCanvasPreferGL(kTRUE);
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  bool is_draw_difference = false;
-//   bool is_draw_difference = true;
+  enum DrawOption {
+    kPlain,
+    kDifference,
+    kRatio
+  };
 
-//   bool is_write_rootfile = false;
-  bool is_write_rootfile = true;
+  bool is_draw_difference;
+
+//   DrawOption drawOption = kPlain;
+//   DrawOption drawOption = kDifference;
+  DrawOption drawOption = kRatio;
+
+  bool is_write_rootfile = false;
+//   bool is_write_rootfile = true;
 
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
 
   std::vector<std::string> particles{
                                      "lambda",
-//                                      "kshort",
-//                                      "xi",
-//                                      "pipos",
-//                                      "pineg"
+                                     "kshort",
+                                     "xi",
+                                     "pipos",
+                                     "pineg"
                                     };
   std::vector<std::string> subevents{
-                                     "psd1"/*, "psd2", "psd3",*/
-//                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-//                                      "etacut_1_all", "etacut_2_all", "etacut_3_all"
+                                     "psd1", "psd2", "psd3",
+                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
+                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"
                                     };
   std::string step;
   bool average_comp;
@@ -39,7 +48,8 @@ void lambda_stf_dv1dy() {
   std::string y_axis_title;
 
   std::vector<std::string> components{"x1x1", "y1y1"};
-  std::vector<std::string> fitcoeffs{"slope"/*, "intercept"*/};
+  std::vector<std::string> fitcoeffs{"slope", "intercept"};
+  if(drawOption == kRatio) fitcoeffs.pop_back();
 
   axes.at(kSlice).sim_name_ = "SimParticles_pT";
   axes.at(kProjection).sim_name_ = "SimEventHeader_centrality_impactpar";
@@ -50,6 +60,15 @@ void lambda_stf_dv1dy() {
   TFile* fileOut{nullptr};
 
   for(auto& particle : particles) {
+
+    std::string fileOutName;
+    if(drawOption == kPlain) fileOutName = "dv1dy." + particle;
+    if(drawOption == kDifference) fileOutName = "chi2.dv1dy." + particle;
+    if(drawOption == kRatio) fileOutName = "ratio.dv1dy." + particle;
+
+    std::ofstream fileOutText;
+    fileOutText.open((fileOutName + ".txt").c_str());
+    fileOutText << evegen << "\n";
 
     auto* dc = (Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>*)fileIn->Get<Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>>((particle + "/v1sim_intercept.psi.ave").c_str());
     if(dc==nullptr) {
@@ -66,8 +85,7 @@ void lambda_stf_dv1dy() {
     delete dc;
 
     for(auto& subevent : subevents) {
-      TPaveText pt(0.1, 0.1, 0.9, 0.9);
-      pt.SetTextSize(0.04);
+      fileOutText << "Subevent: " << subevent << "\n";
 
       if(subevent[0] == 'p') {
         step = "_RECENTERED";
@@ -79,17 +97,12 @@ void lambda_stf_dv1dy() {
       }
 
       bool is_first_canvas = true;
-      std::string fileOutName;
-      if(!is_draw_difference) {
-        fileOutName = "dv1dy." + particle + "." + subevent;
-      } else {
-        fileOutName = "chi2.dv1dy." + particle + "." + subevent;
-      }
 
-      if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
+      std::string fileOutNameSubE  = fileOutName + "." + subevent;
+      if(is_write_rootfile) fileOut = TFile::Open((fileOutNameSubE + ".root").c_str(), "recreate");
 
       for(auto fc : fitcoeffs) {
-        pt.AddText(fc.c_str());
+        fileOutText << "FitCoefficient: " << fc << "\n";
 
         if(evegen == "dcmqgsm") {
           if(particle == "lambda") {
@@ -130,7 +143,8 @@ void lambda_stf_dv1dy() {
 
         if(fc == "slope") y_axis_title = "dv_{1}/dy";
         if(fc == "intercept") y_axis_title = "v_{1}|_{y=0}";
-        if(is_draw_difference) y_axis_title = "#chi^{2} of " + y_axis_title;
+        if(drawOption == kDifference) y_axis_title = "#chi^{2} of " + y_axis_title;
+        if(drawOption == kRatio) y_axis_title = "REC / MC of " + y_axis_title;
 
         std::vector<DoubleDifferentialCorrelation> v1_R_MC;
         if(average_comp) {
@@ -210,7 +224,7 @@ void lambda_stf_dv1dy() {
           entry->SetMarkerStyle(kOpenSquare);
         }
 
-        if(!is_draw_difference) {
+        if(drawOption == kPlain) {
           for(int i=0; i<v1_R_MC.size(); i++) {
             for( auto obj : v1_R_MC.at(i).GetProjections() ){
               pic.AddDrawable( obj );
@@ -221,34 +235,53 @@ void lambda_stf_dv1dy() {
             pic.AddDrawable( obj );
           }
         } else {
-          pic.DrawZeroLine(false);
-          pic.AddHorizontalLine(-1);
+          if(drawOption == kDifference) {
+            pic.DrawZeroLine(false);
+            pic.AddHorizontalLine(-1);
+          }
           pic.AddHorizontalLine(1);
           for(int i=0; i<v1_R_MC.size(); i++) { // i: X, Y, ave
             int j{0}; // j: slice axis
             for( auto obj_R_MC : v1_R_MC.at(i).GetProjections() ) {
-              std::string string_values;
-              string_values = ("p_{T}^{" + std::to_string(j+1) + "}  ").c_str();
-              auto obj_psiRP = v1_PsiRP.GetProjections().at(j);
-              GraphSubtractor gr_sub;
-              gr_sub.SetMinuend(obj_R_MC);
-              gr_sub.SetSubtrahend(obj_psiRP);
-              gr_sub.Calculate();
-              auto obj_R_MC_psiRP = gr_sub.GetResult();
-              pic.AddDrawable(obj_R_MC_psiRP);
+              fileOutText << "pt_bin: " << j+1 << "\n";
               if(v1_R_MC.size() == 2) {
                 if(i==0) {
-                  string_values += ", X:  ";
+                  fileOutText << "Component: X\n";
                 } else {
-                  string_values += ", Y:  ";
+                  fileOutText << "Component: Y\n";
                 }
               }
-              auto vec_values = gr_sub.GetPointsValues();
-              for(auto& vv : vec_values) {
-                vv = std::round(vv);
-                string_values += (to_string_with_precision(vv, 0) + "   ").c_str();
+              auto obj_psiRP = v1_PsiRP.GetProjections().at(j);
+              Graph* obj_R_MC_psiRP{nullptr};
+              std::vector<float> vec_values{};
+              std::vector<float> vec_errors{};
+              if(drawOption == kDifference) {
+                GraphSubtractor gr_sub;
+                gr_sub.SetMinuend(obj_R_MC);
+                gr_sub.SetSubtrahend(obj_psiRP);
+                gr_sub.Calculate();
+                obj_R_MC_psiRP = gr_sub.GetResult();
+                vec_values = gr_sub.GetPointsValues();
+                vec_errors = gr_sub.GetPointsErrors();
               }
-              pt.AddText(string_values.c_str());
+              if(drawOption == kRatio) {
+                GraphDivider gr_div;
+                gr_div.SetNumerator(obj_R_MC);
+                gr_div.SetDenominator(obj_psiRP);
+                gr_div.Calculate();
+                obj_R_MC_psiRP = gr_div.GetResult();
+                vec_values = gr_div.GetPointsValues();
+                vec_errors = gr_div.GetPointsErrors();
+              }
+              pic.AddDrawable(obj_R_MC_psiRP);
+              for(auto& vv : vec_values) {
+                fileOutText << vv << "\t";
+              }
+              fileOutText << "\n";
+              for(auto& ve : vec_errors) {
+                fileOutText << ve << "\t";
+              }
+              fileOutText << "\n";
               if(i==0) leg1->AddEntry( obj_R_MC->GetPoints(), obj_R_MC->GetTitle().c_str(), "P" );
               j++;
             } // j
@@ -257,7 +290,7 @@ void lambda_stf_dv1dy() {
         pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
 
         pic.CustomizeXRange();
-        if(is_draw_difference) {
+        if(drawOption != kDifference) {
           pic.CustomizeYRange();
         } else {
           pic.SetYRange({y_lo, y_hi});
@@ -269,22 +302,22 @@ void lambda_stf_dv1dy() {
         if(is_write_rootfile) {
           fileOut->cd();
           pic.GetCanvas()->Write();
-          pic.GetCanvas()->SaveAs("cc.C");
+//           pic.GetCanvas()->SaveAs("cc.C");
         }
 
         if(is_first_canvas)
-          pic.GetCanvas()->Print((fileOutName + ".pdf(").c_str(), "pdf");
+          pic.GetCanvas()->Print((fileOutNameSubE + ".pdf(").c_str(), "pdf");
         else
-          pic.GetCanvas()->Print((fileOutName + ".pdf").c_str(), "pdf");
+          pic.GetCanvas()->Print((fileOutNameSubE + ".pdf").c_str(), "pdf");
         is_first_canvas = false;
       }
 
       TCanvas emptycanvas("", "", 1000, 1000);
       emptycanvas.cd();
-      pt.Draw();
-      emptycanvas.Print((fileOutName + ".pdf)").c_str(), "pdf");
+      emptycanvas.Print((fileOutNameSubE + ".pdf)").c_str(), "pdf");
 
       if(is_write_rootfile) fileOut->Close();
     }
+    fileOutText.close();
   }
 }
