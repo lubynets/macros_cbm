@@ -85,7 +85,7 @@ void lambda_stf_dv1dy() {
     delete dc;
 
     for(auto& subevent : subevents) {
-      fileOutText << "Subevent: " << subevent << "\n";
+//       fileOutText << "Subevent: " << subevent << "\n";
 
       if(subevent[0] == 'p') {
         step = "_RECENTERED";
@@ -102,7 +102,7 @@ void lambda_stf_dv1dy() {
       if(is_write_rootfile) fileOut = TFile::Open((fileOutNameSubE + ".root").c_str(), "recreate");
 
       for(auto fc : fitcoeffs) {
-        fileOutText << "FitCoefficient: " << fc << "\n";
+//         fileOutText << "FitCoefficient: " << fc << "\n";
 
         if(evegen == "dcmqgsm") {
           if(particle == "lambda") {
@@ -243,13 +243,16 @@ void lambda_stf_dv1dy() {
           for(int i=0; i<v1_R_MC.size(); i++) { // i: X, Y, ave
             int j{0}; // j: slice axis
             for( auto obj_R_MC : v1_R_MC.at(i).GetProjections() ) {
-              fileOutText << "pt_bin: " << j+1 << "\n";
+//               fileOutText << "pt_bin: " << j+1 << "\n";
+              std::string comp;
               if(v1_R_MC.size() == 2) {
                 if(i==0) {
-                  fileOutText << "Component: X\n";
+                  comp = "X";
                 } else {
-                  fileOutText << "Component: Y\n";
+                  comp = "Y";
                 }
+              } else {
+                comp = "AVE";
               }
               auto obj_psiRP = v1_PsiRP.GetProjections().at(j);
               Graph* obj_R_MC_psiRP{nullptr};
@@ -274,12 +277,9 @@ void lambda_stf_dv1dy() {
                 vec_errors = gr_div.GetPointsErrors();
               }
               pic.AddDrawable(obj_R_MC_psiRP);
-              for(auto& vv : vec_values) {
-                fileOutText << vv << "\t";
-              }
-              fileOutText << "\n";
-              for(auto& ve : vec_errors) {
-                fileOutText << ve << "\t";
+              fileOutText << subevent << "\t" << fc << "\t" << "pt" << j+1 << "\t" << comp << "\t";
+              for(int iv=0; iv<vec_values.size(); iv++) {
+                fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
               }
               fileOutText << "\n";
               if(i==0) leg1->AddEntry( obj_R_MC->GetPoints(), obj_R_MC->GetTitle().c_str(), "P" );
