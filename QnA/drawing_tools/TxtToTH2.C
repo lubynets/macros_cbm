@@ -1,4 +1,15 @@
 void TxtToTH2(std::string fileInName) {
+  gStyle->SetOptStat(0);
+  gStyle->SetPalette(kRainBow); // FIXME if there is no this line, for some reasons doesn't work custom palette
+
+  Int_t palette[5];
+  palette[0] = kRed;
+  palette[1] = kBlue;
+  palette[2] = kGreen+2;
+  palette[3] = kMagenta;
+  palette[4] = kCyan;
+  gStyle->SetPalette(5, palette);
+
   std::ifstream fileIn;
   fileIn.open(fileInName);
 
@@ -52,8 +63,24 @@ void TxtToTH2(std::string fileInName) {
     }
   }
 
+  TCanvas cc("cc", "", 1500, 448);
+  cc.SetLeftMargin(0);
+  cc.SetRightMargin(0);
+  cc.SetTopMargin(0);
+  cc.SetBottomMargin(0);
+  histovalues.GetXaxis()->SetTickSize(0);
+  histovalues.GetYaxis()->SetTickSize(0);
+  histovalues.SetContour(5);
+  histovalues.SetContourLevel(0, -2);
+  histovalues.SetContourLevel(1, 0.1);
+  histovalues.SetContourLevel(2, 0.5);
+  histovalues.SetContourLevel(3, 0.7);
+  histovalues.SetContourLevel(4, 1.3);
+  histovalues.Draw("colz text");
+
   TFile* fileOut = TFile::Open("fileOut.root", "recreate");
   histovalues.Write();
   histoerrors.Write();
+  cc.Write();
   fileOut->Close();
 }
