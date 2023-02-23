@@ -1,6 +1,6 @@
 #include "lambda.h"
 
-void lambda_rtp() {
+void lambda_rtp_wei() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
   std::string evegen = "dcmqgsm";
@@ -9,18 +9,12 @@ void lambda_rtp() {
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
-//   std::string step = "PLAIN";
-//   std::string step = "RECENTERED";
-//   std::string step = "TWIST";
-  std::string step = "RESCALED";
-
-  std::string weightstatus = "wei";
-//   std::string weightstatus = "now";
-
-  std::string fileNameWei = "/home/oleksii/cbmdir/working/qna/rectrackspsi/" + evegen + "/cl.rtp." + evegen + "." + weightstatus + ".root";
+  std::string fileNameWei = "/home/oleksii/cbmdir/working/qna/rectrackspsi/" + evegen + "/cl.rtp." + evegen + ".wei.root";
+  std::string fileNameNow = "/home/oleksii/cbmdir/working/qna/rectrackspsi/" + evegen + "/cl.rtp." + evegen + ".now.root";
 
   std::vector<std::string> particles{"lambda", "kshort"};
 
+  std::string step;
   bool average_comp = true;
 //   bool average_comp = false;
 
@@ -82,26 +76,26 @@ void lambda_rtp() {
     bool is_first_canvas = true;
     std::string fileOutName;
 
-    fileOutName = "v1." + particle + "." + step + "." + weightstatus;
+    fileOutName = "v1." + particle;
 
     if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
 
     for(int iEdge=0; iEdge<axes.at(kSelect).bin_edges_.size()-1; iEdge++) {
-      std::vector<DoubleDifferentialCorrelation> v1_rec;
+      std::vector<DoubleDifferentialCorrelation> v1_rec_wei;
       if(average_comp) {
-        v1_rec.resize(1);
-        v1_rec.at(0) = DoubleDifferentialCorrelation( fileNameWei.c_str(), {("rec/u_" + particle + "_rec_" + step + ".Q_psi_PLAIN.x1x1").c_str(),
-                                                                            ("rec/u_" + particle + "_rec_" + step + ".Q_psi_PLAIN.y1y1").c_str()} );
-        v1_rec.at(0).SetMarker(kFullSquare);
+        v1_rec_wei.resize(1);
+        v1_rec_wei.at(0) = DoubleDifferentialCorrelation( fileNameWei.c_str(), {("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.x1x1").c_str(),
+                                                                                ("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.y1y1").c_str()} );
+        v1_rec_wei.at(0).SetMarker(kFullSquare);
       } else {
-        v1_rec.resize(2);
-        v1_rec.at(0) = DoubleDifferentialCorrelation( fileNameWei.c_str(), {("rec/u_" + particle + "_rec_" + step + ".Q_psi_PLAIN.x1x1").c_str()} );
-        v1_rec.at(1) = DoubleDifferentialCorrelation( fileNameWei.c_str(), {("rec/u_" + particle + "_rec_" + step + ".Q_psi_PLAIN.y1y1").c_str()} );
-        v1_rec.at(0).SetMarker(kFullSquare);
-        v1_rec.at(1).SetMarker(kOpenSquare);
+        v1_rec_wei.resize(2);
+        v1_rec_wei.at(0) = DoubleDifferentialCorrelation( fileNameWei.c_str(), {("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.x1x1").c_str()} );
+        v1_rec_wei.at(1) = DoubleDifferentialCorrelation( fileNameWei.c_str(), {("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.y1y1").c_str()} );
+        v1_rec_wei.at(0).SetMarker(kFullSquare);
+        v1_rec_wei.at(1).SetMarker(kOpenSquare);
       }
 
-      for(auto& vc : v1_rec) {
+      for(auto& vc : v1_rec_wei) {
         vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         vc.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
                        kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
@@ -115,9 +109,42 @@ void lambda_rtp() {
         vc.ShiftProjectionAxis(axes.at(kProjection).shift_);
       }
 
-      v1_rec.at(0).SlightShiftProjectionAxis(0.025);
+      v1_rec_wei.at(0).SlightShiftProjectionAxis(0.025);
       if(!average_comp) {
-        v1_rec.at(1).SlightShiftProjectionAxis(0.025, 0.0125);
+        v1_rec_wei.at(1).SlightShiftProjectionAxis(0.025, 0.0125);
+      }
+
+      std::vector<DoubleDifferentialCorrelation> v1_rec_now;
+      if(average_comp) {
+        v1_rec_now.resize(1);
+        v1_rec_now.at(0) = DoubleDifferentialCorrelation( fileNameNow.c_str(), {("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.x1x1").c_str(),
+                                                                                ("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.y1y1").c_str()} );
+        v1_rec_now.at(0).SetMarker(kFullCircle);
+      } else {
+        v1_rec_now.resize(2);
+        v1_rec_now.at(0) = DoubleDifferentialCorrelation( fileNameNow.c_str(), {("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.x1x1").c_str()} );
+        v1_rec_now.at(1) = DoubleDifferentialCorrelation( fileNameNow.c_str(), {("rec/u_" + particle + "_rec_RESCALED.Q_psi_PLAIN.y1y1").c_str()} );
+        v1_rec_now.at(0).SetMarker(kFullCircle);
+        v1_rec_now.at(1).SetMarker(kOpenCircle);
+      }
+
+      for(auto& vc : v1_rec_now) {
+        vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+        vc.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
+                       kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+        vc.SetBiasPalette(false);
+        vc.Rebin({{axes.at(kSelect).reco_name_.c_str(),
+                  {axes.at(kSelect).bin_edges_.at(iEdge), axes.at(kSelect).bin_edges_.at(iEdge+1)}}});
+        vc.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
+        vc.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
+        vc.ShiftSliceAxis(axes.at(kSlice).shift_);
+        vc.Calculate();
+        vc.ShiftProjectionAxis(axes.at(kProjection).shift_);
+      }
+
+      v1_rec_now.at(0).SlightShiftProjectionAxis(-0.025);
+      if(!average_comp) {
+        v1_rec_now.at(1).SlightShiftProjectionAxis(-0.025, 0.0125);
       }
 
       auto v1_sim = DoubleDifferentialCorrelation( fileNameWei.c_str(), {("sim/u_" + particle + "_sim_PLAIN.Q_psi_PLAIN.x1x1").c_str(),
@@ -170,10 +197,13 @@ void lambda_rtp() {
         entry->SetMarkerStyle(kOpenSquare);
       }
 
-      for(int i=0; i<v1_rec.size(); i++) {
-        for( auto obj : v1_rec.at(i).GetProjections() ) {
+      for(int i=0; i<v1_rec_wei.size(); i++) {
+        for( auto obj : v1_rec_wei.at(i).GetProjections() ) {
           pic.AddDrawable( obj );
           if(i==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
+        }
+        for( auto obj : v1_rec_now.at(i).GetProjections() ) {
+          pic.AddDrawable( obj );
         }
       }
       for( auto obj : v1_sim.GetProjections() ) {
@@ -182,7 +212,6 @@ void lambda_rtp() {
       pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
 
       pic.CustomizeXRange();
-//       pic.CustomizeYRange();
       pic.CustomizeYRangeWithLimits(y_lo, y_hi);
       pic.AddLegend(leg1);
       pic.CustomizeLegend(leg1);

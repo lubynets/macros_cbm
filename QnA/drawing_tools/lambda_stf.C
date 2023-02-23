@@ -18,9 +18,9 @@ void lambda_stf() {
 //                                      "pipos",
 //                                      "pineg"
                                     };
-  std::vector<std::string> subevents{"psd1", "psd2", "psd3",
-                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"};
+  std::vector<std::string> subevents{/*"psd1", "psd2", "psd3",*/
+                                     "etacut_1_charged"/*, "etacut_2_charged", "etacut_3_charged",
+                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"*/};
   std::string step;
   bool average_comp;
   float y_lo, y_hi;
@@ -40,6 +40,7 @@ void lambda_stf() {
   axes.at(2).reco_name_ = "SimEventHeader_centrality_impactpar";
   
   TFile* fileIn = TFile::Open(fileName.c_str(), "open");
+  if(!fileIn) throw std::runtime_error("fileIn does not exist");
   auto* dc = (Qn::DataContainer<Qn::StatCalculate,Qn::Axis<double>>*)fileIn->Get<Qn::DataContainer<Qn::StatCalculate,Qn::Axis<double>>>("v1/lambda/uPsi/v1.uPsi.x1x1");
   assert(dc!=nullptr);
   for(auto& ax : axes) {

@@ -1,20 +1,18 @@
 #include "lambda.h"
 
 void lambda_stf_dv1dy() {
-  gStyle->SetCanvasPreferGL(kTRUE);
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
   enum DrawOption {
     kPlain,
     kDifference,
+    kChi2,
     kRatio
   };
-
-  bool is_draw_difference;
-
 //   DrawOption drawOption = kPlain;
-//   DrawOption drawOption = kDifference;
-  DrawOption drawOption = kRatio;
+  DrawOption drawOption = kDifference;
+//   DrawOption drawOption = kChi2;
+//   DrawOption drawOption = kRatio;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
@@ -41,7 +39,6 @@ void lambda_stf_dv1dy() {
   bool average_comp;
   float y_lo, y_hi;
 
-//   SetAxis("centrality", "select");
   SetAxis("centrality", "projection");
   SetAxis("pT", "slice");
 
@@ -50,6 +47,7 @@ void lambda_stf_dv1dy() {
   std::vector<std::string> components{"x1x1", "y1y1"};
   std::vector<std::string> fitcoeffs{"slope", "intercept"};
   if(drawOption == kRatio) fitcoeffs.pop_back();
+  if(drawOption == kDifference) fitcoeffs.erase(fitcoeffs.begin());
 
   axes.at(kSlice).sim_name_ = "SimParticles_pT";
   axes.at(kProjection).sim_name_ = "SimEventHeader_centrality_impactpar";
@@ -63,7 +61,8 @@ void lambda_stf_dv1dy() {
 
     std::string fileOutName;
     if(drawOption == kPlain) fileOutName = "dv1dy." + particle;
-    if(drawOption == kDifference) fileOutName = "chi2.dv1dy." + particle;
+    if(drawOption == kChi2) fileOutName = "chi2.dv1dy." + particle;
+    if(drawOption == kDifference) fileOutName = "diff.dv1dy." + particle;
     if(drawOption == kRatio) fileOutName = "ratio.dv1dy." + particle;
 
     std::ofstream fileOutText;
@@ -85,7 +84,6 @@ void lambda_stf_dv1dy() {
     delete dc;
 
     for(auto& subevent : subevents) {
-//       fileOutText << "Subevent: " << subevent << "\n";
 
       if(subevent[0] == 'p') {
         step = "_RECENTERED";
@@ -102,7 +100,6 @@ void lambda_stf_dv1dy() {
       if(is_write_rootfile) fileOut = TFile::Open((fileOutNameSubE + ".root").c_str(), "recreate");
 
       for(auto fc : fitcoeffs) {
-//         fileOutText << "FitCoefficient: " << fc << "\n";
 
         if(evegen == "dcmqgsm") {
           if(particle == "lambda") {
@@ -143,7 +140,7 @@ void lambda_stf_dv1dy() {
 
         if(fc == "slope") y_axis_title = "dv_{1}/dy";
         if(fc == "intercept") y_axis_title = "v_{1}|_{y=0}";
-        if(drawOption == kDifference) y_axis_title = "#chi^{2} of " + y_axis_title;
+        if(drawOption == kChi2) y_axis_title = "#chi^{2} of " + y_axis_title;
         if(drawOption == kRatio) y_axis_title = "REC / MC of " + y_axis_title;
 
         std::vector<DoubleDifferentialCorrelation> v1_R_MC;
@@ -190,8 +187,6 @@ void lambda_stf_dv1dy() {
         v1_PsiRP.ShiftProjectionAxis(axes.at(kProjection).shift_);
 
         HeapPicture pic(fc, {1000, 1000});
-//         pic.SetRelErrorThreshold(0.2);
-
         pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
         if(evegen == "dcmqgsm") {
           pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
@@ -235,22 +230,18 @@ void lambda_stf_dv1dy() {
             pic.AddDrawable( obj );
           }
         } else {
-          if(drawOption == kDifference) {
+          if(drawOption != kPlain && drawOption != kDifference) {
             pic.DrawZeroLine(false);
-            pic.AddHorizontalLine(-1);
+            pic.AddHorizontalLine(1);
           }
-          pic.AddHorizontalLine(1);
+          if(drawOption == kChi2) pic.AddHorizontalLine(-1);
           for(int i=0; i<v1_R_MC.size(); i++) { // i: X, Y, ave
             int j{0}; // j: slice axis
             for( auto obj_R_MC : v1_R_MC.at(i).GetProjections() ) {
-//               fileOutText << "pt_bin: " << j+1 << "\n";
               std::string comp;
               if(v1_R_MC.size() == 2) {
-                if(i==0) {
-                  comp = "X";
-                } else {
-                  comp = "Y";
-                }
+                if(i==0) comp = "X";
+                if(i==1) comp = "Y";
               } else {
                 comp = "AVE";
               }
@@ -258,10 +249,11 @@ void lambda_stf_dv1dy() {
               Graph* obj_R_MC_psiRP{nullptr};
               std::vector<float> vec_values{};
               std::vector<float> vec_errors{};
-              if(drawOption == kDifference) {
+              if(drawOption == kChi2 || drawOption == kDifference) {
                 GraphSubtractor gr_sub;
                 gr_sub.SetMinuend(obj_R_MC);
                 gr_sub.SetSubtrahend(obj_psiRP);
+                if(drawOption == kDifference) gr_sub.DivideOverError(false);
                 gr_sub.Calculate();
                 obj_R_MC_psiRP = gr_sub.GetResult();
                 vec_values = gr_sub.GetPointsValues();
@@ -290,7 +282,7 @@ void lambda_stf_dv1dy() {
         pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
 
         pic.CustomizeXRange();
-        if(drawOption != kDifference) {
+        if(drawOption != kPlain) {
           pic.CustomizeYRange();
         } else {
           pic.SetYRange({y_lo, y_hi});
@@ -313,8 +305,7 @@ void lambda_stf_dv1dy() {
       }
 
       TCanvas emptycanvas("", "", 1000, 1000);
-      emptycanvas.cd();
-      emptycanvas.Print((fileOutNameSubE + ".pdf)").c_str(), "pdf");
+      emptycanvas.Print((fileOutNameSubE + ".pdf]").c_str(), "pdf");
 
       if(is_write_rootfile) fileOut->Close();
     }

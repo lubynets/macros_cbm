@@ -1,4 +1,4 @@
-void fit_dv1dy() {
+void fit_dv1dy_sim() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
