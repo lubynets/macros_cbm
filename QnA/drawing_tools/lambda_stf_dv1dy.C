@@ -1,6 +1,6 @@
 #include "lambda.h"
 
-void lambda_stf_dv1dy() {
+void lambda_stf_dv1dy_new() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
   enum DrawOption {
@@ -14,26 +14,32 @@ void lambda_stf_dv1dy() {
 //   DrawOption drawOption = kChi2;
 //   DrawOption drawOption = kRatio;
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
+
+//   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
+  Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::BOOTSTRAP};
+
+//   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::PROPAGATION};
+  Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
 
   std::vector<std::string> particles{
                                      "lambda",
-                                     "kshort",
-                                     "xi",
-                                     "pipos",
-                                     "pineg"
+//                                      "kshort",
+//                                      "xi",
+//                                      "pipos",
+//                                      "pineg"
                                     };
   std::vector<std::string> subevents{
-                                     "psd1", "psd2", "psd3",
+                                     "psd1"/*, "psd2", "psd3",
                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"
+                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"*/
                                     };
   std::string step;
   bool average_comp;
@@ -157,6 +163,8 @@ void lambda_stf_dv1dy() {
         }
 
         for(auto& vc : v1_R_MC) {
+          vc.SetErrorType(error_mode);
+          vc.SetMeanType(mean_mode);
           vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
           vc.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
                          kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
@@ -174,6 +182,8 @@ void lambda_stf_dv1dy() {
         }
 
         auto v1_PsiRP = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
+        v1_PsiRP.SetErrorType(error_mode);
+        v1_PsiRP.SetMeanType(mean_mode);
         v1_PsiRP.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         v1_PsiRP.SetMarker(-1);
         v1_PsiRP.SetIsFillLine();
@@ -219,65 +229,47 @@ void lambda_stf_dv1dy() {
           entry->SetMarkerStyle(kOpenSquare);
         }
 
-        if(drawOption == kPlain) {
-          for(int i=0; i<v1_R_MC.size(); i++) {
-            for( auto obj : v1_R_MC.at(i).GetProjections() ){
-              pic.AddDrawable( obj );
-              if(i==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
+
+        if(drawOption != kPlain && drawOption != kDifference) {
+          pic.DrawZeroLine(false);
+          pic.AddHorizontalLine(1);
+        }
+        if(drawOption == kChi2) pic.AddHorizontalLine(-1);
+
+        std::vector<DoubleDifferentialCorrelation> vplot;
+        vplot.resize(v1_R_MC.size());
+        for(int iv=0; iv<v1_R_MC.size(); iv++) { // iv: X, Y, ave
+          if(drawOption == kPlain) vplot.at(iv) = v1_R_MC.at(iv);
+          if(drawOption == kDifference || drawOption == kChi2) vplot.at(iv) = Minus(v1_R_MC.at(iv), v1_PsiRP);
+          if(drawOption == kChi2) vplot.at(iv).DivideValueByError();
+          if(drawOption == kRatio) vplot.at(iv) = Divide(v1_R_MC.at(iv), v1_PsiRP);
+
+          int j{0}; // j: slice axis
+          for( auto obj : vplot.at(iv).GetProjections() ) {
+            std::string comp;
+            if(vplot.size() == 2) {
+              if(iv==0) comp = "X";
+              if(iv==1) comp = "Y";
+            } else {
+              comp = "AVE";
             }
-          }
+            std::vector<float> vec_values = obj->GetPointsValues();
+            std::vector<float> vec_errors = obj->GetPointsErrors();
+            pic.AddDrawable(obj);
+            if(iv==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
+            fileOutText << subevent << "\t" << fc << "\t" << "pt" << j+1 << "\t" << comp << "\t";
+            for(int iv=0; iv<vec_values.size(); iv++) {
+              fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
+            }
+            fileOutText << "\n";
+
+            j++;
+          } // j
+        } // iv
+        if(drawOption == kPlain) {
           for( auto obj : v1_PsiRP.GetProjections() ){
             pic.AddDrawable( obj );
           }
-        } else {
-          if(drawOption != kPlain && drawOption != kDifference) {
-            pic.DrawZeroLine(false);
-            pic.AddHorizontalLine(1);
-          }
-          if(drawOption == kChi2) pic.AddHorizontalLine(-1);
-          for(int i=0; i<v1_R_MC.size(); i++) { // i: X, Y, ave
-            int j{0}; // j: slice axis
-            for( auto obj_R_MC : v1_R_MC.at(i).GetProjections() ) {
-              std::string comp;
-              if(v1_R_MC.size() == 2) {
-                if(i==0) comp = "X";
-                if(i==1) comp = "Y";
-              } else {
-                comp = "AVE";
-              }
-              auto obj_psiRP = v1_PsiRP.GetProjections().at(j);
-              Graph* obj_R_MC_psiRP{nullptr};
-              std::vector<float> vec_values{};
-              std::vector<float> vec_errors{};
-              if(drawOption == kChi2 || drawOption == kDifference) {
-                GraphSubtractor gr_sub;
-                gr_sub.SetMinuend(obj_R_MC);
-                gr_sub.SetSubtrahend(obj_psiRP);
-                if(drawOption == kDifference) gr_sub.DivideOverError(false);
-                gr_sub.Calculate();
-                obj_R_MC_psiRP = gr_sub.GetResult();
-                vec_values = gr_sub.GetPointsValues();
-                vec_errors = gr_sub.GetPointsErrors();
-              }
-              if(drawOption == kRatio) {
-                GraphDivider gr_div;
-                gr_div.SetNumerator(obj_R_MC);
-                gr_div.SetDenominator(obj_psiRP);
-                gr_div.Calculate();
-                obj_R_MC_psiRP = gr_div.GetResult();
-                vec_values = gr_div.GetPointsValues();
-                vec_errors = gr_div.GetPointsErrors();
-              }
-              pic.AddDrawable(obj_R_MC_psiRP);
-              fileOutText << subevent << "\t" << fc << "\t" << "pt" << j+1 << "\t" << comp << "\t";
-              for(int iv=0; iv<vec_values.size(); iv++) {
-                fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
-              }
-              fileOutText << "\n";
-              if(i==0) leg1->AddEntry( obj_R_MC->GetPoints(), obj_R_MC->GetTitle().c_str(), "P" );
-              j++;
-            } // j
-          } // i
         }
         pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
 
