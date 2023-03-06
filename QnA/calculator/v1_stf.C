@@ -2,7 +2,7 @@ void v1_stf() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/cl.stf." + evegen + ".newboot.root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/cl.stf." + evegen + ".root";
   
   TFile* fileIn = TFile::Open(fileName.c_str());
   
@@ -22,7 +22,7 @@ void v1_stf() {
                                      };
   std::vector<std::pair<int, int>> sub_indices{{0, 3}, {3, 6}, {6, 9}};
   
-  TFile* fileOut = TFile::Open(("v1andR1.stf." + evegen + ".newboot.root").c_str(), "recreate");
+  TFile* fileOut = TFile::Open(("v1andR1.stf." + evegen + ".root").c_str(), "recreate");
   fileOut->cd();
   for(auto& pa : particles) {
     fileOut->mkdir(("v1/" + pa + "/uPsi").c_str());

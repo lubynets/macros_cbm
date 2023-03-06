@@ -2,8 +2,8 @@ void fit_dv1dy_sim() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-//   bool is_rebin_centrality = true;
-  bool is_rebin_centrality = false;
+  bool is_rebin_centrality = true;
+//   bool is_rebin_centrality = false;
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
 

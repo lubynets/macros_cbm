@@ -1,6 +1,6 @@
 #include "lambda.h"
 
-void lambda_stf_dv1dy() {
+void lambda_stf_dv1dy_mod() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
   enum DrawOption {
@@ -10,9 +10,9 @@ void lambda_stf_dv1dy() {
     kRatio
   };
 //   DrawOption drawOption = kPlain;
-//   DrawOption drawOption = kDifference;
+  DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;
-  DrawOption drawOption = kRatio;
+//   DrawOption drawOption = kRatio;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
@@ -37,7 +37,6 @@ void lambda_stf_dv1dy() {
                                      "pineg"
                                     };
   std::vector<std::string> subevents{
-                                     "psd1", "psd2", "psd3",
                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
                                      "etacut_1_all", "etacut_2_all", "etacut_3_all"
                                     };
@@ -50,7 +49,6 @@ void lambda_stf_dv1dy() {
 
   std::string y_axis_title;
 
-  std::vector<std::string> components{"x1x1", "y1y1"};
   std::vector<std::string> fitcoeffs{"slope", "intercept"};
   if(drawOption == kRatio) fitcoeffs.pop_back();
   if(drawOption == kDifference) fitcoeffs.erase(fitcoeffs.begin());
@@ -90,15 +88,6 @@ void lambda_stf_dv1dy() {
     delete dc;
 
     for(auto& subevent : subevents) {
-
-      if(subevent[0] == 'p') {
-        step = "_RECENTERED";
-        average_comp = false;
-      }
-      if(subevent[0] == 'e') {
-        step = "_PLAIN";
-        average_comp = true;
-      }
 
       bool is_first_canvas = true;
 
@@ -149,52 +138,33 @@ void lambda_stf_dv1dy() {
         if(drawOption == kChi2) y_axis_title = "#chi^{2} of " + y_axis_title;
         if(drawOption == kRatio) y_axis_title = "REC / MC of " + y_axis_title;
 
-        std::vector<DoubleDifferentialCorrelation> v1_R_MC;
-        if(average_comp) {
-          v1_R_MC.resize(1);
-          v1_R_MC.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + subevent + ".ave").c_str()} );
-          v1_R_MC.at(0).SetMarker(kFullSquare);
-        } else {
-          v1_R_MC.resize(2);
-          v1_R_MC.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + subevent + ".x1x1").c_str()} );
-          v1_R_MC.at(1) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + subevent + ".y1y1").c_str()} );
-          v1_R_MC.at(0).SetMarker(kFullSquare);
-          v1_R_MC.at(1).SetMarker(kOpenSquare);
-        }
+        auto v1_est = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + subevent + ".ave").c_str()} );
+        v1_est.SetMarker(kFullSquare);
+        v1_est.SetErrorType(error_mode);
+        v1_est.SetMeanType(mean_mode);
+        v1_est.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+        v1_est.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
+                           kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+        v1_est.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
+        v1_est.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
+        v1_est.ShiftSliceAxis(axes.at(kSlice).shift_);
+        v1_est.ShiftProjectionAxis(axes.at(kProjection).shift_);
+        v1_est.SlightShiftProjectionAxis(1);
+        v1_est.Calculate();
 
-        for(auto& vc : v1_R_MC) {
-          vc.SetErrorType(error_mode);
-          vc.SetMeanType(mean_mode);
-          vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
-          vc.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                         kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-          vc.SetBiasPalette(false);
-          vc.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
-          vc.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
-          vc.ShiftSliceAxis(axes.at(kSlice).shift_);
-          vc.Calculate();
-          vc.ShiftProjectionAxis(axes.at(kProjection).shift_);
-        }
-
-        v1_R_MC.at(0).SlightShiftProjectionAxis(1);
-        if(!average_comp) {
-          v1_R_MC.at(1).SlightShiftProjectionAxis(1, 0.5);
-        }
-
-        auto v1_PsiRP = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
-        v1_PsiRP.SetErrorType(error_mode);
-        v1_PsiRP.SetMeanType(mean_mode);
-        v1_PsiRP.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
-        v1_PsiRP.SetMarker(-1);
-        v1_PsiRP.SetIsFillLine();
-        v1_PsiRP.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                             kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-        v1_PsiRP.SetBiasPalette(false);
-        v1_PsiRP.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
-        v1_PsiRP.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
-        v1_PsiRP.ShiftSliceAxis(axes.at(kSlice).shift_);
-        v1_PsiRP.Calculate();
-        v1_PsiRP.ShiftProjectionAxis(axes.at(kProjection).shift_);
+        auto v1_ref = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
+        v1_ref.SetErrorType(error_mode);
+        v1_ref.SetMeanType(mean_mode);
+        v1_ref.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+        v1_ref.SetMarker(-1);
+        v1_ref.SetIsFillLine();
+        v1_ref.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
+                           kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+        v1_ref.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
+        v1_ref.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
+        v1_ref.ShiftSliceAxis(axes.at(kSlice).shift_);
+        v1_ref.ShiftProjectionAxis(axes.at(kProjection).shift_);
+        v1_ref.Calculate();
 
         HeapPicture pic(fc, {1000, 1000});
         pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
@@ -214,21 +184,11 @@ void lambda_stf_dv1dy() {
         leg1->SetHeader((axes.at(kSlice).title_+axes.at(kSlice).unit_).c_str());
 
         TLegendEntry* entry;
-        entry = leg1->AddEntry("", "#Psi^{RP}, x&y averaged", "L");
+        entry = leg1->AddEntry("", "REF: #Psi^{RP}, x&y averaged", "L");
         entry->SetMarkerSize(2);
-        if(average_comp) {
-          entry = leg1->AddEntry("", "#Psi(R_{1}^{true}), x&y averaged", "P");
-          entry->SetMarkerSize(2);
-          entry->SetMarkerStyle(kFullSquare);
-        } else {
-          entry = leg1->AddEntry("", "#Psi(R_{1}^{true}), X", "P");
-          entry->SetMarkerSize(2);
-          entry->SetMarkerStyle(kFullSquare);
-          entry = leg1->AddEntry("", "#Psi(R_{1}^{true}), Y", "P");
-          entry->SetMarkerSize(2);
-          entry->SetMarkerStyle(kOpenSquare);
-        }
-
+        entry = leg1->AddEntry("", "EST: eta-cut, R_{MC}, x&y averaged", "P");
+        entry->SetMarkerSize(2);
+        entry->SetMarkerStyle(kFullSquare);
 
         if(drawOption != kPlain && drawOption != kDifference) {
           pic.DrawZeroLine(false);
@@ -236,38 +196,28 @@ void lambda_stf_dv1dy() {
         }
         if(drawOption == kChi2) pic.AddHorizontalLine(-1);
 
-        std::vector<DoubleDifferentialCorrelation> vplot;
-        vplot.resize(v1_R_MC.size());
-        for(int iv=0; iv<v1_R_MC.size(); iv++) { // iv: X, Y, ave
-          if(drawOption == kPlain) vplot.at(iv) = v1_R_MC.at(iv);
-          if(drawOption == kDifference || drawOption == kChi2) vplot.at(iv) = Minus(v1_R_MC.at(iv), v1_PsiRP);
-          if(drawOption == kChi2) vplot.at(iv).DivideValueByError();
-          if(drawOption == kRatio) vplot.at(iv) = Divide(v1_R_MC.at(iv), v1_PsiRP);
+        DoubleDifferentialCorrelation vplot;
+        if(drawOption == kPlain) vplot = v1_est;
+        if(drawOption == kDifference || drawOption == kChi2) vplot = Minus(v1_est, v1_ref);
+        if(drawOption == kChi2) vplot.DivideValueByError();
+        if(drawOption == kRatio) vplot = Divide(v1_est, v1_ref);
 
-          int j{0}; // j: slice axis
-          for( auto obj : vplot.at(iv).GetProjections() ) {
-            std::string comp;
-            if(vplot.size() == 2) {
-              if(iv==0) comp = "X";
-              if(iv==1) comp = "Y";
-            } else {
-              comp = "AVE";
-            }
-            std::vector<float> vec_values = obj->GetPointsValues();
-            std::vector<float> vec_errors = obj->GetPointsErrors();
-            pic.AddDrawable(obj);
-            if(iv==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
-            fileOutText << subevent << "\t" << fc << "\t" << "pt" << j+1 << "\t" << comp << "\t";
-            for(int iv=0; iv<vec_values.size(); iv++) {
-              fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
-            }
-            fileOutText << "\n";
+        int j{0}; // j: slice axis
+        for( auto obj : vplot.GetProjections() ) {
+          std::vector<float> vec_values = obj->GetPointsValues();
+          std::vector<float> vec_errors = obj->GetPointsErrors();
+          pic.AddDrawable(obj);
+          leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
+          fileOutText << subevent << "\t" << fc << "\t" << "pt" << j+1 << "\t" << "AVE" << "\t";
+          for(int iv=0; iv<vec_values.size(); iv++) {
+            fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
+          }
+          fileOutText << "\n";
 
-            j++;
-          } // j
-        } // iv
+          j++;
+        } // j
         if(drawOption == kPlain) {
-          for( auto obj : v1_PsiRP.GetProjections() ){
+          for( auto obj : v1_ref.GetProjections() ){
             pic.AddDrawable( obj );
           }
         }

@@ -1,6 +1,6 @@
 #include "lambda.h"
 
-void lambda_rtp_dv1dy() {
+void lambda_stf_dv1dy_det() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
   enum DrawOption {
@@ -10,28 +10,42 @@ void lambda_rtp_dv1dy() {
     kRatio
   };
 //   DrawOption drawOption = kPlain;
-//   DrawOption drawOption = kDifference;
+  DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;
-  DrawOption drawOption = kRatio;
+//   DrawOption drawOption = kRatio;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
+//   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::BOOTSTRAP};
+
+//   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-//   bool average_comp{true}; std::vector<std::string> components{"ave"}; std::string avestatus = ".ave";
-  bool average_comp{false}; std::vector<std::string> components{"x1x1", "y1y1"}; std::string avestatus = "";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
 
-  std::vector<std::string> particles{"lambda", "kshort"};
-  std::vector<std::string> steps{"PLAIN", "RECENTERED", "TWIST", "RESCALED"};
-  std::vector<std::string> weightstatus{"now", "wei"};
+  std::vector<std::string> particles{
+                                     "lambda",
+                                     "kshort",
+                                     "xi",
+                                     "pipos",
+                                     "pineg"
+                                    };
+  std::vector<std::string> subevents_mod{
+                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
+                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"
+                                    };
+  std::vector<std::string> subevents_det{"psd1", "psd2", "psd3"};
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/rectrackspsi/" + evegen + "/dv1dy.rebinned.rtp." + evegen + avestatus + ".root";
+  bool compare_only_corresponding{true};
+//   bool compare_only_corresponding{false};
 
+  bool average_comp{false};
   float y_lo, y_hi;
 
   SetAxis("centrality", "projection");
@@ -39,14 +53,15 @@ void lambda_rtp_dv1dy() {
 
   std::string y_axis_title;
 
+  std::vector<std::string> components{"x1x1", "y1y1"};
   std::vector<std::string> fitcoeffs{"slope", "intercept"};
   if(drawOption == kRatio) fitcoeffs.pop_back();
   if(drawOption == kDifference) fitcoeffs.erase(fitcoeffs.begin());
 
   axes.at(kSlice).sim_name_ = "SimParticles_pT";
-  axes.at(kProjection).sim_name_ = "RecEventHeader_centrality_tracks";
-  axes.at(kSlice).reco_name_ = "ReconstructedParticles_pT";
-  axes.at(kProjection).reco_name_ = "RecEventHeader_centrality_tracks";
+  axes.at(kProjection).sim_name_ = "SimEventHeader_centrality_impactpar";
+  axes.at(kSlice).reco_name_ = "SimParticles_pT";
+  axes.at(kProjection).reco_name_ = "SimEventHeader_centrality_impactpar";
 
   TFile* fileIn = TFile::Open(fileName.c_str(), "open");
   TFile* fileOut{nullptr};
@@ -77,12 +92,13 @@ void lambda_rtp_dv1dy() {
     }
     delete dc;
 
-    bool is_first_canvas = true;
-    if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
+    for(auto& sm : subevents_mod) {
+      for(auto& sd : subevents_det) {
+        if(compare_only_corresponding && sm.at(7) != sd.at(3)) continue;
+        bool is_first_canvas = true;
 
-    for(auto& step : steps) {
-      if(step != "PLAIN" && step!= "RECENTERED") continue;
-      for(auto& ws : weightstatus) {
+        std::string fileOutNameSubE  = fileOutName + "." + sm + "." + sd;
+        if(is_write_rootfile) fileOut = TFile::Open((fileOutNameSubE + ".root").c_str(), "recreate");
 
         for(auto fc : fitcoeffs) {
 
@@ -131,13 +147,13 @@ void lambda_rtp_dv1dy() {
           std::vector<DoubleDifferentialCorrelation> v1_est;
           if(average_comp) {
             v1_est.resize(1);
-            v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + ws + "." + step + ".ave").c_str()} );
+            v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + sd + ".ave").c_str()} );
             v1_est.at(0).SetMarker(kFullSquare);
             v1_est.at(0).SlightShiftProjectionAxis(1);
           } else {
             v1_est.resize(2);
-            v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + ws + "." + step + ".x1x1").c_str()} );
-            v1_est.at(1) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + ws + "." + step + ".y1y1").c_str()} );
+            v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + sd + ".x1x1").c_str()} );
+            v1_est.at(1) = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + sd + ".y1y1").c_str()} );
             v1_est.at(0).SetMarker(kFullSquare);
             v1_est.at(1).SetMarker(kOpenSquare);
             v1_est.at(1).SlightShiftProjectionAxis(1, 0.5);
@@ -156,8 +172,7 @@ void lambda_rtp_dv1dy() {
             vc.Calculate();
           }
 
-          auto v1_ref = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
-          v1_ref.RenameAxis("SimParticles_pT", "ReconstructedParticles_pT");
+          auto v1_ref = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + sm + ".ave").c_str()} );
           v1_ref.SetErrorType(error_mode);
           v1_ref.SetMeanType(mean_mode);
           v1_ref.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
@@ -165,13 +180,11 @@ void lambda_rtp_dv1dy() {
           v1_ref.SetIsFillLine();
           v1_ref.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
                              kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-          v1_ref.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
-          v1_ref.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
+          v1_ref.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
+          v1_ref.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
           v1_ref.ShiftSliceAxis(axes.at(kSlice).shift_);
           v1_ref.ShiftProjectionAxis(axes.at(kProjection).shift_);
-          std::cout << "aaa\n";
           v1_ref.Calculate();
-          std::cout << "bbb\n";
 
           HeapPicture pic(fc, {1000, 1000});
           pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
@@ -184,19 +197,29 @@ void lambda_rtp_dv1dy() {
             pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
           }
           pic.AddText({0.2, 0.81, "12A GeV/c"}, 0.025);
-          pic.AddText({0.2, 0.78, step.c_str()}, 0.025);
-          pic.AddText({0.2, 0.75, ws.c_str()}, 0.025);
+          pic.AddText({0.2, 0.78, sm.c_str()}, 0.025);
+          pic.AddText({0.2, 0.75, sd.c_str()}, 0.025);
 
           auto leg1 = new TLegend();
           leg1->SetBorderSize(1);
           leg1->SetHeader((axes.at(kSlice).title_+axes.at(kSlice).unit_).c_str());
 
           TLegendEntry* entry;
-          entry = leg1->AddEntry("", "REF: sim-tracks", "L");
+          entry = leg1->AddEntry("", "REF: eta-cut, R_{MC}, x&y averaged", "L");
           entry->SetMarkerSize(2);
-          entry = leg1->AddEntry("", "EST: reco-tracks", "P");
-          entry->SetMarkerSize(2);
-          entry->SetMarkerStyle(kFullSquare);
+          if(average_comp) {
+            entry = leg1->AddEntry("", "EST: PSD, R_{MC}, x&y averaged", "P");
+            entry->SetMarkerSize(2);
+            entry->SetMarkerStyle(kFullSquare);
+          } else {
+            entry = leg1->AddEntry("", "EST: PSD, R_{MC}, X", "P");
+            entry->SetMarkerSize(2);
+            entry->SetMarkerStyle(kFullSquare);
+            entry = leg1->AddEntry("", "EST: PSD, R_{MC}, Y", "P");
+            entry->SetMarkerSize(2);
+            entry->SetMarkerStyle(kOpenSquare);
+          }
+
 
           if(drawOption != kPlain && drawOption != kDifference) {
             pic.DrawZeroLine(false);
@@ -225,7 +248,7 @@ void lambda_rtp_dv1dy() {
               std::vector<float> vec_errors = obj->GetPointsErrors();
               pic.AddDrawable(obj);
               if(iv==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
-              fileOutText << step << "\t" << ws << "\t" << fc << "\t" << "pt" << j+1 << "\t" << comp << "\t";
+              fileOutText << sm << "\t" << sd << "\t" << fc << "\t" << "pt" << j+1 << "\t" << comp << "\t";
               for(int iv=0; iv<vec_values.size(); iv++) {
                 fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
               }
@@ -258,16 +281,18 @@ void lambda_rtp_dv1dy() {
           }
 
           if(is_first_canvas)
-            pic.GetCanvas()->Print((fileOutName + ".pdf(").c_str(), "pdf");
+            pic.GetCanvas()->Print((fileOutNameSubE + ".pdf(").c_str(), "pdf");
           else
-            pic.GetCanvas()->Print((fileOutName + ".pdf").c_str(), "pdf");
+            pic.GetCanvas()->Print((fileOutNameSubE + ".pdf").c_str(), "pdf");
           is_first_canvas = false;
         } // fitcoeffs
-      } // weightstatus
-    } // steps
-    TCanvas emptycanvas("", "", 1000, 1000);
-    emptycanvas.Print((fileOutName + ".pdf]").c_str(), "pdf");
-    if(is_write_rootfile) fileOut->Close();
+
+        TCanvas emptycanvas("", "", 1000, 1000);
+        emptycanvas.Print((fileOutNameSubE + ".pdf]").c_str(), "pdf");
+
+        if(is_write_rootfile) fileOut->Close();
+      } // subevents_det
+    } // subevents_mod
     fileOutText.close();
   } // particles
 }
