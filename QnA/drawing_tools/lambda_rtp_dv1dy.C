@@ -9,10 +9,10 @@ void lambda_rtp_dv1dy() {
     kChi2,
     kRatio
   };
-//   DrawOption drawOption = kPlain;
+  DrawOption drawOption = kPlain;
 //   DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;
-  DrawOption drawOption = kRatio;
+//   DrawOption drawOption = kRatio;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
@@ -62,6 +62,7 @@ void lambda_rtp_dv1dy() {
     std::ofstream fileOutText;
     fileOutText.open((fileOutName + ".txt").c_str());
     fileOutText << evegen << "\n";
+    fileOutText << "particle\t" << particle << "\n";
 
     auto* dc = (Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>*)fileIn->Get<Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>>((particle + "/v1sim_intercept.psi.ave").c_str());
     if(dc==nullptr) {
@@ -81,7 +82,7 @@ void lambda_rtp_dv1dy() {
     if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
 
     for(auto& step : steps) {
-      if(step != "PLAIN" && step!= "RECENTERED") continue;
+      if(step != "PLAIN" && step!= "RESCALED") continue;
       for(auto& ws : weightstatus) {
 
         for(auto fc : fitcoeffs) {
@@ -144,6 +145,7 @@ void lambda_rtp_dv1dy() {
           }
 
           for(auto& vc : v1_est) {
+            vc.Scale(2.);
             vc.SetErrorType(error_mode);
             vc.SetMeanType(mean_mode);
             vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
@@ -157,6 +159,7 @@ void lambda_rtp_dv1dy() {
           }
 
           auto v1_ref = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
+          v1_ref.Scale(2.);
           v1_ref.RenameAxis("SimParticles_pT", "ReconstructedParticles_pT");
           v1_ref.SetErrorType(error_mode);
           v1_ref.SetMeanType(mean_mode);
@@ -169,9 +172,7 @@ void lambda_rtp_dv1dy() {
           v1_ref.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
           v1_ref.ShiftSliceAxis(axes.at(kSlice).shift_);
           v1_ref.ShiftProjectionAxis(axes.at(kProjection).shift_);
-          std::cout << "aaa\n";
           v1_ref.Calculate();
-          std::cout << "bbb\n";
 
           HeapPicture pic(fc, {1000, 1000});
           pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
