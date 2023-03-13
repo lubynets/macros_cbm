@@ -105,7 +105,6 @@ void lambda_rtp() {
         vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         vc.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
                        kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-        vc.SetBiasPalette(false);
         vc.Rebin({{axes.at(kSelect).reco_name_.c_str(),
                   {axes.at(kSelect).bin_edges_.at(iEdge), axes.at(kSelect).bin_edges_.at(iEdge+1)}}});
         vc.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
