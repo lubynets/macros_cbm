@@ -5,14 +5,14 @@ void fit_flow() {
 
   gROOT->Macro("/home/oleksii/cbmdir/flow_drawing_tools/example/style_1.cc");
 
-  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/shapes/shapes.lambda.root";
-  std::string v1filename = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/cl.imf.dcmqgsm.12agev.root";
-  const float mu = 1.115683;
-  std::string particle = "lambda";
+  std::string evegen = "dcmqgsm";
 
-//   std::string shapefilename = "/home/oleksii/cbmdir/working/qna/shapes/shape_fit.dcmqgsm.12agev.recpid.310.root";
-//   std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/v1andR1.dcmqgsm.apr20.recpid.lightcuts1.310.set4.root";
-//   const float mu = 0.497611;
+  const float mu = 1.115683; std::string particle = "lambda";
+
+//   const float mu = 0.497611; std::string particle = "kshort";
+
+  std::string v1filename = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/" + evegen + "/cl.imf." + evegen + ".12agev.root";
+  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/" + evegen + "/shapes/shapes." + particle + ".root";
 
   TFile* shapefile = TFile::Open(shapefilename.c_str(), "read");
   Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>* shcntr = (Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>*) shapefile->Get("ReFit");
@@ -75,7 +75,7 @@ void fit_flow() {
       gex.ReduceDataContainerToBin(shcntr->GetIndex(i));
       TGraphErrors* gr = gex.GetGraph();
       std::vector<double> samples_weights = gex.GetSamplesWeights();
-      std::vector<TGraph*> grs = gex.GetSamplesGraphs();
+      std::vector<TGraphErrors*> grs = gex.GetSamplesGraphs();
       std::vector indices = shcntr->GetIndex(i);
       std::string binname = "C" + StringBinNumber(indices.at(0) + 1) + "_pT" + StringBinNumber(indices.at(1) + 1) + "_y" + StringBinNumber(indices.at(2) + 1) + "." + co;
       const float C_lo = shcntr->GetAxis("centrality").GetLowerBinEdge(indices.at(0));

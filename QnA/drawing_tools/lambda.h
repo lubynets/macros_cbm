@@ -71,6 +71,13 @@ void SetSelectAxisBinEdges(std::vector<double> binedges){ axes.at(kSelect).bin_e
 void SetSliceAxisBinEdges(std::vector<double> binedges){ axes.at(kSlice).bin_edges_ = binedges; };
 void SetProjectionAxisBinEdges(std::vector<double> binedges){ axes.at(kProjection).bin_edges_ = binedges; };
 
+enum DrawOption {
+  kPlain,
+  kDifference,
+  kChi2,
+  kRatio
+};
+
 template <typename T>
 std::string to_string_with_precision(const T a_value, const int n = 6) {
   std::ostringstream out;

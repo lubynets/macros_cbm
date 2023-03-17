@@ -9,7 +9,8 @@ void lambda_imf() {
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
-  std::string particle = "lambda";
+//   std::string particle = "lambda";
+  std::string particle = "kshort";
 
   std::string fileNameMc = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/cl.imf." + evegen + ".12agev.root";
   std::string fileNameImf = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/out.fitter." + evegen + ".12agev." + particle + ".root";
@@ -17,8 +18,10 @@ void lambda_imf() {
 //   bool average_comp = true; std::vector<std::string> components{"ave"};
   bool average_comp = false; std::vector<std::string> components{"x1x1", "y1y1"};
 
-  float y_lo, y_hi;
+  Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
+  Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
+  float y_lo, y_hi;
   SetAxis("centrality", "select");
   SetAxis("rapidity", "projection");
   SetAxis("pT", "slice");
@@ -36,31 +39,24 @@ void lambda_imf() {
     }
   }
 
-  Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
-  Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
-
   TFile* fileOut{nullptr};
 
   if(evegen == "dcmqgsm") {
     if(particle == "lambda") {
-//       SetSliceAxisBinEdges({0, 0.4, 0.8, 1.2, 1.6});
       y_lo = -0.2;
       y_hi = 0.3;
     }
     if(particle == "kshort") {
-//       SetSliceAxisBinEdges({0, 0.4, 0.8, 1.6});
-      y_lo = -0.04;
-      y_hi = 0.04;
+      y_lo = -0.1;
+      y_hi = 0.2;
     }
   }
   if(evegen == "urqmd") {
     if(particle == "lambda") {
-//       SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
       y_lo = -0.2;
       y_hi = 0.2;
     }
     if(particle == "kshort") {
-//       SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
       y_lo = -0.2;
       y_hi = 0.2;
     }
@@ -172,7 +168,6 @@ void lambda_imf() {
 
       pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
       pic.CustomizeXRange();
-//       pic.CustomizeYRange();
       pic.CustomizeYRangeWithLimits(y_lo, y_hi);
       pic.AddLegend(leg1);
       pic.CustomizeLegend(leg1);

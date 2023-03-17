@@ -3,19 +3,19 @@
 void lambda_rtp_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  enum DrawOption {
-    kPlain,
-    kDifference,
-    kChi2,
-    kRatio
-  };
+//   enum DrawOption {
+//     kPlain,
+//     kDifference,
+//     kChi2,
+//     kRatio
+//   };
   DrawOption drawOption = kPlain;
 //   DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;
 //   DrawOption drawOption = kRatio;
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
