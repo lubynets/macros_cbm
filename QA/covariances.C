@@ -89,13 +89,14 @@ void covariances(const std::string&& particle) {
 //   const int nEvents = 10;
 
   for(int iEvent=0; iEvent<nEvents; iEvent++) {
-    if(iEvent%1000==0)
+    if(iEvent%10000==0)
       std::cout << iEvent << "\n";
     treeIn->GetEntry(iEvent);
     const size_t C_bin = FindBin(C_edges, impactpar);
     if(C_bin<0 || C_bin>C_nbins-1) continue;
     MyQVec qspec = MyQVec(dc_qspec->At(0));
     MyQVec qpsi = MyQVec(dc_qpsi->At(0));
+    std::cout << qpsi.x_ << "\t" << qpsi.y_ << "\n";
     MyQVec qpsiR = RotateRight(qpsi);
     const float Qpar = ScalarProduct(qspec, qpsi);
     const float Qperp = ScalarProduct(qspec, qpsiR);
@@ -145,7 +146,8 @@ MyQVec RotateRight(MyQVec mqv) {
 }
 
 float ScalarProduct(MyQVec v1, MyQVec v2) {
-  return v1.x_*v2.x_ + v1.y_*v2.y_;
+  const float sp = v1.x_*v2.x_ + v1.y_*v2.y_;
+  return sp;
 }
 
 

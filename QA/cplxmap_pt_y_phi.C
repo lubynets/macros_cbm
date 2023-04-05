@@ -23,10 +23,10 @@ void cplxmap_pt_y_phi(std::string filelist_sim, std::string filelist_rec, float 
   
   std::cout << midrapidity << std::endl;
   
-//   std::vector<int> pdgs{3312, 3334};
-  std::vector<int> pdgs{3122, 310};
+  std::vector<int> pdgs{3122, 310}; std::string recotree = "pTree";
+//   std::vector<int> pdgs{3312, 3334}; std::string recotree = "aTree";
   
-  AnalysisTree::Chain* treeIn = new AnalysisTree::Chain(std::vector<std::string>({filelist_sim, filelist_rec}), std::vector<std::string>({"aTree", "pTree"}));
+  AnalysisTree::Chain* treeIn = new AnalysisTree::Chain(std::vector<std::string>({filelist_sim, filelist_rec}), std::vector<std::string>({"rTree", recotree.c_str()}));
   
   auto* sim_tracks = new AnalysisTree::Particles();
   auto* reco_tracks = new AnalysisTree::Particles();
@@ -64,6 +64,7 @@ void cplxmap_pt_y_phi(std::string filelist_sim, std::string filelist_rec, float 
   
   const int mother_id_id = treeIn->GetConfiguration()->GetBranchConfig("SimParticles").GetFieldId("mother_id");
   const int z_id = treeIn->GetConfiguration()->GetBranchConfig("SimParticles").GetFieldId("z");
+  const int g4_process_id_id = treeIn->GetConfiguration()->GetBranchConfig("SimParticles").GetFieldId("geant_process_id");
   const int generation_id = treeIn->GetConfiguration()->GetBranchConfig("Candidates").GetFieldId("generation");
   
   const int n_entries = treeIn->GetEntries();
@@ -74,11 +75,12 @@ void cplxmap_pt_y_phi(std::string filelist_sim, std::string filelist_rec, float 
     if(iEvent%100==0)
       std::cout << iEvent << std::endl;
     for(const auto& simtrack : *(sim_tracks->GetChannels())) {
-//       const int mother_id = simtrack.GetField<int>(mother_id_id);
-//       if(mother_id != -1) continue;
       
-      const float z = simtrack.GetField<float>(z_id);
-      if(z>100) continue;
+      const int mother_id = simtrack.GetField<int>(mother_id_id);
+      if(mother_id != -1) continue;
+      
+//       const int g4_process_id = simtrack.GetField<int>(g4_process_id_id);
+//       if (g4_process_id>10) continue;
       
       const int pid = simtrack.GetPid();
       const int index = std::find(pdgs.begin(), pdgs.end(), pid)-pdgs.begin();
@@ -91,7 +93,7 @@ void cplxmap_pt_y_phi(std::string filelist_sim, std::string filelist_rec, float 
     
     for(const auto& recotrack : *(reco_tracks->GetChannels())) {
       const int generation = recotrack.GetField<int>(generation_id);
-      if(generation < 1) continue;
+      if(generation != 1) continue;
       const int pid = recotrack.GetPid();
       const int index = std::find(pdgs.begin(), pdgs.end(), pid)-pdgs.begin();
       if (index>=pdgs.size()) continue;

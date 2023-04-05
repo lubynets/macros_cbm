@@ -1,0 +1,149 @@
+_axes:
+  - &rec_axis_pT
+    name: Candidates/pT
+    nb: 10
+    lo: 0.0
+    hi: 2.0
+  - &rec_axis_rapidity
+    name: Candidates/rapidity
+    nb: 10
+    lo: 0.62179005 # midrapidity-1.0
+    hi: 2.6217901 # midrapidity+1.0
+  - &sim_axis_pT
+    name: Candidates/pT
+    nb: 10
+    lo: 0.0
+    hi: 2.0
+  - &sim_axis_rapidity
+    name: Candidates/rapidity
+    nb: 10
+    lo: 0.62179005 # midrapidity-1.0
+    hi: 2.6217901 # midrapidity+1.0
+
+cbm_analysis:
+  event-variables:
+    - RecEventHeader/centrality_tracks
+  axes:
+    - { name: RecEventHeader/centrality_tracks, bin-edges: [0, 2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70]}
+  q-vectors:
+    - name: u_lambda_rec
+      type: track
+      phi:  ReconstructedParticles/phi
+      weight: ReconstructedParticles/weight
+      #weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      axes:
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+      cuts:
+        ReconstructedParticles/pid: { equals: 3122 }
+        ReconstructedParticles/generation: { range: [0.9, 1.1] }
+    - name: u_lambda_sim
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 3122 }
+        SimParticles/mother_id: { equals: -1 }
+    - name: u_kshort_rec
+      type: track
+      phi:  ReconstructedParticles/phi
+      weight: ReconstructedParticles/weight
+      #weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      axes:
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+      cuts:
+        ReconstructedParticles/pid: { equals: 310 }
+        ReconstructedParticles/generation: { range: [0.9, 1.1] }
+    - name: u_kshort_sim
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 310 }
+        SimParticles/mother_id: { equals: -1 }
+    - name: Q_psi
+      type: psi
+      phi:  SimEventHeader/psi_RP
+      weight: Ones
+      norm: m
+
+#====================================================================================================================
+
+_detectors: &detectors
+  - name: u_lambda_rec
+    tags: [ un_vector ]
+  - name: u_lambda_sim
+    tags: [ un_vector ]
+  - name: u_kshort_rec
+    tags: [ un_vector ]
+  - name: u_kshort_sim
+    tags: [ un_vector ]
+  - name: Q_psi
+    tags: [ qn_vector ]
+
+_axes:
+  - &centrality
+    name: AnaEventHeader_centrality_tracks
+    bin-edges: [0, 2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70]
+_components:
+  - &sp_components
+    [ x1,y1 ]
+
+_queries:
+  - &query_urec
+    name: { equals: u_rec }
+  - &query_usim
+    name: { equals: u_sim }
+  - &query_q
+    tags: { any-in: [qn_vector] }
+
+_task_args:
+  - &ta_urec
+    query: *query_urec
+    query-list: *detectors
+    correction-steps: [plain, recentered, twist, rescaled]
+    components: *sp_components
+    weight: sumw
+
+  - &ta_usim
+    query: *query_usim
+    query-list: *detectors
+    correction-steps: [plain]
+    components: *sp_components
+    weight: sumw
+  - &ta_q_sp
+    query: *query_q
+    query-list: *detectors
+    correction-steps: [plain]
+    components: *sp_components
+    weight: ones
+
+_tasks:
+  - args: [*ta_urec_plain, *ta_q_sp ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/rec"
+    axes: [ *centrality ]
+
+  - args: [*ta_usim, *ta_q_sp ]
+    n-samples: 50
+    weights-type: observable
+    folder: "/sim"
+    axes: [ *centrality ]

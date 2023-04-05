@@ -1,13 +1,12 @@
 #include "/lustre/cbm/users/lubynets/QA/macro/MacroHelper.h"
 
-int FindBin(std::vector<float>& v, float value);
-
 void cplxmap_pt_y_C(std::string filelist_sim, std::string filelist_rec, float pbeam=12.) {
   
   std::cout << "Macro started\n";
   
   const TString y_name = "y_{LAB}";
   const TString pT_name = "p_{T}, GeV/c";
+  const TString C_name = "Centrality, %";
   const int y_nbins = 22;
   const int pT_nbins = 26;
 //   const int y_nbins = 11;
@@ -17,49 +16,58 @@ void cplxmap_pt_y_C(std::string filelist_sim, std::string filelist_rec, float pb
   const float y_up = midrapidity + 1.4;
   const float pT_low = 0.;
   const float pT_up = 2.6;
-  
+  std::vector<float> C_edges{0, 5, 10, 20, 30, 40, 70, 100};
+  const int C_nbins = C_edges.size() - 1;
+
   std::cout << midrapidity << std::endl;
   
   std::vector<int> pdgs{3122, 310}; std::string recotree = "pTree";
 //   std::vector<int> pdgs{3312, 3334}; std::string recotree = "aTree";
   
-  std::vector<float> C_edges{0, 10, 20, 40, 70, 100};
-  const int C_nbins = C_edges.size() - 1;
+  float* y_bins = new float[y_nbins+1];
+  for(int i=0; i<y_nbins+1; i++)
+    y_bins[i] = y_low + i*(y_up - y_low) / y_nbins;
+
+  float* pT_bins = new float[pT_nbins+1];
+  for(int i=0; i<pT_nbins+1; i++)
+    pT_bins[i] = pT_low + i*(pT_up - pT_low) / pT_nbins;
+
+  float* C_bins = new float[C_nbins+1];
+  for(int i=0; i<C_nbins+1; i++)
+    C_bins[i] = C_edges.at(i);
   
   AnalysisTree::Chain* treeIn = new AnalysisTree::Chain(std::vector<std::string>({filelist_sim, filelist_rec}), std::vector<std::string>({"aTree", recotree.c_str()}));
-  
+  auto* config = treeIn->GetConfiguration();
+
   auto* eve_header=  new AnalysisTree::EventHeader();
   auto* sim_tracks = new AnalysisTree::Particles();
   auto* reco_tracks = new AnalysisTree::Particles();
+  auto* simulated_copied = new AnalysisTree::Particles();
+  auto* reco_sim_matching = new AnalysisTree::Matching();
   
-  treeIn -> SetBranchAddress("AnaEventHeader", &eve_header);
-  treeIn -> SetBranchAddress("SimParticles", &sim_tracks);
-  treeIn -> SetBranchAddress("Candidates", &reco_tracks);
+  treeIn -> SetBranchAddress("RecEventHeader.", &eve_header);
+  treeIn -> SetBranchAddress("SimParticles.", &sim_tracks);
+  treeIn -> SetBranchAddress("Candidates.", &reco_tracks);
+  treeIn -> SetBranchAddress("Simulated.", &simulated_copied);
+  treeIn -> SetBranchAddress((config->GetMatchName("Candidates", "Simulated") + ".").c_str(), &reco_sim_matching);
+
+  std::vector<TH3F*> hsim_y_pt_C;
+  hsim_y_pt_C.resize(pdgs.size());
   
-  std::vector<std::vector<TH2F*>> hsim_y_pt;
-  hsim_y_pt.resize(pdgs.size());
-  for(auto& h : hsim_y_pt)
-    h.resize(C_nbins);
-  
-  std::vector<std::vector<TH2F*>> hrec_y_pt;
-  hrec_y_pt.resize(pdgs.size());
-  for(auto& h : hrec_y_pt)
-    h.resize(C_nbins);
+  std::vector<TH3F*> hrec_y_pt_C;
+  hrec_y_pt_C.resize(pdgs.size());
   
   for(int i=0; i<pdgs.size(); i++) {
-    for(int j=0; j< C_nbins; j++) {
-      std::string histoname = std::to_string(pdgs.at(i)) + "_" + std::to_string(j);
-      hsim_y_pt.at(i).at(j) = new TH2F("hsim_y_pt", histoname.c_str(), y_nbins, y_low, y_up, pT_nbins, pT_low, pT_up);
-      SetAxesNames(hsim_y_pt.at(i).at(j), y_name, pT_name);
-      
-      hrec_y_pt.at(i).at(j) = new TH2F("hrec_y_pt", histoname.c_str(), y_nbins, y_low, y_up, pT_nbins, pT_low, pT_up);
-      SetAxesNames(hrec_y_pt.at(i).at(j), y_name, pT_name);
-    }
+    std::string histoname = std::to_string(pdgs.at(i));
+    hsim_y_pt_C.at(i) = new TH3F("hsim_y_pt_C", histoname.c_str(), y_nbins, y_bins, pT_nbins, pT_bins, C_nbins, C_bins);
+    SetAxesNames(hsim_y_pt_C.at(i), y_name, pT_name, C_name);
+
+    hrec_y_pt_C.at(i) = new TH3F("hrec_y_pt_C", histoname.c_str(), y_nbins, y_bins, pT_nbins, pT_bins, C_nbins, C_bins);
+    SetAxesNames(hrec_y_pt_C.at(i), y_name, pT_name, C_name);
   }
   
-  const int centrality_id = treeIn->GetConfiguration()->GetBranchConfig("AnaEventHeader").GetFieldId("centrality_tracks");
+  const int centrality_id = treeIn->GetConfiguration()->GetBranchConfig("RecEventHeader").GetFieldId("centrality_tracks");
   const int mother_id_id = treeIn->GetConfiguration()->GetBranchConfig("SimParticles").GetFieldId("mother_id");
-  const int z_id = treeIn->GetConfiguration()->GetBranchConfig("SimParticles").GetFieldId("z");
   const int g4_process_id_id = treeIn->GetConfiguration()->GetBranchConfig("SimParticles").GetFieldId("geant_process_id");
   const int generation_id = treeIn->GetConfiguration()->GetBranchConfig("Candidates").GetFieldId("generation");
   
@@ -72,7 +80,7 @@ void cplxmap_pt_y_C(std::string filelist_sim, std::string filelist_rec, float pb
       std::cout << iEvent << std::endl;
     
     const float centrality = eve_header->GetField<float>(centrality_id);
-    const int  C_bin = FindBin(C_edges, centrality);
+//     const int  C_bin = FindBin(C_edges, centrality);
     
     for(const auto& simtrack : *(sim_tracks->GetChannels())) {
       
@@ -86,7 +94,7 @@ void cplxmap_pt_y_C(std::string filelist_sim, std::string filelist_rec, float pb
       const int index = std::find(pdgs.begin(), pdgs.end(), pid)-pdgs.begin();
       if (index>=pdgs.size()) continue;
       
-      hsim_y_pt.at(index).at(C_bin)->Fill(simtrack.GetRapidity(), simtrack.GetPt());
+      hsim_y_pt_C.at(index)->Fill(simtrack.GetRapidity(), simtrack.GetPt(), centrality);
     }
     
     for(const auto& recotrack : *(reco_tracks->GetChannels())) {
@@ -95,39 +103,25 @@ void cplxmap_pt_y_C(std::string filelist_sim, std::string filelist_rec, float pb
       const int pid = recotrack.GetPid();
       const int index = std::find(pdgs.begin(), pdgs.end(), pid)-pdgs.begin();
       if (index>=pdgs.size()) continue;
+
+      auto matched_sim_track_id = reco_sim_matching->GetMatch(recotrack.GetId());
+      auto& matched_sim_track = simulated_copied->GetChannel(matched_sim_track_id);
       
-      hrec_y_pt.at(index).at(C_bin)->Fill(recotrack.GetRapidity(), recotrack.GetPt());
+      hrec_y_pt_C.at(index)->Fill(matched_sim_track.GetRapidity(), matched_sim_track.GetPt(), centrality);
     }      
   }
   
   TFile fileOut("cplxmap_pt_y_C.root", "recreate");
   
   for(int i=0; i<pdgs.size(); i++) {
-    for(int j=0; j< C_nbins; j++) {
-      fileOut.mkdir((std::to_string(pdgs.at(i)) + "/" + std::to_string(j)).c_str());
-      fileOut.cd((std::to_string(pdgs.at(i)) + "/" + std::to_string(j)).c_str());
-      
-      hsim_y_pt.at(i).at(j)->Write();
-      hrec_y_pt.at(i).at(j)->Write();
-    }
+    fileOut.mkdir(std::to_string(pdgs.at(i)).c_str());
+    fileOut.cd(std::to_string(pdgs.at(i)).c_str());
+
+    hsim_y_pt_C.at(i)->Write();
+    hrec_y_pt_C.at(i)->Write();
   }
   
   fileOut.Close();
   
   std::cout << "Macro finished successfully\n";  
-}
-
-int FindBin(std::vector<float>& v, float value) {
-  if(!std::is_sorted(v.begin(), v.end()))
-    throw std::runtime_error("Vector of centrality is not ordered!");
-  
-  int bin = -1;
-  for(auto& ele : v) {
-    if(value>ele)
-      bin++;
-    else
-      break;
-  }
-  
-  return bin;
 }
