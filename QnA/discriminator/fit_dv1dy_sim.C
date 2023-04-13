@@ -2,8 +2,8 @@ void fit_dv1dy_sim() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-  bool is_rebin_centrality = true;
-//   bool is_rebin_centrality = false;
+//   bool is_rebin_centrality = true;
+  bool is_rebin_centrality = false;
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
 
@@ -90,7 +90,7 @@ void fit_dv1dy_sim() {
       v1sim_slope[i].SetVEW(fsim->GetParameter(1), fsim->GetParError(1));
       delete fsim;
 
-      std::vector<TGraph*> gr_sims = gex_sim.GetSamplesGraphs();
+      std::vector<TGraphErrors*> gr_sims = gex_sim.GetSamplesGraphs();
       std::vector<double> samples_weights = gex_sim.GetSamplesWeights();
       for(int isample = 0; isample<Nsamples; isample++) {
         fsim = new TF1("fsim", "[0]+[1]*(x-[2])", fitaxis_lo, fitaxis_hi);
@@ -165,7 +165,7 @@ void fit_dv1dy_sim() {
           v1rec_slope[i].SetVEW(frec->GetParameter(1), frec->GetParError(1));
           delete frec;
 
-          std::vector<TGraph*> gr_recs = gex_rec.GetSamplesGraphs();
+          std::vector<TGraphErrors*> gr_recs = gex_rec.GetSamplesGraphs();
           std::vector<double> samples_weights = gex_rec.GetSamplesWeights();
           for(int isample = 0; isample<Nsamples; isample++) {
             frec = new TF1("frec", "[0]+[1]*(x-[2])", fitaxis_lo, fitaxis_hi);

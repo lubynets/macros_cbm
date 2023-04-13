@@ -4,14 +4,17 @@ void resolution_presubevent() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   std::string pbeam = "12";
+  std::string pbeam = "3.3";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
-  std::vector<std::string> correls{"psd1", "psd2", "psd3"};
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
+
+//   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
 //   std::vector<std::string> correls{"etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
-//   std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
+  std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
 
   std::string step;
   bool average_comp;
@@ -51,14 +54,15 @@ void resolution_presubevent() {
   multicor.SlightShiftXAxis(0.);
   HeapPicture pic("picture", {1000, 1000});
   if(evegen == "dcmqgsm") {
-    pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
+    if(pbeam == "12") pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
+    else              pic.AddText({0.18, 0.92, "5.2M Au+Au"}, 0.025);
     pic.AddText({0.18, 0.89, "DCM-QGSM-SMM"}, 0.025);
   }
   if(evegen == "urqmd") {
     pic.AddText({0.18, 0.92, "2M Au+Au"}, 0.025);
     pic.AddText({0.18, 0.89, "UrQMD"}, 0.025);
   }
-  pic.AddText({0.18, 0.86, "12A GeV/c"}, 0.025);
+  pic.AddText({0.18, 0.86, (pbeam + "A GeV/c").c_str()}, 0.025);
 
   auto leg1 = new TLegend();
   leg1->SetBorderSize(1);

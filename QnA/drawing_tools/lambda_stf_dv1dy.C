@@ -3,12 +3,6 @@
 void lambda_stf_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  enum DrawOption {
-    kPlain,
-    kDifference,
-    kChi2,
-    kRatio
-  };
 //   DrawOption drawOption = kPlain;
 //   DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;

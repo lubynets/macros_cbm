@@ -4,10 +4,13 @@ void resolution_MC() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   std::string pbeam = "12";
+  std::string pbeam = "3.3";
+
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
     
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
 
 //   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
 //   std::vector<std::string> correls{"etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
@@ -16,7 +19,7 @@ void resolution_MC() {
   std::string step;
   bool average_comp;
 
-  std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res";
+  std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
 //   std::vector<std::string> components{"x1y1", "y1x1"}; std::string L_or_P = "P"; std::string same_or_cross = "res_cross";
 
   std::string fileOutName;
@@ -52,14 +55,15 @@ void resolution_MC() {
             
   HeapPicture pic("picture", {1000, 1000});
   if(evegen == "dcmqgsm") {
-    pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
+    if(pbeam == "12") pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
+    else              pic.AddText({0.18, 0.92, "5.2M Au+Au"}, 0.025);
     pic.AddText({0.18, 0.89, "DCM-QGSM-SMM"}, 0.025);
   }
   if(evegen == "urqmd") {
     pic.AddText({0.18, 0.92, "2M Au+Au"}, 0.025);
     pic.AddText({0.18, 0.89, "UrQMD"}, 0.025);
   }
-  pic.AddText({0.18, 0.86, "12A GeV/c"}, 0.025);
+  pic.AddText({0.18, 0.86, (pbeam + "A GeV/c").c_str()}, 0.025);
   pic.AddText({0.18, 0.83, "MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT"}, 0.02);
   
   auto leg1 = new TLegend();

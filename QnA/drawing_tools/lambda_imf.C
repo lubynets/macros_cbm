@@ -9,11 +9,11 @@ void lambda_imf() {
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
-//   std::string particle = "lambda";
-  std::string particle = "kshort";
+  std::string particle = "lambda";
+//   std::string particle = "kshort";
 
-  std::string fileNameMc = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/cl.imf." + evegen + ".12agev.root";
-  std::string fileNameImf = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/out.fitter." + evegen + ".12agev." + particle + ".root";
+  std::string fileNameMc = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/" + evegen + "/cl.imf." + evegen + ".12agev.root";
+  std::string fileNameImf = "/home/oleksii/cbmdir/working/qna/inv_mass_flow/" + evegen + "/imfits/out.fitter." + evegen + ".12agev." + particle + ".root";
 
 //   bool average_comp = true; std::vector<std::string> components{"ave"};
   bool average_comp = false; std::vector<std::string> components{"x1x1", "y1y1"};

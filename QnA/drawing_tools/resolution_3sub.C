@@ -1,14 +1,16 @@
 void resolution_3sub() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+//   std::string evegen = "dcmqgsm";
+  std::string evegen = "urqmd";
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+  std::string pbeam = "12";
+//   std::string pbeam = "3.3";
+
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
     
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".nopass.root";
-
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
 //   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
 //   std::vector<std::string> correls{"etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
   std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
@@ -20,7 +22,7 @@ void resolution_3sub() {
 
   std::string fileOutName;
   if(correls.at(0)[0] == 'p') { step = "_RECENTERED"; fileOutName = "res_3sub.psd"; average_comp = false; }
-  if(correls.at(0)[0] == 'e') { step = "_PLAIN"; fileOutName = "res_3sub.etacut"; average_comp = true; }
+  if(correls.at(0)[0] == 'e') { step = "_PLAIN"; fileOutName = "res_3sub.etacut_" + correls.at(0).substr(9); average_comp = true; }
 
   MultiCorrelation multicor_mc, multicor_sub3;
   multicor_mc.SetIsFillSysErrors(false);
@@ -55,14 +57,15 @@ void resolution_3sub() {
             
   HeapPicture pic("picture", {1000, 1000});
   if(evegen == "dcmqgsm") {
-    pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
+    if(pbeam == "12") pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
+    else              pic.AddText({0.18, 0.92, "5.2M Au+Au"}, 0.025);
     pic.AddText({0.18, 0.89, "DCM-QGSM-SMM"}, 0.025);
   }
   if(evegen == "urqmd") {
     pic.AddText({0.18, 0.92, "2M Au+Au"}, 0.025);
     pic.AddText({0.18, 0.89, "UrQMD"}, 0.025);
   }
-  pic.AddText({0.18, 0.86, "12A GeV/c"}, 0.025);
+  pic.AddText({0.18, 0.86, (pbeam + "A GeV/c").c_str()}, 0.025);
   pic.AddText({0.18, 0.83, "MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT"}, 0.02);
   
   auto leg1 = new TLegend();
