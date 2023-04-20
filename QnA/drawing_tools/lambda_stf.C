@@ -9,14 +9,14 @@ void lambda_stf() {
   std::string pbeam = "12";
 //   std::string pbeam = "3.3";
 
-  //   bool is_write_rootfile = false;
-  bool is_write_rootfile = true;
+    bool is_write_rootfile = false;
+//   bool is_write_rootfile = true;
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
   
   std::vector<std::string> particles{
                                      "lambda",
-//                                      "kshort",
+                                     "kshort",
 //                                      "xi",
 //                                      "pipos",
 //                                      "pineg"

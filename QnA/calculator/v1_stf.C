@@ -2,8 +2,8 @@ void v1_stf() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-//   std::string pbeam = "12";
-  std::string pbeam = "3.3";
+  std::string pbeam = "12";
+//   std::string pbeam = "3.3";
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/cl.stf." + evegen + "." + pbeam + "agev.root";
   
@@ -23,6 +23,8 @@ void v1_stf() {
                                      "etacut_2_all_PLAIN",
                                      "etacut_3_all_PLAIN"
                                      };
+  std::vector<std::string> sub4th{"sts_p", "sts_pipos"};
+
   std::vector<std::pair<int, int>> sub_indices{{0, 3}, {3, 6}, {6, 9}};
   
   TFile* fileOut = TFile::Open(("v1andR1.stf." + evegen + "." + pbeam + "agev.root").c_str(), "recreate");
@@ -81,6 +83,18 @@ void v1_stf() {
     std::vector<Correlation> R1_3sub = Functions::VectorResolutions3S(QQ.at(1).at(2), QQ.at(0).at(2), QQ.at(0).at(1));
     for(int i=0; i<3; i++) {
       R1_3sub.at(i).Save("res.sub3." + subevents.at(si.first + i));
+    }
+  }
+
+  for(auto& s4 : sub4th){
+    Correlation Q13 = Correlation(fileIn, "QQ", {subevents.at(0), subevents.at(2)}, components_same) * 2.;
+    Correlation Q14 = Correlation(fileIn, "QQ", {subevents.at(0), (s4 + "_RESCALED").c_str()}, components_same) * 2.;
+    Correlation Q24 = Correlation(fileIn, "QQ", {subevents.at(1), (s4 + "_RESCALED").c_str()}, components_same) * 2.;
+    Correlation Q34 = Correlation(fileIn, "QQ", {subevents.at(2), (s4 + "_RESCALED").c_str()}, components_same) * 2.;
+
+    std::vector<Correlation> R1_4sub = Functions::VectorResolutions4S(Q14, Q24, Q34, Q13);
+    for(int i=0; i<3; i++) {
+      R1_4sub.at(i).Save("res.sub4." + s4 + "." + subevents.at(i));
     }
   }
 
