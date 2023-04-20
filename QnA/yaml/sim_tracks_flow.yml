@@ -19,7 +19,9 @@ _axes:
     nb: 10
     lo: 0.62179005 # midrapidity-1.0
     hi: 2.6217901 # midrapidity+1.0
-    
+    #lo: -0.0147 # midrapidity-1.0
+    #hi: 1.9853 # midrapidity+1.0
+
 cbm_analysis:
   event-variables:
     - SimEventHeader/centrality_impactpar
@@ -153,12 +155,42 @@ cbm_analysis:
       cuts:
         - { variable:  SimParticles/eta, range: [2.94, 3.47] }
         - { variable:  SimParticles/mother_id, equals: -1 }
+    - name: sts_p
+      type: track
+      phi: RecParticles/phi
+      weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      cuts:
+        RecParticles/pid: { equals: 2212 }
+        RecParticles/pT: { range: [0, 3] }
+        RecParticles/rapidity: { range: [1.02179, 1.42179] } # -0.6; -0.2
+        #RecParticles/rapidity: { range: [0.3853, 0.7853] } # -0.6; -0.2
+    - name: sts_pipos
+      type: track
+      phi: RecParticles/phi
+      weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      cuts:
+        RecParticles/pid: { equals: 211 }
+        RecParticles/pT: { range: [0, 1.4] }
+        RecParticles/rapidity: { range: [2.42179, 2.82179] } # 0.8; 1.2
+        #RecParticles/rapidity: { range: [1.7853, 2.1853] } # 0.8; 1.2
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP
       weight: Ones
       norm: m
-      
+    - name: Q_psi
+      type: psi
+      phi:  SimEventHeader/psi_RP
+      weight: Ones
+      norm: m
 #=========================================================================================
 
 _detectors: &detectors
@@ -180,6 +212,10 @@ _detectors: &detectors
     tags: [ psd ]  
   - name: psdall
     tags: [ psd ]  
+  - name: sts_p
+    tags: [ sts ]
+  - name: sts_pipos
+    tags: [ sts ]
   - name: etacut_1_charged
     tags: [ etacut_charged ]
   - name: etacut_2_charged
@@ -208,6 +244,8 @@ _queries:
     tags: { any-in: [un_vector] }
   - &query_psd
     tags: { any-in: [psd] }
+  - &query_sts
+    tags: { any-in: [sts] }
   - &query_etacut_charged
     tags: { any-in: [etacut_charged] }
   - &query_etacut_all
@@ -226,6 +264,12 @@ _task_args:
     query: *query_psd
     query-list: *detectors
     correction-steps: [recentered]
+    components: *sp_components
+    weight: ones
+  - &ta_sts
+    query: *query_sts
+    query-list: *detectors
+    correction-steps: [rescaled]
     components: *sp_components
     weight: ones
   - &ta_etacut_charged
@@ -249,52 +293,54 @@ _task_args:
     
 _tasks:
   - args: [*ta_usim, *ta_psd ]
-    n-samples: 50
     weights-type: observable
     folder: "/uQ"
     axes: [ *centrality ]
   - args: [*ta_usim, *ta_etacut_charged ]
-    n-samples: 50
     weights-type: observable
     folder: "/uQ"
     axes: [ *centrality ]
   - args: [*ta_usim, *ta_etacut_all ]
-    n-samples: 50
     weights-type: observable
     folder: "/uQ"
     axes: [ *centrality ]
   - args: [*ta_usim, *ta_psi ]
-    n-samples: 50
     weights-type: observable
     folder: "/uPsi"
     axes: [ *centrality ]
   - args: [*ta_psd, *ta_psi ]
-    n-samples: 50
+    weights-type: reference
+    folder: "/QPsi"
+    axes: [ *centrality ]
+  - args: [*ta_sts, *ta_psi ]
     weights-type: reference
     folder: "/QPsi"
     axes: [ *centrality ]
   - args: [*ta_etacut_charged, *ta_psi ]
-    n-samples: 50
     weights-type: reference
     folder: "/QPsi"
     axes: [ *centrality ]
   - args: [*ta_etacut_all, *ta_psi ]
-    n-samples: 50
     weights-type: reference
     folder: "/QPsi"
     axes: [ *centrality ]
   - args: [*ta_psd, *ta_psd ]
-    n-samples: 50
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]
+  - args: [*ta_sts, *ta_psd ]
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]
+  - args: [*ta_psd, *ta_sts ]
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
   - args: [*ta_etacut_charged, *ta_etacut_charged ]
-    n-samples: 50
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
   - args: [*ta_etacut_all, *ta_etacut_all ]
-    n-samples: 50
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
