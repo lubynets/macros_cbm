@@ -23,7 +23,7 @@ void v1_stf() {
                                      "etacut_2_all_PLAIN",
                                      "etacut_3_all_PLAIN"
                                      };
-  std::vector<std::string> sub4th{"sts_p", "sts_pipos"};
+  std::vector<std::string> sub4th{/*"sts_p", */"sts_pipos"};
 
   std::vector<std::pair<int, int>> sub_indices{{0, 3}, {3, 6}, {6, 9}};
   
@@ -47,10 +47,14 @@ void v1_stf() {
   
   fileOut->cd("R1");
   std::vector<Correlation> R1;
-  R1.resize(subevents.size());
+  R1.resize(subevents.size() + sub4th.size());
   for(int i=0; i<subevents.size(); i++) {
     R1.at(i) = Correlation(fileIn, "QPsi", {subevents.at(i), "Q_psi_PLAIN"}, components_same) * 2.;
     R1.at(i).Save("res.mc." + subevents.at(i));
+  }
+  for(int i=0; i<sub4th.size(); i++) {
+    R1.at(subevents.size() + i) = Correlation(fileIn, "QPsi", {sub4th.at(i) + "_RESCALED", "Q_psi_PLAIN"}, components_same) * 2.;
+    R1.at(subevents.size() + i).Save("res.mc." + sub4th.at(i) + "_RESCALED");
   }
 
   fileOut->cd("R1R1");
@@ -60,6 +64,18 @@ void v1_stf() {
         auto R1R1 = R1.at(i) * R1.at(j);
         R1R1.Save("r1r1." + subevents.at(i) + "_" + subevents.at(j));
       }
+    }
+  }
+
+  for(int j=0; j<sub4th.size(); j++){
+    for(int i=0; i<3; i++){
+      auto R1R1 = R1.at(i) * R1.at(subevents.size() + j);
+      fileOut->cd("R1R1");
+      R1R1.Save("r1r1." + subevents.at(i) + "_" + sub4th.at(j));
+
+      fileOut->cd("QQ");
+      Correlation QQ = Correlation(fileIn, "QQ", {subevents.at(i), sub4th.at(j) + "_RESCALED"}, components_same) * 2.;
+      QQ.Save("qq." + subevents.at(i) + "_" + sub4th.at(j));
     }
   }
 

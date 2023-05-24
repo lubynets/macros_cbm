@@ -3,8 +3,8 @@
 void lambda_stf() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+//   std::string evegen = "dcmqgsm";
+  std::string evegen = "urqmd";
 
   std::string pbeam = "12";
 //   std::string pbeam = "3.3";
@@ -17,7 +17,7 @@ void lambda_stf() {
   std::vector<std::string> particles{
                                      "lambda",
                                      "kshort",
-//                                      "xi",
+// //                                      "xi",
 //                                      "pipos",
 //                                      "pineg"
                                     };
@@ -63,7 +63,7 @@ void lambda_stf() {
 //                               1.0-axes.at(kProjection).shift_});
 
   for(auto& particle : particles) {
-    if(evegen == "dcmqgsm") {
+    if(evegen == "dcmqgsm" && pbeam == "12") {
       if(particle == "lambda") {
         SetSliceAxisBinEdges({0, 0.4, 0.8, 1.2, 1.6});
         y_lo = -0.3;
@@ -81,6 +81,23 @@ void lambda_stf() {
       }
       if(particle == "xi") {
         SetSliceAxisBinEdges({0, 0.4, 0.8, 1.2, 1.6});
+        y_lo = -0.3;
+        y_hi = 0.3;
+      }
+    }
+    if(evegen == "dcmqgsm" && pbeam == "3.3") {
+      if(particle == "lambda") {
+        SetSliceAxisBinEdges({0, 0.4, 0.8, 1.6});
+        y_lo = -0.5;
+        y_hi = 0.5;
+      }
+      if(particle == "kshort"){
+        SetSliceAxisBinEdges({0, 0.4, 0.8, 1.6});
+        y_lo = -0.5;
+        y_hi = 0.5;
+      }
+      if(particle == "pipos" || particle == "pineg") {
+        SetSliceAxisBinEdges({0, 0.4, 0.6, 1.0});
         y_lo = -0.3;
         y_hi = 0.3;
       }
@@ -224,8 +241,8 @@ void lambda_stf() {
         pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
 
         pic.CustomizeXRange();
-        pic.CustomizeYRange();
-//         pic.SetYRange({y_lo, y_hi});
+//         pic.CustomizeYRange();
+        pic.SetYRange({y_lo, y_hi});
         pic.AddLegend(leg1);
         pic.CustomizeLegend(leg1);
         pic.Draw();

@@ -4,15 +4,15 @@ void resolution_4sub() {
   std::string evegen = "dcmqgsm";
 //   std::string evegen = "urqmd";
 
-  std::string pbeam = "12";
-//   std::string pbeam = "3.3";
+//   std::string pbeam = "12";
+  std::string pbeam = "3.3";
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
-  std::vector<std::string> fourth{"sts_p", "sts_pipos"};
+  std::vector<std::string> fourth{/*"sts_p", */"sts_pipos"};
 
   bool average_comp = false;
   std::string step = "_RECENTERED";
@@ -123,7 +123,7 @@ void resolution_4sub() {
 
     pic.SetAxisTitles( {"Centrality, %", "R_{1}"} );
     pic.CustomizeXRange();
-    pic.CustomizeYRangeWithLimits(0, 0.2);
+    pic.CustomizeYRangeWithLimits(0, 0.3);
     pic.AddLegend(leg1);
     pic.CustomizeLegend(leg1);
   //   pic.SetGridX();
