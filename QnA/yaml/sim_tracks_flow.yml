@@ -17,10 +17,10 @@ _axes:
   - &sim_axis_rapidity
     name: SimParticles/rapidity
     nb: 10
-    lo: 0.62179005 # midrapidity-1.0
-    hi: 2.6217901 # midrapidity+1.0
-    #lo: -0.0147 # midrapidity-1.0
-    #hi: 1.9853 # midrapidity+1.0
+    #lo: 0.62179005 # midrapidity-1.0
+    #hi: 2.6217901 # midrapidity+1.0
+    lo: -0.0147 # midrapidity-1.0
+    hi: 1.9853 # midrapidity+1.0
 
 cbm_analysis:
   event-variables:
@@ -155,19 +155,6 @@ cbm_analysis:
       cuts:
         - { variable:  SimParticles/eta, range: [2.94, 3.47] }
         - { variable:  SimParticles/mother_id, equals: -1 }
-    - name: sts_p
-      type: track
-      phi: RecParticles/phi
-      weight: Ones
-      norm: m
-      corrections:
-        - recentering
-        - twist-and-rescale
-      cuts:
-        RecParticles/pid: { equals: 2212 }
-        RecParticles/pT: { range: [0, 3] }
-        RecParticles/rapidity: { range: [1.02179, 1.42179] } # -0.6; -0.2
-        #RecParticles/rapidity: { range: [0.3853, 0.7853] } # -0.6; -0.2
     - name: sts_pipos
       type: track
       phi: RecParticles/phi
@@ -178,9 +165,10 @@ cbm_analysis:
         - twist-and-rescale
       cuts:
         RecParticles/pid: { equals: 211 }
-        RecParticles/pT: { range: [0, 1.4] }
-        RecParticles/rapidity: { range: [2.42179, 2.82179] } # 0.8; 1.2
-        #RecParticles/rapidity: { range: [1.7853, 2.1853] } # 0.8; 1.2
+        RecParticles/pT: { range: [0, 0.4] }
+        #RecParticles/rapidity: { range: [2.42179, 3.62179] } # 0.8; 2
+        RecParticles/rapidity: { range: [1.7853, 2.9853] } # 0.8; 2
+        RecParticles/eta: { range: [0, 2.75] }
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP
@@ -212,8 +200,8 @@ _detectors: &detectors
     tags: [ psd ]  
   - name: psdall
     tags: [ psd ]  
-  - name: sts_p
-    tags: [ sts ]
+  #- name: sts_p
+    #tags: [ sts ]
   - name: sts_pipos
     tags: [ sts ]
   - name: etacut_1_charged
@@ -328,11 +316,15 @@ _tasks:
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
-  - args: [*ta_sts, *ta_psd ]
+  - args: [*ta_psd, *ta_sts ]
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
-  - args: [*ta_psd, *ta_sts ]
+  - args: [*ta_etacut_charged, *ta_sts ]
+    weights-type: reference
+    folder: "/QQ"
+    axes: [ *centrality ]
+  - args: [*ta_etacut_all, *ta_sts ]
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]

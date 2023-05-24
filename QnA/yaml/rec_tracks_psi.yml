@@ -7,8 +7,10 @@ _axes:
   - &rec_axis_rapidity
     name: ReconstructedParticles/rapidity
     nb: 10
-    lo: 0.62179005 # midrapidity-1.0
-    hi: 2.6217901 # midrapidity+1.0
+    #lo: 0.62179005 # midrapidity-1.0
+    #hi: 2.6217901 # midrapidity+1.0
+    lo: -0.0147 # midrapidity-1.0
+    hi: 1.9853 # midrapidity+1.0
   - &sim_axis_pT
     name: SimParticles/pT
     nb: 10
@@ -17,8 +19,10 @@ _axes:
   - &sim_axis_rapidity
     name: SimParticles/rapidity
     nb: 10
-    lo: 0.62179005 # midrapidity-1.0
-    hi: 2.6217901 # midrapidity+1.0
+    #lo: 0.62179005 # midrapidity-1.0
+    #hi: 2.6217901 # midrapidity+1.0
+    lo: -0.0147 # midrapidity-1.0
+    hi: 1.9853 # midrapidity+1.0
 
 cbm_analysis:
   event-variables:
