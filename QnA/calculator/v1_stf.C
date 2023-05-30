@@ -1,31 +1,32 @@
 void v1_stf() {
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+//   std::string evegen = "dcmqgsm";
+  std::string evegen = "urqmd";
 
   std::string pbeam = "12";
 //   std::string pbeam = "3.3";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/cl.stf." + evegen + "." + pbeam + "agev.root";
-  
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/cl.stf." + evegen + "." + pbeam + "agev.root";
+  std::string fileName = "/home/oleksii/cbmdir/sandbox/cl.d3.root";
+
   TFile* fileIn = TFile::Open(fileName.c_str());
   
-  std::vector<std::string> particles{"lambda", "kshort", "xi", "pipos", "pineg"};
+  std::vector<std::string> particles{/*"lambda", "kshort", "xi", "pipos", "pineg"*/};
   std::vector<std::string> components{"x1x1", "y1y1", "x1y1", "y1x1"};
   std::vector<std::string> components_same{"x1x1", "y1y1"};
   std::vector<std::string> components_cross{"x1y1", "y1x1"};
   std::vector<std::string> subevents{"psd1_RECENTERED",
                                      "psd2_RECENTERED",
                                      "psd3_RECENTERED",
-                                     "etacut_1_charged_PLAIN",
-                                     "etacut_2_charged_PLAIN",
-                                     "etacut_3_charged_PLAIN",
-                                     "etacut_1_all_PLAIN",
-                                     "etacut_2_all_PLAIN",
-                                     "etacut_3_all_PLAIN"
+//                                      "etacut_1_charged_PLAIN",
+//                                      "etacut_2_charged_PLAIN",
+//                                      "etacut_3_charged_PLAIN",
+//                                      "etacut_1_all_PLAIN",
+//                                      "etacut_2_all_PLAIN",
+//                                      "etacut_3_all_PLAIN"
                                      };
-  std::vector<std::string> sub4th{/*"sts_p", */"sts_pipos"};
+  std::vector<std::string> sub4th{"sts_pipos_yS_nocut", "sts_pipos_yS_cut", "sts_pipos_yL_nocut", "sts_pipos_yL_cut"};
 
-  std::vector<std::pair<int, int>> sub_indices{{0, 3}, {3, 6}, {6, 9}};
+  std::vector<std::pair<int, int>> sub_indices{{0, 3}/*, {3, 6}, {6, 9}*/};
   
   TFile* fileOut = TFile::Open(("v1andR1.stf." + evegen + "." + pbeam + "agev.root").c_str(), "recreate");
   fileOut->cd();

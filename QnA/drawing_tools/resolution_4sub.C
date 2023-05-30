@@ -10,9 +10,10 @@ void resolution_4sub() {
 //   bool is_write_rootfile = false;
   bool is_write_rootfile = true;
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
+  std::string fileName = "/home/oleksii/cbmdir/flow_calculator/build/v1andR1.d3.root";
   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
-  std::vector<std::string> fourth{/*"sts_p", */"sts_pipos"};
+  std::vector<std::string> fourth{"sts_pipos_yS_nocut", "sts_pipos_yS_cut", "sts_pipos_yL_nocut", "sts_pipos_yL_cut"};
 
   bool average_comp = false;
   std::string step = "_RECENTERED";

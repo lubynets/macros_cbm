@@ -80,16 +80,16 @@ void v1_complex()
 
     fileOut->cd("v1/uQ_R1_MC");
     auto uQ_R1_MC = uQ / R1_MC.at(i) * 2.;
-    uQ_R1_MC.Save("v1.u_rec." + subevents.at(i) + ".res_MC");
+    uQ_R1_MC.Save("v1.u_rec." + subevents.at(i) + "_res_MC");
 
     fileOut->cd("v1/uQ_R1_sub3");
     auto uQ_R1_sub3 = uQ / R1_sub3.at(i) * 2.;
-    uQ_R1_sub3.Save("v1.u_rec." + subevents.at(i) + ".res_sub3");
+    uQ_R1_sub3.Save("v1.u_rec." + subevents.at(i) + "_res_sub3");
 
     fileOut->cd("v1/uQ_R1_sub4");
     for(int j=0; j<sub4th.size(); j++) {
       auto uQ_R1_sub4 = uQ / R1_sub4.at(j).at(i) * 2.;
-      uQ_R1_sub4.Save("v1.u_rec." + subevents.at(i)+ ".res_sub4_" + sub4th.at(j));
+      uQ_R1_sub4.Save("v1.u_rec." + subevents.at(i)+ "_res_sub4_" + sub4th.at(j));
     }
   }
 
@@ -98,16 +98,16 @@ void v1_complex()
 
     fileOut->cd("v1/uQ_R1_MC");
     auto uQ_R1_MC = uQ / R1_MC.at(i) * 2.;
-    uQ_R1_MC.Save("v1.u_rec_sgnl." + subevents.at(i) + ".res_MC");
+    uQ_R1_MC.Save("v1.u_rec_sgnl." + subevents.at(i) + "_res_MC");
 
     fileOut->cd("v1/uQ_R1_sub3");
     auto uQ_R1_sub3 = uQ / R1_sub3.at(i) * 2.;
-    uQ_R1_sub3.Save("v1.u_rec_sgnl." + subevents.at(i) + ".res_sub3");
+    uQ_R1_sub3.Save("v1.u_rec_sgnl." + subevents.at(i) + "_res_sub3");
 
     fileOut->cd("v1/uQ_R1_sub4");
     for(int j=0; j<sub4th.size(); j++) {
       auto uQ_R1_sub4 = uQ / R1_sub4.at(j).at(i) * 2.;
-      uQ_R1_sub4.Save("v1.u_rec_sgnl." + subevents.at(i)+ ".res_sub4_" + sub4th.at(j));
+      uQ_R1_sub4.Save("v1.u_rec_sgnl." + subevents.at(i)+ "_res_sub4_" + sub4th.at(j));
     }
   }
 

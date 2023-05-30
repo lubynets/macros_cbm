@@ -27,16 +27,16 @@ void fit_flow() {
   TFile* fileOut = TFile::Open("out.fitter.root", "recreate");
 
   std::vector<std::pair<std::string, std::string>> inputs {
-    {"uPsi", "Q_psi"},
-    {"uQ_R1_MC", "res_MC"},
-    {"uQ_R1_sub3", "res_sub3"},
-    {"uQ_R1_sub4", "res_sub4_sts_pipos"}
+    {"uPsi", ""},
+    {"uQ_R1_MC", "_res_MC"},
+    {"uQ_R1_sub3", "_res_sub3"},
+    {"uQ_R1_sub4", "_res_sub4_sts_pipos"}
   };
 
   for(auto& ip : inputs) {
     std::vector<std::string> subevents;
-    if(ip.second == "Q_psi") subevents = {""};
-    else                     subevents = {"psd1", "psd2", "psd3"};
+    if(ip.second == "") subevents = {"Q_psi"};
+    else                subevents = {"psd1", "psd2", "psd3"};
 
     for(auto& se : subevents) {
       Qn::DataContainerStatDiscriminator dc_entries_sgnl;
@@ -49,10 +49,7 @@ void fit_flow() {
 
       for (auto& co : components) {
 
-        std::string corr_name;
-        if(se == "") corr_name = "v1/" + ip.first + "/v1.u_rec." + se + ip.second + "." + co;
-        else         corr_name = "v1/" + ip.first + "/v1.u_rec." + se + "." + ip.second + "." + co;
-
+        std::string corr_name = "v1/" + ip.first + "/v1.u_rec." + se + ip.second + "." + co;
         std::cout << corr_name << "\n";
         Qn::DataContainer<Qn::StatCalculate, Qn::Axis<double>> lambda_psi_pre =
         Qn::DataContainerStatCalculate(*(Qn::DataContainer<Qn::StatCalculate, Qn::Axis<double>>*) v1file->Get(corr_name.c_str()));
@@ -82,7 +79,7 @@ void fit_flow() {
         gex.SetDataContainer(&lambda_psi);
         gex.SetSelectAxis(invmassaxis.c_str());
 
-        CD(fileOut, ("Fits/" + ip.first + "/" + se + "_" + ip.second).c_str());
+        CD(fileOut, ("Fits/" + ip.first + "/" + se + ip.second).c_str());
 
         const int Nsamples = lambda_psi.At(0).GetSampleMeans().size();
 
@@ -226,18 +223,18 @@ void fit_flow() {
           dc_entries_bckgr[i].SetWeight(bckgr_weight);
         }
 
-        CD(fileOut, ("Pars/" + ip.first + "/" + se + "_" + ip.second).c_str());
+        CD(fileOut, ("Pars/" + ip.first + "/" + se + ip.second).c_str());
         dc_signal.Write(("signal." + co).c_str());
         dc_bckgr_0.Write(("bckgr_0." + co).c_str());
         dc_bckgr_1.Write(("bckgr_1." + co).c_str());
 
-        CD(fileOut, ("Chi2s/" + ip.first + "/" + se + "_" + ip.second).c_str());
+        CD(fileOut, ("Chi2s/" + ip.first + "/" + se + ip.second).c_str());
         dc_fit_chi2ndf.Write(("fit_chi2ndf." + co).c_str());
 
         common_dc_for_all_components = true;
       } // components
 
-      CD(fileOut, ("Entries/" + ip.first + "/" + se + "_" + ip.second).c_str());
+      CD(fileOut, ("Entries/" + ip.first + "/" + se + ip.second).c_str());
       dc_entries_sgnl.Write("entries_sgnl");
       dc_entries_bckgr.Write("entries_bckgr");
 
