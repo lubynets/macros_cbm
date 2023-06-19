@@ -3,32 +3,38 @@
 void lambda_complex() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
 //   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-  std::string particle = "#Lambda"; std::string pdg = "3122";
-//   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
-//   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
+//   std::string particle = "#Lambda"; std::string pdg = "3122"; std::string cuts = "oc1";
+//   std::string particle = "K^{0}_{S}"; std::string pdg = "310"; std::string cuts = "oc1";
+  std::string particle = "#Xi^{-}"; std::string pdg = "3312"; std::string cuts = "dc";
+
+//   bool is_imf = true;
+  bool is_imf = false;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
-//   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::BOOTSTRAP};
-
-//   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/v1andR1." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
-  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/out.fitter." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
+  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
 
   SetAxis("centrality", "select");
   SetAxis("rapidity", "projection");
   SetAxis("pT", "slice");
   std::string component_1 = "x1x1";
   std::string component_2 = "y1y1";
-  std::string harmonic = "1";
+
+  if(!is_imf) {
+    fileRecName = fileMcName;
+    axes.at(0).reco_fit_name_ = axes.at(0).reco_name_;
+    axes.at(1).reco_fit_name_ = axes.at(1).reco_name_;
+    axes.at(2).reco_fit_name_ = axes.at(2).reco_name_;
+  }
 
   struct Inputs {
     std::string dirname_;
@@ -54,8 +60,14 @@ void lambda_complex() {
     }
   }
 
-//   SetSelectAxisBinEdges({0, 20, 40, 70});
-//   IntegrateSliceAxis();
+  SetSelectAxisBinEdges({0, 20, 40, 70});
+//   SetSliceAxisBinEdges({0.2, 1.0});
+  IntegrateSliceAxis();
+//   SetProjectionAxisBinEdges({-0.5-axes.at(kProjection).shift_,
+//                              -0.1-axes.at(kProjection).shift_,
+//                               0.1-axes.at(kProjection).shift_,
+//                               0.5-axes.at(kProjection).shift_,
+//                               0.7-axes.at(kProjection).shift_});
 
   TFile* fileOut;
 
@@ -105,9 +117,13 @@ void lambda_complex() {
         v1_rec_nofit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
         v1_rec_nofit.ShiftSliceAxis(axes.at(kSlice).shift_);
         v1_rec_nofit.ShiftProjectionAxis(axes.at(kProjection).shift_);
+        v1_rec_nofit.SlightShiftProjectionAxis(0.025, 0.0125);
         v1_rec_nofit.Calculate();
 
-        std::string rec_fit_name = "Pars/" + ip.dirname_ + "/" + se + ip.resname_ + "/signal.";
+        std::string rec_fit_name;
+        if(is_imf) rec_fit_name = "Pars/" + ip.dirname_ + "/" + se + ip.resname_ + "/signal.";
+        else       rec_fit_name = "v1/" + ip.dirname_ + "/v1.u_rec." + se + ip.resname_ + ".";
+
         auto v1_rec_fit = DoubleDifferentialCorrelation( fileRecName.c_str(),
                                                     {(rec_fit_name + component_1).c_str(),
                                                      (rec_fit_name + component_2).c_str() } );
@@ -174,13 +190,14 @@ void lambda_complex() {
         }
 
 
-        pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), ("v_{" + harmonic + "}").c_str()});
+        pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), "v_{1}"});
 
     //     pic.SetXRange({-0.05, 0.95});
         pic.CustomizeXRange();
-        pic.CustomizeYRange();
+        pic.CustomizeYRangeWithLimits(-0.3, 0.6);
         pic.AddLegend(leg1);
         pic.CustomizeLegend(leg1);
+//         pic.SetGridXY();
         pic.Draw();
 
         if(is_write_rootfile) {

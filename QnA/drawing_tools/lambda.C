@@ -6,26 +6,26 @@
 
 // void lambda(const std::string& filename){
 void lambda(){
-  gROOT->Macro( "/home/user/cbmdir/flow_drawing_tools/example/style.cc" );
+  gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   auto leg1 = new TLegend( 0.65, 0.75, 0.9, 0.945 );
   bool is_first_canvas = true;
   
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/derivatives/v1.dcmqgsm.12agev.defcuts.3122.set2.sgnl_1.root");
-  SetFileName("/home/user/cbmdir/working/qna/correlations/cl.dcmqgsm.12agev.defcuts.3122.set1.sgnl_1.root");
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.urqmd.12agev.defcuts.3122.set1.sgnl_1.root");
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.dcmqgsm.3.3agev.defcuts.3122.set1.sgnl_1.root");
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.master.root");
-  std::string particle = "#Lambda";
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/derivatives/v1.dcmqgsm.12agev.defcuts.3122.set2.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.dcmqgsm.12agev.defcuts.3122.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.urqmd.12agev.defcuts.3122.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.dcmqgsm.3.3agev.defcuts.3122.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.master.root");
+//   std::string particle = "#Lambda";
   
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.dcmqgsm.12agev.defcuts.3312.set1.sgnl_1.root");
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.urqmd.12agev.defcuts.3312.set1.sgnl_1.root");
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.dcmqgsm.3.3agev.defcuts.3312.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.dcmqgsm.12agev.defcuts.3312.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.urqmd.12agev.defcuts.3312.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.dcmqgsm.3.3agev.defcuts.3312.set1.sgnl_1.root");
 //   std::string particle = "#Xi^{-}";
   
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.dcmqgsm.12agev.defcuts.310.set1.sgnl_1.root");
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.urqmd.12agev.defcuts.310.set1.sgnl_1.root");
-//   SetFileName("/home/user/cbmdir/working/qna/correlations/cl.dcmqgsm.3.3agev.defcuts.310.set1.sgnl_1.root");
-//   std::string particle = "K^{0}_{S}";
+  SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.dcmqgsm.12agev.defcuts.310.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.urqmd.12agev.defcuts.310.set1.sgnl_1.root");
+//   SetFileName("/home/oleksii/cbmdir/working/qna/correlations/cl.dcmqgsm.3.3agev.defcuts.310.set1.sgnl_1.root");
+  std::string particle = "K^{0}_{S}";
   
   SetAxis("centrality", "select");
   SetAxis("rapidity", "projection");
@@ -33,6 +33,9 @@ void lambda(){
   std::string component_1 = "x1x1";
   std::string component_2 = "y1y1";
   std::string harmonic = "1";
+
+  axes.at(2).sim_name_ = "AnaEventHeader_centrality_tracks";
+  axes.at(2).reco_name_ = "AnaEventHeader_centrality_tracks";
   
 //   SetAxis("rapidity", "select");
 //   SetAxis("pT", "projection");
@@ -52,10 +55,10 @@ void lambda(){
     }
   }
   
-//   SetSelectAxisBinEdges({0, 70});  
+  SetSelectAxisBinEdges({10, 40});
 //   IntegrateSelectAxis();
 
-//   IntegrateSliceAxis();
+  IntegrateSliceAxis();
 //   SetSliceAxisBinEdges({0, 0.8, 1.2, 1.6});
 //   SetSliceAxisBinEdges({0, 10, 20, 40, 70});
 

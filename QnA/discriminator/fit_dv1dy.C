@@ -5,16 +5,20 @@ void fit_dv1dy() {
   excludedObjects = {"bckgr"};
   axestofit = {"ReconstructedParticles_rapidity", "SimParticles_rapidity", "y"};
   axestoignore = {"ReconstructedParticles_mass"};
+  axestoslice = {"ReconstructedParticles_pT", "SimParticles_pT", "pT"};
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12"; midrapidity = 1.6217901;
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; midrapidity = 1.6217901;
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; midrapidity = 0.985344;
+//   std::string evegen = "urqmd"; std::string pbeam = "12"; midrapidity = 1.6217901;
 
-  std::string pdg = "3122";
-
+//   std::string pdg = "3122"; std::string cuts = "oc1";
+//   std::string pdg = "310"; std::string cuts = "oc1";
+  std::string pdg = "3312"; std::string cuts = "dc";
 
   fileInPath = "/home/oleksii/cbmdir/working/qna/aXmass";
 
-//   fileInName = "vR." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
-  fileInName = "of." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
+  fileInName = "vR." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+//   fileInName = "of." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
 
   TFile* fileIn = TFile::Open((fileInPath + "/" + fileInName).c_str(), "read");
 
@@ -77,6 +81,8 @@ void fit_dv1dy() {
 
 std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn) {
   const int Nsamples = dcIn.At(0).GetSampleMeans().size();
+
+  dcIn = dcIn.Rebin({axistoslice, {0, 0.9}});
 
   const double fitaxis_lo = dcIn.GetAxis(axistofit.c_str()).GetFirstBinEdge();
   const double fitaxis_hi = dcIn.GetAxis(axistofit.c_str()).GetLastBinEdge();

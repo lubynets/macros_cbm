@@ -1,6 +1,18 @@
 void v1_complex()
 {
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/cl.dcmqgsm.12agev.lc1.3122.root";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
+
+//   std::string pdg = "3122";
+//   std::string pdg = "310";
+  std::string pdg = "3312";
+
+//   std::string cut = "lc1";
+  std::string cut = "dc";
+//   std::string cut = "oc1";
+
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/cl." + evegen + "." + pbeam + "agev." + cut + "." + pdg + ".root";
 
   TFile* fileIn = TFile::Open(fileName.c_str());
   

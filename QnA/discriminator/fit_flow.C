@@ -5,18 +5,18 @@ void fit_flow() {
 
   gROOT->Macro("/home/oleksii/cbmdir/flow_drawing_tools/example/style_1.cc");
 
-  std::string evegen = "dcmqgsm";
-  std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "urqmd"; std::string pbeam = "12";
 
-  const float mu = 1.115683; std::string particle = "lambda"; std::string pdg = "3122";
+//   const float mu = 1.115683; std::string particle = "lambda"; std::string pdg = "3122";
 
-//   const float mu = 0.497611; std::string particle = "kshort";
+  const float mu = 0.497611; std::string particle = "kshort"; std::string pdg = "310";
 
-  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/v1andR1." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
+  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
   std::string shapefilename = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/shape." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
 
   TFile* shapefile = TFile::Open(shapefilename.c_str(), "read");
-  Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>* shcntr = (Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>*) shapefile->Get("ReFit");
+  Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>* shcntr = (Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>*) shapefile->Get(/*"ReFit"*/"PreFit" );
 
   TFile* v1file = TFile::Open(v1filename.c_str(), "read");
 
@@ -205,7 +205,7 @@ void fit_flow() {
             dc_signal[i].AddSampleMean(fitter.GetBsFitParameter(isample, 0));
             dc_bckgr_0[i].AddSampleMean(fitter.GetBsFitParameter(isample, 1));
             dc_bckgr_1[i].AddSampleMean(fitter.GetBsFitParameter(isample, 2));
-            dc_signal[i].AddSampleWeight(samples_weights.at(isample));
+            dc_signal[i].AddSampleWeight(samples_weights.at(isample));        //TODO check if it is correct
             dc_bckgr_0[i].AddSampleWeight(samples_weights.at(isample));
             dc_bckgr_1[i].AddSampleWeight(samples_weights.at(isample));
           }

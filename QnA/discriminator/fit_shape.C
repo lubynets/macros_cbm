@@ -7,18 +7,26 @@ void fit_shape() {
 
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style_1.cc" );
 
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC.dcmqgsm.12agev.lc1.3122.root";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "urqmd"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.lc1.3122.root";
 //   const float mu = 1.115683;
 //   const float sigma = 0.00145786;
 //   std::string particle = "#Lambda";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC.dcmqgsm.12agev.lc1.310.root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.lc1.310.root";
   const float mu = 0.497611;
   const float sigma = 0.0037;
   std::string particle = "K^{0}_{S}";
 
-  TFile* fileIn = TFile::Open(fileName.c_str(), "read");
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.dc1.3312.root";
+//   const float mu = 1.32171;
+//   const float sigma = 0.00145786;
+//   std::string particle = "#Xi^{-}";
 
+  TFile* fileIn = TFile::Open(fileName.c_str(), "read");
   Qn::DataContainer<TH1F, Qn::Axis<double>> dcprimary = *(fileIn->Get<Qn::DataContainer<TH1F, Qn::Axis<double>>>("dcmass_all"));
 //   auto dcIn = dcprimary.Rebin({"centrality", {0, 10, 20, 40, 70}});
   auto dcIn = dcprimary;
@@ -107,22 +115,22 @@ void fit_shape() {
     dcIn[i].SetStats(kFALSE);
     dcIn[i].Draw("");
 
+    TPaveText binedges(0.12, 0.75, 0.27, 0.92, "brNDC");
+    binedges.AddText(particle.c_str());
+    binedges.AddText(("C: " + to_string_with_precision(C_lo, 2) + " - " + to_string_with_precision(C_hi, 2) + " %").c_str());
+    binedges.AddText(("p_{T}: " + to_string_with_precision(pT_lo, 2) + " - " + to_string_with_precision(pT_hi, 2) + " GeV/c").c_str());
+    binedges.AddText(("y_{LAB}: " + to_string_with_precision(y_lo, 2) + " - " + to_string_with_precision(y_hi, 2)).c_str());
+    binedges.SetFillColor(0);
+    binedges.SetTextSize(0.03);
+    binedges.SetTextFont(22);
+    binedges.Draw("same");
+
     shFtr.GetReGraphAll()->SetFillStyle(3001);
     shFtr.GetReGraphAll()->SetFillColor(kRed - 4);
     shFtr.GetReGraphAll()->SetLineColor(kRed);
     shFtr.GetReGraphAll()->Draw("l e3 same");
     shFtr.GetReGraphBckgr()->SetLineColor(kGreen + 2);
     shFtr.GetReGraphBckgr()->Draw("l same");
-
-//     TCanvas chelp("", "", 1500, 900);
-//     chelp.cd();
-//     auto grpair = ErrorVsValue(shFtr.GetReGraphAll());
-//     grpair.first->SetTitle(binname.c_str());
-//     grpair.first->GetXaxis()->SetTitle("y");
-//     grpair.first->GetYaxis()->SetTitle("#Delta y^{2}");
-//     grpair.first->Draw();
-// //     grpair.first->Draw("same");
-//     cc.cd();
 
     shFtr.GetGraphAll()->SetLineColor(kRed);
     shFtr.GetGraphAll()->SetLineStyle(2);
@@ -140,16 +148,6 @@ void fit_shape() {
     legend.SetTextSize(0.03);
     legend.SetTextFont(22);
     legend.Draw("same");
-
-    TPaveText binedges(0.12, 0.75, 0.27, 0.92, "brNDC");
-    binedges.AddText(particle.c_str());
-    binedges.AddText(("C: " + to_string_with_precision(C_lo, 2) + " - " + to_string_with_precision(C_hi, 2) + " %").c_str());
-    binedges.AddText(("p_{T}: " + to_string_with_precision(pT_lo, 2) + " - " + to_string_with_precision(pT_hi, 2) + " GeV/c").c_str());
-    binedges.AddText(("y_{LAB}: " + to_string_with_precision(y_lo, 2) + " - " + to_string_with_precision(y_hi, 2)).c_str());
-    binedges.SetFillColor(0);
-    binedges.SetTextSize(0.03);
-    binedges.SetTextFont(22);
-    binedges.Draw("same");
 
     TF1* func_sgnl = shFtr.GetReFuncSgnl();
     TF1* func_bckgr = shFtr.GetReFuncBckgr();

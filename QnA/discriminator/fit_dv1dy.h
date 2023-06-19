@@ -10,6 +10,8 @@ std::vector <TString> excludedObjects;
 int maxDepth{100};
 std::vector<std::string> axestofit;
 std::string axistofit;
+std::vector<std::string> axestoslice;
+std::string axistoslice;
 std::vector<std::string> axestoignore;
 float midrapidity;
 TString fileOutName;
@@ -17,7 +19,7 @@ TString fileOutName;
 void BuildObjectList(TDirectory *folder, int depth = 0);
 bool CheckAxes(Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>* obj);
 std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn);
-std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn_1, Qn::DataContainerStatDiscriminator dcIn_2);
+// std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn_1, Qn::DataContainerStatDiscriminator dcIn_2);
 
 std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn_1, Qn::DataContainerStatDiscriminator dcIn_2) {
   Qn::DataContainerStatDiscriminator dcIn = (dcIn_1 + dcIn_2)/2;
@@ -66,6 +68,11 @@ bool CheckAxes(Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>* obj) {
       if(name == atf) {
         axistofit = atf;
         ok = true;
+      }
+    }
+    for(auto& ats : axestoslice) {
+      if(name == ats) {
+        axistoslice = ats;
       }
     }
     for(auto& ati : axestoignore) {
