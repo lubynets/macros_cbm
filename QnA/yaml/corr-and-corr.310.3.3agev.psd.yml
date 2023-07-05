@@ -13,23 +13,26 @@ _axes:
   - &rec_axis_pT
     name: ReconstructedParticles/pT
     nb: 3
-    lo: 0.2
-    hi: 1.4
+    lo: 0
+    hi: 0.9
   - &rec_axis_rapidity
     name: ReconstructedParticles/rapidity
-    nb: 6
-    lo: 1.12179 # midrapidity-0.5
-    hi: 2.32179 # midrapidity+0.7
+    nb: 7
+    lo: 0.885344 # midrapidity-0.1
+    hi: 2.285344 # midrapidity+1.3
+  - &rec_axis_mass
+    name: ReconstructedParticles/mass
+    bin-edges: [0.440011, 0.460011, 0.484111, 0.511111, 0.535211, 0.555211]
   - &sim_axis_pT
     name: SimParticles/pT
     nb: 3
-    lo: 0.2
-    hi: 1.4
+    lo: 0
+    hi: 0.9
   - &sim_axis_rapidity
     name: SimParticles/rapidity
-    nb: 6
-    lo: 1.12179 # midrapidity-0.5
-    hi: 2.32179 # midrapidity+0.7
+    nb: 7
+    lo: 0.885344 # midrapidity-0.1
+    hi: 2.285344 # midrapidity+1.3
     
 cbm_analysis:
   event-variables:
@@ -48,14 +51,15 @@ cbm_analysis:
       axes:
         - *rec_axis_pT
         - *rec_axis_rapidity
+        - *rec_axis_mass
       cuts:
-        ReconstructedParticles/pid: { equals: 3312 }
+        ReconstructedParticles/pid: { equals: 310 }
         ReconstructedParticles/generation: { range: [-0.1, 2.1] }  #all
-        ReconstructedParticles/mass: { range: [1.315, 1.328] }
       qa:
         - {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
         - *rec_axis_pT
         - *rec_axis_rapidity
+        - *rec_axis_mass
         - [ *rec_axis_rapidity, *rec_axis_pT ]
     - name: u_rec_sgnl_prim
       type: track
@@ -69,7 +73,7 @@ cbm_analysis:
         - *rec_axis_pT
         - *rec_axis_rapidity
       cuts:
-        ReconstructedParticles/pid: { equals: 3312 }
+        ReconstructedParticles/pid: { equals: 310 }
         ReconstructedParticles/generation: { range: [0.9, 1.1] }   #sgnl only
       qa:
         - {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
@@ -88,7 +92,7 @@ cbm_analysis:
         - *rec_axis_pT
         - *rec_axis_rapidity
       cuts:
-        ReconstructedParticles/pid: { equals: 3312 }
+        ReconstructedParticles/pid: { equals: 310 }
         ReconstructedParticles/generation: { range: [0.9, 2.1] }   #sgnl only
       qa:
         - {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
@@ -104,7 +108,7 @@ cbm_analysis:
         - *sim_axis_pT
         - *sim_axis_rapidity
       cuts:
-        SimParticles/pid: { equals: 3312 }
+        SimParticles/pid: { equals: 310 }
         SimParticles/mother_id: { equals: -1 }
     - name: u_sim
       type: track
@@ -115,7 +119,7 @@ cbm_analysis:
         - *sim_axis_pT
         - *sim_axis_rapidity
       cuts:
-        SimParticles/pid: { equals: 3312 }
+        SimParticles/pid: { equals: 310 }
         SimParticles/z: { range: [-10, 100] }
     - name: psd1
       _from: &reference-base-detector
@@ -145,11 +149,9 @@ cbm_analysis:
         - twist-and-rescale
       cuts:
         RecParticles/pid: { equals: 211 }
-        #RecParticles/pT: { range: [0, 1.4] }  # dcm-12
-        #RecParticles/rapidity: { range: [2.42179, 2.82179] }  # dcm-12
-        RecParticles/pT: { range: [0, 1] }  # urqmd-12
-        RecParticles/rapidity: { range: [2.02179, 2.82179] }  # urqmd-12
-        RecParticles/eta: { range: [0, 2.88] }  # urqmd-12
+        RecParticles/pT: { range: [0, 0.4] }  # dcmqgsm-3.3
+        RecParticles/rapidity: { range: [1.3853, 2.5853] }
+        RecParticles/eta: { range: [0, 2.88] }
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP
@@ -273,4 +275,3 @@ _tasks:
     weights-type: observable
     folder: "/uPsi"
     axes: [ *centrality ]
-  

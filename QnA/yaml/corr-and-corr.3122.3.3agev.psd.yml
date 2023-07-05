@@ -12,33 +12,30 @@ _layouts:
 _axes:
   - &rec_axis_pT
     name: ReconstructedParticles/pT
-    nb: 4
+    nb: 3
     lo: 0
-    hi: 1
+    hi: 1.2
   - &rec_axis_rapidity
     name: ReconstructedParticles/rapidity
-    nb: 4
-    lo: 0.835344 # midrapidity-0.15
-    hi: 2.035344 # midrapidity+1.05
-  - &rec_axis_mass
-    name: ReconstructedParticles/mass
-    bin-edges: [1.095, 1.101, 1.107, 1.113, 1.115, 1.117, 1.119, 1.125, 1.131, 1.137]    
+    nb: 7
+    lo: 0.685344 # midrapidity-0.3
+    hi: 2.085344 # midrapidity+1.1
   - &sim_axis_pT
     name: SimParticles/pT
-    nb: 4
+    nb: 3
     lo: 0
-    hi: 1
+    hi: 1.2
   - &sim_axis_rapidity
     name: SimParticles/rapidity
-    nb: 4
-    lo: 0.835344 # midrapidity-0.15
-    hi: 2.035344 # midrapidity+1.05
+    nb: 7
+    lo: 0.685344 # midrapidity-0.3
+    hi: 2.085344 # midrapidity+1.1
     
 cbm_analysis:
   event-variables:
-    - AnaEventHeader/centrality_tracks
+    - RecEventHeader/centrality_tracks
   axes:
-    - { name: AnaEventHeader/centrality_tracks, bin-edges: [0, 10, 20, 30, 40, 70, 100]}
+    - { name: RecEventHeader/centrality_tracks, bin-edges: [0, 10, 20, 30, 40, 70]}
   q-vectors:
     - name: u_rec
       type: track
@@ -51,16 +48,34 @@ cbm_analysis:
       axes:
         - *rec_axis_pT
         - *rec_axis_rapidity
-        - *rec_axis_mass
       cuts:
         ReconstructedParticles/pid: { equals: 3122 }
         ReconstructedParticles/generation: { range: [-0.1, 2.1] }  #all
-      #qa:
-        #- {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
-        #- *rec_axis_pT
-        #- *rec_axis_rapidity
-        #- *rec_axis_mass
-        #- [ *rec_axis_rapidity, *rec_axis_pT ]
+        ReconstructedParticles/mass: { range: [1.108, 1.124] }
+      qa:
+        - {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+        - [ *rec_axis_rapidity, *rec_axis_pT ]
+    - name: u_rec_sgnl_prim
+      type: track
+      phi:  ReconstructedParticles/phi
+      weight: ReconstructedParticles/weight
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      axes:
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+      cuts:
+        ReconstructedParticles/pid: { equals: 3122 }
+        ReconstructedParticles/generation: { range: [0.9, 1.1] }   #sgnl only
+      qa:
+        - {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+        - [ *rec_axis_rapidity, *rec_axis_pT ]
     - name: u_rec_sgnl
       type: track
       phi:  ReconstructedParticles/phi
@@ -75,11 +90,22 @@ cbm_analysis:
       cuts:
         ReconstructedParticles/pid: { equals: 3122 }
         ReconstructedParticles/generation: { range: [0.9, 2.1] }   #sgnl only
-      #qa:
-        #- {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
-        #- *rec_axis_pT
-        #- *rec_axis_rapidity
-        #- [ *rec_axis_rapidity, *rec_axis_pT ]
+      qa:
+        - {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+        - [ *rec_axis_rapidity, *rec_axis_pT ]
+    - name: u_sim_prim
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 3122 }
+        SimParticles/mother_id: { equals: -1 }
     - name: u_sim
       type: track
       phi:  SimParticles/phi
@@ -90,8 +116,7 @@ cbm_analysis:
         - *sim_axis_rapidity
       cuts:
         SimParticles/pid: { equals: 3122 }
-        #SimParticles/z: { range: [-10, 100] }
-        SimParticles/geant_process_id: { range: [-1, 10] }
+        SimParticles/z: { range: [-10, 100] }
     - name: psd1
       _from: &reference-base-detector
         type: channel
@@ -100,9 +125,9 @@ cbm_analysis:
         norm: m
         corrections:
           - recentering
-        #qa:
-          #- {name: PsdModules/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
-          #- {name: PsdModules/signal, nb: 100, lo: 0, hi: 100}
+        qa:
+          - {name: PsdModules/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+          - {name: PsdModules/signal, nb: 100, lo: 0, hi: 100}
       channel-ids: *layout-psd1
     - name: psd2
       _from: *reference-base-detector
@@ -110,18 +135,6 @@ cbm_analysis:
     - name: psd3
       _from: *reference-base-detector
       channel-ids: *layout-psd3
-    - name: sts_p
-      type: track
-      phi: RecParticles/phi
-      weight: Ones
-      norm: m
-      corrections:
-        - recentering
-        - twist-and-rescale
-      cuts:
-        RecParticles/pid: { equals: 2212 }
-        RecParticles/pT: { range: [0, 1.5] }
-        RecParticles/rapidity: { range: [0.585344, 0.885344] }
     - name: sts_pipos
       type: track
       phi: RecParticles/phi
@@ -132,8 +145,9 @@ cbm_analysis:
         - twist-and-rescale
       cuts:
         RecParticles/pid: { equals: 211 }
-        RecParticles/pT: { range: [0, 0.6] }
-        RecParticles/rapidity: { range: [1.385344, 2.385344] }        
+        RecParticles/pT: { range: [0, 0.4] }  # dcmqgsm-3.3
+        RecParticles/rapidity: { range: [1.3853, 2.5853] }
+        RecParticles/eta: { range: [0, 2.88] }
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP
@@ -145,45 +159,49 @@ cbm_analysis:
 _detectors: &detectors
   - name: u_rec
     tags: [ un_vector ]
+  - name: u_rec_sgnl_prim
+    tags: [ u_rec_s ]
   - name: u_rec_sgnl
-    tags: [ un_vector ]
+    tags: [ u_rec_s ]
+  - name: u_sim_prim
+    tags: [ u_sim ]
   - name: u_sim
-    tags: [ un_vector ]
+    tags: [ u_sim ]
   - name: psd1
     tags: [ psd ]
   - name: psd2
     tags: [ psd ]
   - name: psd3
     tags: [ psd ]
-  - name: sts_p
-    tags: [ sts ]
   - name: sts_pipos
-    tags: [ sts ]    
+    tags: [ sts ]
   - name: Q_psi
     tags: [ psi ]
-    
+
 _axes:
   - &centrality
-    name: AnaEventHeader_centrality_tracks
-    bin-edges: [0, 10, 20, 30, 40, 70, 100]
+    name: RecEventHeader_centrality_tracks
+    bin-edges: [0, 10, 20, 30, 40, 70]
 _components:
   - &sp_components
     [ x1,y1 ]
-    
+  - &ep_components
+    [ cos1,sin1 ]
+
 _queries:
   - &query_urec
     name: { equals: u_rec }
   - &query_urec_sgnl
-    name: { equals: u_rec_sgnl }
+    tags: { any-in: [u_rec_s] }
   - &query_usim
-    name: { equals: u_sim }
+    tags: { any-in: [u_sim] }
   - &query_psd
     tags: { any-in: [psd] }
   - &query_sts
     tags: { any-in: [sts] }
   - &query_psi
     name: { equals: Q_psi }
-    
+
 _task_args:
   - &ta_urec
     query: *query_urec
@@ -209,62 +227,59 @@ _task_args:
     correction-steps: [recentered]
     components: *sp_components
     weight: ones
+  - &ta_psd_ep
+    query: *query_psd
+    query-list: *detectors
+    correction-steps: [recentered]
+    components: *ep_components
+    weight: ones
   - &ta_sts
     query: *query_sts
     query-list: *detectors
     correction-steps: [rescaled]
     components: *sp_components
-    weight: ones    
+    weight: ones
   - &ta_psi
     query: *query_psi
     query-list: *detectors
     correction-steps: [plain]
     components: *sp_components
     weight: ones
-    
+
 _tasks:
   - args: [*ta_urec, *ta_psd ]
-    n-samples: 50
     weights-type: observable
     folder: "/uQ"
     axes: [ *centrality ]
   - args: [*ta_urec, *ta_psi ]
-    n-samples: 50
     weights-type: observable
     folder: "/uPsi"
     axes: [ *centrality ]
   - args: [*ta_urec_sgnl, *ta_psd ]
-    n-samples: 50
     weights-type: observable
     folder: "/uQ"
     axes: [ *centrality ]
   - args: [*ta_urec_sgnl, *ta_psi ]
-    n-samples: 50
     weights-type: observable
     folder: "/uPsi"
     axes: [ *centrality ]
   - args: [*ta_psd, *ta_psd ]
-    n-samples: 50
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
   - args: [*ta_psd, *ta_sts ]
-    n-samples: 50
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
-  - args: [*ta_sts, *ta_psd ]
-    n-samples: 50
-    weights-type: reference
-    folder: "/QQ"
-    axes: [ *centrality ]    
   - args: [*ta_psd, *ta_psi ]
-    n-samples: 50
     weights-type: reference
     folder: "/QPsi"
-    axes: [ *centrality ]    
+    axes: [ *centrality ]
+  - args: [*ta_psd_ep, *ta_psi ]
+    weights-type: reference
+    folder: "/QPsi"
+    axes: [ *centrality ]
   - args: [*ta_usim, *ta_psi ]
-    n-samples: 50
     weights-type: observable
     folder: "/uPsi"
     axes: [ *centrality ]

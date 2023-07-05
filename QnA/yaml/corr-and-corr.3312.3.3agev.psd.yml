@@ -13,23 +13,23 @@ _axes:
   - &rec_axis_pT
     name: ReconstructedParticles/pT
     nb: 3
-    lo: 0.2
-    hi: 1.4
+    lo: 0
+    hi: 0.9
   - &rec_axis_rapidity
     name: ReconstructedParticles/rapidity
-    nb: 6
-    lo: 1.12179 # midrapidity-0.5
-    hi: 2.32179 # midrapidity+0.7
+    nb: 5
+    lo: 0.885344 # midrapidity-0.1
+    hi: 1.885344 # midrapidity+0.9
   - &sim_axis_pT
     name: SimParticles/pT
     nb: 3
-    lo: 0.2
-    hi: 1.4
+    lo: 0
+    hi: 0.9
   - &sim_axis_rapidity
     name: SimParticles/rapidity
-    nb: 6
-    lo: 1.12179 # midrapidity-0.5
-    hi: 2.32179 # midrapidity+0.7
+    nb: 5
+    lo: 0.885344 # midrapidity-0.1
+    hi: 1.885344 # midrapidity+0.9
     
 cbm_analysis:
   event-variables:
@@ -145,11 +145,9 @@ cbm_analysis:
         - twist-and-rescale
       cuts:
         RecParticles/pid: { equals: 211 }
-        #RecParticles/pT: { range: [0, 1.4] }  # dcm-12
-        #RecParticles/rapidity: { range: [2.42179, 2.82179] }  # dcm-12
-        RecParticles/pT: { range: [0, 1] }  # urqmd-12
-        RecParticles/rapidity: { range: [2.02179, 2.82179] }  # urqmd-12
-        RecParticles/eta: { range: [0, 2.88] }  # urqmd-12
+        RecParticles/pT: { range: [0, 0.4] }  # dcmqgsm-3.3
+        RecParticles/rapidity: { range: [1.3853, 2.5853] }
+        RecParticles/eta: { range: [0, 2.88] }
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP

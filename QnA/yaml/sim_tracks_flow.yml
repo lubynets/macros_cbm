@@ -28,61 +28,61 @@ cbm_analysis:
   axes:
     - { name: SimEventHeader/centrality_impactpar, bin-edges: [0, 2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70]}
   q-vectors:
-    - name: u_sim_lambda
-      type: track
-      phi:  SimParticles/phi
-      weight: Ones
-      norm: m
-      axes:
-        - *sim_axis_pT
-        - *sim_axis_rapidity
-      cuts:
-        SimParticles/pid: { equals: 3122 }
-        SimParticles/mother_id: { equals: -1 }
-    - name: u_sim_kshort
-      type: track
-      phi:  SimParticles/phi
-      weight: Ones
-      norm: m
-      axes:
-        - *sim_axis_pT
-        - *sim_axis_rapidity
-      cuts:
-        SimParticles/pid: { equals: 310 }
-        SimParticles/mother_id: { equals: -1 }
-    - name: u_sim_pipos
-      type: track
-      phi:  SimParticles/phi
-      weight: Ones
-      norm: m
-      axes:
-        - *sim_axis_pT
-        - *sim_axis_rapidity
-      cuts:
-        SimParticles/pid: { equals: 211 }
-        SimParticles/mother_id: { equals: -1 }
-    - name: u_sim_pineg
-      type: track
-      phi:  SimParticles/phi
-      weight: Ones
-      norm: m
-      axes:
-        - *sim_axis_pT
-        - *sim_axis_rapidity
-      cuts:
-        SimParticles/pid: { equals: -211 }
-        SimParticles/mother_id: { equals: -1 }
-    - name: u_sim_xi
-      type: track
-      phi:  SimParticles/phi
-      weight: Ones
-      norm: m
-      axes:
-        - *sim_axis_pT
-        - *sim_axis_rapidity
-      cuts:
-        SimParticles/pid: { equals: 3312 }
-        SimParticles/mother_id: { equals: -1 }
+    #- name: u_sim_lambda
+      #type: track
+      #phi:  SimParticles/phi
+      #weight: Ones
+      #norm: m
+      #axes:
+        #- *sim_axis_pT
+        #- *sim_axis_rapidity
+      #cuts:
+        #SimParticles/pid: { equals: 3122 }
+        #SimParticles/mother_id: { equals: -1 }
+    #- name: u_sim_kshort
+      #type: track
+      #phi:  SimParticles/phi
+      #weight: Ones
+      #norm: m
+      #axes:
+        #- *sim_axis_pT
+        #- *sim_axis_rapidity
+      #cuts:
+        #SimParticles/pid: { equals: 310 }
+        #SimParticles/mother_id: { equals: -1 }
+    #- name: u_sim_pipos
+      #type: track
+      #phi:  SimParticles/phi
+      #weight: Ones
+      #norm: m
+      #axes:
+        #- *sim_axis_pT
+        #- *sim_axis_rapidity
+      #cuts:
+        #SimParticles/pid: { equals: 211 }
+        #SimParticles/mother_id: { equals: -1 }
+    #- name: u_sim_pineg
+      #type: track
+      #phi:  SimParticles/phi
+      #weight: Ones
+      #norm: m
+      #axes:
+        #- *sim_axis_pT
+        #- *sim_axis_rapidity
+      #cuts:
+        #SimParticles/pid: { equals: -211 }
+        #SimParticles/mother_id: { equals: -1 }
+    #- name: u_sim_xi
+      #type: track
+      #phi:  SimParticles/phi
+      #weight: Ones
+      #norm: m
+      #axes:
+        #- *sim_axis_pT
+        #- *sim_axis_rapidity
+      #cuts:
+        #SimParticles/pid: { equals: 3312 }
+        #SimParticles/mother_id: { equals: -1 }
     - name: psd1
       _from: &reference-base-detector
         type: channel
@@ -98,64 +98,64 @@ cbm_analysis:
     - name: psd3
       _from: *reference-base-detector
       channel-ids: *layout-psd3  
-    - name: psdall
-      _from: *reference-base-detector
-      channel-ids: *layout-psdall  
-    - name: etacut_1_charged
-      type: track
-      phi: SimParticles/phi
-      weight: SimParticles/T
-      norm: m
-      cuts:
-        - { variable:  SimParticles/eta, range: [4.16, 10] }
-        - { variable:  SimParticles/mother_id, equals: -1 }
-        - expr: >
-            {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
-    - name: etacut_2_charged
-      type: track
-      phi: SimParticles/phi
-      weight: SimParticles/T
-      norm: m
-      cuts:
-        - { variable:  SimParticles/eta, range: [3.47, 4.16] }
-        - { variable:  SimParticles/mother_id, equals: -1 }
-        - expr: >
-            {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
-    - name: etacut_3_charged
-      type: track
-      phi: SimParticles/phi
-      weight: SimParticles/T
-      norm: m
-      cuts:
-        - { variable:  SimParticles/eta, range: [2.94, 3.47] }
-        - { variable:  SimParticles/mother_id, equals: -1 }
-        - expr: >
-            {{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
-    - name: etacut_1_all
-      type: track
-      phi: SimParticles/phi
-      weight: SimParticles/T
-      norm: m
-      cuts:
-        - { variable:  SimParticles/eta, range: [4.16, 10] }
-        - { variable:  SimParticles/mother_id, equals: -1 }
-    - name: etacut_2_all
-      type: track
-      phi: SimParticles/phi
-      weight: SimParticles/T
-      norm: m
-      cuts:
-        - { variable:  SimParticles/eta, range: [3.47, 4.16] }
-        - { variable:  SimParticles/mother_id, equals: -1 }
-    - name: etacut_3_all
-      type: track
-      phi: SimParticles/phi
-      weight: SimParticles/T
-      norm: m
-      cuts:
-        - { variable:  SimParticles/eta, range: [2.94, 3.47] }
-        - { variable:  SimParticles/mother_id, equals: -1 }
-    - name: sts_pipos
+    #- name: psdall
+      #_from: *reference-base-detector
+      #channel-ids: *layout-psdall
+    #- name: etacut_1_charged
+      #type: track
+      #phi: SimParticles/phi
+      #weight: SimParticles/T
+      #norm: m
+      #cuts:
+        #- { variable:  SimParticles/eta, range: [4.16, 10] }
+        #- { variable:  SimParticles/mother_id, equals: -1 }
+        #- expr: >
+            #{{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
+    #- name: etacut_2_charged
+      #type: track
+      #phi: SimParticles/phi
+      #weight: SimParticles/T
+      #norm: m
+      #cuts:
+        #- { variable:  SimParticles/eta, range: [3.47, 4.16] }
+        #- { variable:  SimParticles/mother_id, equals: -1 }
+        #- expr: >
+            #{{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
+    #- name: etacut_3_charged
+      #type: track
+      #phi: SimParticles/phi
+      #weight: SimParticles/T
+      #norm: m
+      #cuts:
+        #- { variable:  SimParticles/eta, range: [2.94, 3.47] }
+        #- { variable:  SimParticles/mother_id, equals: -1 }
+        #- expr: >
+            #{{SimParticles/pid}} == 2212 || ({{SimParticles/pid}} > 1000000000 && (int({{SimParticles/pid}})%10000000)/10000 != 0)
+    #- name: etacut_1_all
+      #type: track
+      #phi: SimParticles/phi
+      #weight: SimParticles/T
+      #norm: m
+      #cuts:
+        #- { variable:  SimParticles/eta, range: [4.16, 10] }
+        #- { variable:  SimParticles/mother_id, equals: -1 }
+    #- name: etacut_2_all
+      #type: track
+      #phi: SimParticles/phi
+      #weight: SimParticles/T
+      #norm: m
+      #cuts:
+        #- { variable:  SimParticles/eta, range: [3.47, 4.16] }
+        #- { variable:  SimParticles/mother_id, equals: -1 }
+    #- name: etacut_3_all
+      #type: track
+      #phi: SimParticles/phi
+      #weight: SimParticles/T
+      #norm: m
+      #cuts:
+        #- { variable:  SimParticles/eta, range: [2.94, 3.47] }
+        #- { variable:  SimParticles/mother_id, equals: -1 }
+    - name: sts_pipos_yS_nocut
       type: track
       phi: RecParticles/phi
       weight: Ones
@@ -166,9 +166,45 @@ cbm_analysis:
       cuts:
         RecParticles/pid: { equals: 211 }
         RecParticles/pT: { range: [0, 0.4] }
-        #RecParticles/rapidity: { range: [2.42179, 3.62179] } # 0.8; 2
-        RecParticles/rapidity: { range: [1.7853, 2.9853] } # 0.8; 2
-        RecParticles/eta: { range: [0, 2.75] }
+        RecParticles/rapidity: { range: [1.7853, 2.5853] } # 0.8; 1.6
+    - name: sts_pipos_yS_cut
+      type: track
+      phi: RecParticles/phi
+      weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      cuts:
+        RecParticles/pid: { equals: 211 }
+        RecParticles/pT: { range: [0, 0.4] }
+        RecParticles/rapidity: { range: [1.7853, 2.5853] } # 0.8; 1.6
+        RecParticles/eta: { range: [0, 2.88] }
+    - name: sts_pipos_yL_nocut
+      type: track
+      phi: RecParticles/phi
+      weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      cuts:
+        RecParticles/pid: { equals: 211 }
+        RecParticles/pT: { range: [0, 0.4] }
+        RecParticles/rapidity: { range: [1.3853, 2.5853] } # 0.4; 1.6
+    - name: sts_pipos_yL_cut
+      type: track
+      phi: RecParticles/phi
+      weight: Ones
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      cuts:
+        RecParticles/pid: { equals: 211 }
+        RecParticles/pT: { range: [0, 0.4] }
+        RecParticles/rapidity: { range: [1.3853, 2.5853] } # 0.4; 1.6
+        RecParticles/eta: { range: [0, 2.88] }
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP
@@ -200,9 +236,13 @@ _detectors: &detectors
     tags: [ psd ]  
   - name: psdall
     tags: [ psd ]  
-  #- name: sts_p
-    #tags: [ sts ]
-  - name: sts_pipos
+  - name: sts_pipos_yS_nocut
+    tags: [ sts ]
+  - name: sts_pipos_yS_cut
+    tags: [ sts ]
+  - name: sts_pipos_yL_nocut
+    tags: [ sts ]
+  - name: sts_pipos_yL_cut
     tags: [ sts ]
   - name: etacut_1_charged
     tags: [ etacut_charged ]
@@ -280,22 +320,22 @@ _task_args:
     weight: ones
     
 _tasks:
-  - args: [*ta_usim, *ta_psd ]
-    weights-type: observable
-    folder: "/uQ"
-    axes: [ *centrality ]
-  - args: [*ta_usim, *ta_etacut_charged ]
-    weights-type: observable
-    folder: "/uQ"
-    axes: [ *centrality ]
-  - args: [*ta_usim, *ta_etacut_all ]
-    weights-type: observable
-    folder: "/uQ"
-    axes: [ *centrality ]
-  - args: [*ta_usim, *ta_psi ]
-    weights-type: observable
-    folder: "/uPsi"
-    axes: [ *centrality ]
+  #- args: [*ta_usim, *ta_psd ]
+    #weights-type: observable
+    #folder: "/uQ"
+    #axes: [ *centrality ]
+  #- args: [*ta_usim, *ta_etacut_charged ]
+    #weights-type: observable
+    #folder: "/uQ"
+    #axes: [ *centrality ]
+  #- args: [*ta_usim, *ta_etacut_all ]
+    #weights-type: observable
+    #folder: "/uQ"
+    #axes: [ *centrality ]
+  #- args: [*ta_usim, *ta_psi ]
+    #weights-type: observable
+    #folder: "/uPsi"
+    #axes: [ *centrality ]
   - args: [*ta_psd, *ta_psi ]
     weights-type: reference
     folder: "/QPsi"
@@ -304,14 +344,14 @@ _tasks:
     weights-type: reference
     folder: "/QPsi"
     axes: [ *centrality ]
-  - args: [*ta_etacut_charged, *ta_psi ]
-    weights-type: reference
-    folder: "/QPsi"
-    axes: [ *centrality ]
-  - args: [*ta_etacut_all, *ta_psi ]
-    weights-type: reference
-    folder: "/QPsi"
-    axes: [ *centrality ]
+  #- args: [*ta_etacut_charged, *ta_psi ]
+    #weights-type: reference
+    #folder: "/QPsi"
+    #axes: [ *centrality ]
+  #- args: [*ta_etacut_all, *ta_psi ]
+    #weights-type: reference
+    #folder: "/QPsi"
+    #axes: [ *centrality ]
   - args: [*ta_psd, *ta_psd ]
     weights-type: reference
     folder: "/QQ"
@@ -320,19 +360,19 @@ _tasks:
     weights-type: reference
     folder: "/QQ"
     axes: [ *centrality ]
-  - args: [*ta_etacut_charged, *ta_sts ]
-    weights-type: reference
-    folder: "/QQ"
-    axes: [ *centrality ]
-  - args: [*ta_etacut_all, *ta_sts ]
-    weights-type: reference
-    folder: "/QQ"
-    axes: [ *centrality ]
-  - args: [*ta_etacut_charged, *ta_etacut_charged ]
-    weights-type: reference
-    folder: "/QQ"
-    axes: [ *centrality ]
-  - args: [*ta_etacut_all, *ta_etacut_all ]
-    weights-type: reference
-    folder: "/QQ"
-    axes: [ *centrality ]
+  #- args: [*ta_etacut_charged, *ta_sts ]
+    #weights-type: reference
+    #folder: "/QQ"
+    #axes: [ *centrality ]
+  #- args: [*ta_etacut_all, *ta_sts ]
+    #weights-type: reference
+    #folder: "/QQ"
+    #axes: [ *centrality ]
+  #- args: [*ta_etacut_charged, *ta_etacut_charged ]
+    #weights-type: reference
+    #folder: "/QQ"
+    #axes: [ *centrality ]
+  #- args: [*ta_etacut_all, *ta_etacut_all ]
+    #weights-type: reference
+    #folder: "/QQ"
+    #axes: [ *centrality ]

@@ -38,7 +38,7 @@ cbm_analysis:
   event-variables:
     - RecEventHeader/centrality_tracks
   axes:
-    - { name: RecEventHeader/centrality_tracks, bin-edges: [0, 10, 20, 30, 40, 70]}
+    - { name: RecEventHeader/centrality_tracks, bin-edges: [0, 5, 10, 15, 20, 30, 40, 70]}
   q-vectors:
     - name: u_rec
       type: track
@@ -61,6 +61,25 @@ cbm_analysis:
         - *rec_axis_rapidity
         - *rec_axis_mass
         - [ *rec_axis_rapidity, *rec_axis_pT ]
+    - name: u_rec_sgnl_prim
+      type: track
+      phi:  ReconstructedParticles/phi
+      weight: ReconstructedParticles/weight
+      norm: m
+      corrections:
+        - recentering
+        - twist-and-rescale
+      axes:
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+      cuts:
+        ReconstructedParticles/pid: { equals: 3122 }
+        ReconstructedParticles/generation: { range: [0.9, 1.1] }   #sgnl only
+      qa:
+        - {name: ReconstructedParticles/phi, nb: 100, lo: -3.1415926, hi: 3.1415926}
+        - *rec_axis_pT
+        - *rec_axis_rapidity
+        - [ *rec_axis_rapidity, *rec_axis_pT ]
     - name: u_rec_sgnl
       type: track
       phi:  ReconstructedParticles/phi
@@ -80,6 +99,17 @@ cbm_analysis:
         - *rec_axis_pT
         - *rec_axis_rapidity
         - [ *rec_axis_rapidity, *rec_axis_pT ]
+    - name: u_sim_prim
+      type: track
+      phi:  SimParticles/phi
+      weight: Ones
+      norm: m
+      axes:
+        - *sim_axis_pT
+        - *sim_axis_rapidity
+      cuts:
+        SimParticles/pid: { equals: 3122 }
+        SimParticles/mother_id: { equals: -1 }
     - name: u_sim
       type: track
       phi:  SimParticles/phi
@@ -90,6 +120,7 @@ cbm_analysis:
         - *sim_axis_rapidity
       cuts:
         SimParticles/pid: { equals: 3122 }
+        SimParticles/z: { range: [-10, 100] }
     - name: psd1
       _from: &reference-base-detector
         type: channel
@@ -118,8 +149,11 @@ cbm_analysis:
         - twist-and-rescale
       cuts:
         RecParticles/pid: { equals: 211 }
-        RecParticles/pT: { range: [0, 1.4] }
-        RecParticles/rapidity: { range: [2.42179, 2.82179] }
+        #RecParticles/pT: { range: [0, 1.4] }  # dcm-12
+        #RecParticles/rapidity: { range: [2.42179, 2.82179] }  # dcm-12
+        RecParticles/pT: { range: [0, 1] }  # urqmd-12
+        RecParticles/rapidity: { range: [2.02179, 2.82179] }  # urqmd-12
+        RecParticles/eta: { range: [0, 2.88] }  # urqmd-12
     - name: Q_psi
       type: psi
       phi:  SimEventHeader/psi_RP
@@ -131,10 +165,14 @@ cbm_analysis:
 _detectors: &detectors
   - name: u_rec
     tags: [ un_vector ]
+  - name: u_rec_sgnl_prim
+    tags: [ u_rec_s ]
   - name: u_rec_sgnl
-    tags: [ un_vector ]
+    tags: [ u_rec_s ]
+  - name: u_sim_prim
+    tags: [ u_sim ]
   - name: u_sim
-    tags: [ un_vector ]
+    tags: [ u_sim ]
   - name: psd1
     tags: [ psd ]
   - name: psd2
@@ -149,18 +187,20 @@ _detectors: &detectors
 _axes:
   - &centrality
     name: RecEventHeader_centrality_tracks
-    bin-edges: [0, 10, 20, 30, 40, 70]
+    bin-edges: [0, 5, 10, 15, 20, 30, 40, 70]
 _components:
   - &sp_components
     [ x1,y1 ]
+  - &ep_components
+    [ cos1,sin1 ]
     
 _queries:
   - &query_urec
     name: { equals: u_rec }
   - &query_urec_sgnl
-    name: { equals: u_rec_sgnl }
+    tags: { any-in: [u_rec_s] }
   - &query_usim
-    name: { equals: u_sim }
+    tags: { any-in: [u_sim] }
   - &query_psd
     tags: { any-in: [psd] }
   - &query_sts
@@ -192,6 +232,12 @@ _task_args:
     query-list: *detectors
     correction-steps: [recentered]
     components: *sp_components
+    weight: ones
+  - &ta_psd_ep
+    query: *query_psd
+    query-list: *detectors
+    correction-steps: [recentered]
+    components: *ep_components
     weight: ones
   - &ta_sts
     query: *query_sts
@@ -232,6 +278,10 @@ _tasks:
     folder: "/QQ"
     axes: [ *centrality ]
   - args: [*ta_psd, *ta_psi ]
+    weights-type: reference
+    folder: "/QPsi"
+    axes: [ *centrality ]
+  - args: [*ta_psd_ep, *ta_psi ]
     weights-type: reference
     folder: "/QPsi"
     axes: [ *centrality ]
