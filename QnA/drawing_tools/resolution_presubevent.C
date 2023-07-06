@@ -1,8 +1,8 @@
 void resolution_presubevent() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+//   std::string evegen = "dcmqgsm";
+  std::string evegen = "urqmd";
 
   std::string pbeam = "12";
 //   std::string pbeam = "3.3";
@@ -51,6 +51,9 @@ void resolution_presubevent() {
       }
     }
   }
+
+  multicor.Rebin({{"SimEventHeader_centrality_impactpar", {0, 10, 20, 30, 40, 50, 60, 70}}});
+
   multicor.SlightShiftXAxis(0.);
   HeapPicture pic("picture", {1000, 1000});
   if(evegen == "dcmqgsm") {

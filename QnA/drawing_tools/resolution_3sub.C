@@ -1,17 +1,15 @@
 void resolution_3sub() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
-
-  std::string pbeam = "12";
-//   std::string pbeam = "3.3";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
+  std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
-//   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev." + cuts + ".3122.root";
+  std::vector<std::string> correls{"psd1", "psd2", "psd3"};
 //   std::vector<std::string> correls{"etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
 //   std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
 
@@ -42,14 +40,14 @@ void resolution_3sub() {
   for(auto& corr : correls) {
     if(!average_comp) {
       for(auto& comp : components) {
-        multicor_mc.AddCorrelation(fileName, {"R1/res.mc." + corr + step + "." + comp}, "mc_" + corr + step);
-        multicor_sub3.AddCorrelation(fileName, {"R1/res.sub3." + corr + step + "." + comp}, "mc_" + corr + step);
+        multicor_mc.AddCorrelation(fileName, {"R1/MC/res_MC." + corr + "." + comp}, "mc_" + corr + step);
+        multicor_sub3.AddCorrelation(fileName, {"R1/sub3/res_sub3." + corr + "." + comp}, "sub3_" + corr + step);
       }
     } else {
-      multicor_mc.AddCorrelation(fileName, {"R1/res.mc." + corr + step + "." + components.at(0),
-                                            "R1/res.mc." + corr + step + "." + components.at(1)}, "mc_" + corr + step);
-      multicor_sub3.AddCorrelation(fileName, {"R1/res.sub3." + corr + step + "." + components.at(0),
-                                              "R1/res.sub3." + corr + step + "." + components.at(1)}, "mc_" + corr + step);
+      multicor_mc.AddCorrelation(fileName, {"R1/MC/res_MC." + corr + "." + components.at(0),
+                                            "R1/MC/res_MC." + corr + "." + components.at(1)}, "mc_" + corr + step);
+      multicor_sub3.AddCorrelation(fileName, {"R1/sub3/res_sub3." + corr + "." + components.at(0),
+                                              "R1/sub3/res_sub3." + corr + "." + components.at(1)}, "sub3_" + corr + step);
     }
   }
 

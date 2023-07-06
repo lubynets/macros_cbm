@@ -1,19 +1,16 @@
 void resolution_4sub() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
+  std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
 
-//   std::string pbeam = "12";
-  std::string pbeam = "3.3";
+  bool is_write_rootfile = false;
+//   bool is_write_rootfile = true;
 
-//   bool is_write_rootfile = false;
-  bool is_write_rootfile = true;
-
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
-  std::string fileName = "/home/oleksii/cbmdir/flow_calculator/build/v1andR1.d3.root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev." + cuts + ".3122.root";
   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
-  std::vector<std::string> fourth{"sts_pipos_yS_nocut", "sts_pipos_yS_cut", "sts_pipos_yL_nocut", "sts_pipos_yL_cut"};
+  std::vector<std::string> fourth{"sts_pipos"};
 
   bool average_comp = false;
   std::string step = "_RECENTERED";
@@ -38,11 +35,11 @@ void resolution_4sub() {
   for(auto& corr : correls) {
     if(!average_comp) {
       for(auto& comp : components) {
-        multicor_mc.AddCorrelation(fileName, {"R1/res.mc." + corr + step + "." + comp}, "mc_" + corr + step);
+        multicor_mc.AddCorrelation(fileName, {"R1/MC/res_MC." + corr + "." + comp}, "mc_" + corr + step);
       }
     } else {
-      multicor_mc.AddCorrelation(fileName, {"R1/res.mc." + corr + step + "." + components.at(0),
-                                            "R1/res.mc." + corr + step + "." + components.at(1)}, "mc_" + corr + step);
+      multicor_mc.AddCorrelation(fileName, {"R1/MC/res_MC." + corr + "." + components.at(0),
+                                            "R1/MC/res_MC." + corr + "." + components.at(1)}, "mc_" + corr + step);
     }
   }
 
@@ -61,11 +58,11 @@ void resolution_4sub() {
     for(auto& corr : correls) {
       if(!average_comp) {
         for(auto& comp : components) {
-          multicor_sub4.AddCorrelation(fileName, {"R1/res.sub4." + s4 + "." + corr + step + "." + comp}, "sub4_" + corr + step);
+          multicor_sub4.AddCorrelation(fileName, {"R1/sub4/res.sub4." + s4 + "." + corr + "." + comp}, "sub4_" + corr + step);
         }
       } else {
-        multicor_sub4.AddCorrelation(fileName, {"R1/res.sub4." + s4 + "." + corr + step + "." + components.at(0),
-                                                "R1/res.sub4." + s4 + "." + corr + step + "." + components.at(1)}, "sub4_" + corr + step);
+        multicor_sub4.AddCorrelation(fileName, {"R1/sub4/res.sub4." + s4 + "." + corr + "." + components.at(0),
+                                                "R1/sub4/res.sub4." + s4 + "." + corr + "." + components.at(1)}, "sub4_" + corr + step);
       }
     }
     multicor_sub4.SlightShiftXAxis(0.3);

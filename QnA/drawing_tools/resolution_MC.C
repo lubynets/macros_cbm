@@ -1,29 +1,29 @@
 void resolution_MC() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
+//   std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
 
-//   std::string pbeam = "12";
-  std::string pbeam = "3.3";
-
-//   bool is_write_rootfile = false;
-  bool is_write_rootfile = true;
+  bool is_write_rootfile = false;
+//   bool is_write_rootfile = true;
     
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/cl." + evegen + "." + pbeam + "agev." + cuts + ".3122.root";
 
-//   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
+  std::vector<std::string> correls{"psd1", "psd2", "psd3"};
 //   std::vector<std::string> correls{"etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
-  std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
+//   std::vector<std::string> correls{"etacut_1_all", "etacut_2_all", "etacut_3_all"};
 
   std::string step;
   bool average_comp;
 
-  std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
+//   std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
+  std::vector<std::string> components{"cos1x1", "sin1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
 //   std::vector<std::string> components{"x1y1", "y1x1"}; std::string L_or_P = "P"; std::string same_or_cross = "res_cross";
 
   std::string fileOutName;
-  if(correls.at(0)[0] == 'p' && components.at(0) == "x1x1") { step = "_RECENTERED"; fileOutName = "res.psd"; average_comp = false; }
+  if(correls.at(0)[0] == 'p' && (components.at(0) == "x1x1" || components.at(0) == "cos1x1")) { step = "_RECENTERED"; fileOutName = "res.psd"; average_comp = false; }
   if(correls.at(0)[0] == 'p' && components.at(0) == "x1y1") { step = "_RECENTERED"; fileOutName = "res_cross.psd"; average_comp = false; }
   if(correls.at(0)[0] == 'e' && components.at(0) == "x1x1") { step = "_PLAIN"; fileOutName = "res.etacut"; average_comp = true; }
   if(correls.at(0)[0] == 'e' && components.at(0) == "x1y1") { step = "_PLAIN"; fileOutName = "res_cross.etacut"; average_comp = false; }
@@ -32,24 +32,25 @@ void resolution_MC() {
   multicor_mc.SetIsFillSysErrors(false);
   if(!average_comp) {
     multicor_mc.SetPalette( {kBlue, kBlue, kRed, kRed, kGreen+2, kGreen+2} );
-    if(components.at(0) == "x1x1") multicor_mc.SetMarkers( {-1, -2, -1, -2, -1, -2} );
+    if(components.at(0) == "x1x1" || components.at(0) == "cos1x1") multicor_mc.SetMarkers( {-1, -2, -1, -2, -1, -2} );
     if(components.at(0) == "x1y1") multicor_mc.SetMarkers( {kFullSquare, kOpenSquare, kFullSquare, kOpenSquare, kFullSquare, kOpenSquare} );
   } else {
     multicor_mc.SetPalette( {kBlue, kRed, kGreen+2} );
-    if(components.at(0) == "x1x1") multicor_mc.SetMarkers( {-1, -1, -1} );
+    if(components.at(0) == "x1x1" || components.at(0) == "cos1x1") multicor_mc.SetMarkers( {-1, -1, -1} );
   }
 
   for(auto& corr : correls) {
     if(!average_comp) {
       for(auto& comp : components) {
-        multicor_mc.AddCorrelation(fileName, {"R1/" + same_or_cross + "." + corr + step + "." + comp}, "mc_" + corr + step);
+        multicor_mc.AddCorrelation(fileName, {"QPsi/" + corr + step + ".Q_psi_PLAIN." + comp}, "mc_" + corr + step);
       }
     } else {
-      multicor_mc.AddCorrelation(fileName, {"R1/" + same_or_cross + "." + corr + step + "." + components.at(0),
-                                            "R1/" + same_or_cross + "." + corr + step + "." + components.at(1)}, "mc_" + corr + step);
+      multicor_mc.AddCorrelation(fileName, {"QPsi/" + corr + step + ".Q_psi_PLAIN." + components.at(0),
+                                            "QPsi/" + corr + step + ".Q_psi_PLAIN." + components.at(1)}, "mc_" + corr + step);
     }
   }
 
+  multicor_mc.Scale(2);
   multicor_mc.SlightShiftXAxis(0.);
   if(components.at(0) == "x1y1") multicor_mc.SlightShiftXAxis(1);
             
@@ -68,7 +69,7 @@ void resolution_MC() {
   
   auto leg1 = new TLegend();
   leg1->SetBorderSize(1);
-  
+
   for(auto& obj : multicor_mc.GetCorrelations()) {
     obj->SetCalculateSystematicsFromVariation(false);
     pic.AddDrawable(obj);
