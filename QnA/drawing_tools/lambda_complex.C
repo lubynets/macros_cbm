@@ -3,19 +3,19 @@
 void lambda_complex() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
 //   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   std::string particle = "#Lambda"; std::string pdg = "3122"; std::string cuts = "oc1";
-//   std::string particle = "K^{0}_{S}"; std::string pdg = "310"; std::string cuts = "oc1";
-  std::string particle = "#Xi^{-}"; std::string pdg = "3312"; std::string cuts = "dc";
+  std::string particle = "#Lambda"; std::string pdg = "3122"; std::string cuts = "lc1";
+//   std::string particle = "K^{0}_{S}"; std::string pdg = "310"; std::string cuts = "lc1";
+//   std::string particle = "#Xi^{-}"; std::string pdg = "3312"; std::string cuts = "dc";
 
-//   bool is_imf = true;
-  bool is_imf = false;
+  bool is_imf = true;
+//   bool is_imf = false;
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
@@ -60,9 +60,9 @@ void lambda_complex() {
     }
   }
 
-  SetSelectAxisBinEdges({0, 20, 40, 70});
+//   SetSelectAxisBinEdges({10, 30});
 //   SetSliceAxisBinEdges({0.2, 1.0});
-  IntegrateSliceAxis();
+//   IntegrateSliceAxis();
 //   SetProjectionAxisBinEdges({-0.5-axes.at(kProjection).shift_,
 //                              -0.1-axes.at(kProjection).shift_,
 //                               0.1-axes.at(kProjection).shift_,

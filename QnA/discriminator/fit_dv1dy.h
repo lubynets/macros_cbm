@@ -12,6 +12,7 @@ std::vector<std::string> axestofit;
 std::string axistofit;
 std::vector<std::string> axestoslice;
 std::string axistoslice;
+std::vector<std::vector<double>> rangestoslice;
 std::vector<std::string> axestoignore;
 float midrapidity;
 TString fileOutName;

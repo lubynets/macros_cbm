@@ -1,15 +1,15 @@
 void v1_complex()
 {
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
 //   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   std::string pdg = "3122";
+  std::string pdg = "3122";
 //   std::string pdg = "310";
-  std::string pdg = "3312";
+//   std::string pdg = "3312";
 
-//   std::string cut = "lc1";
-  std::string cut = "dc";
+  std::string cut = "lc1";
+//   std::string cut = "dc";
 //   std::string cut = "oc1";
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/cl." + evegen + "." + pbeam + "agev." + cut + "." + pdg + ".root";
@@ -18,6 +18,7 @@ void v1_complex()
   
   std::vector<std::string> components{"x1x1", "y1y1"/*, "x1y1", "y1x1"*/};
   std::vector<std::string> subevents{"psd1", "psd2", "psd3"};
+  std::vector<std::string> subevents_etacut{"etacut_1_all", "etacut_2_all", "etacut_3_all", "etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
   std::vector<std::string> sub4th{"sts_pipos"};
   
   TFile* fileOut = TFile::Open("v1andR1.root", "recreate");
@@ -27,6 +28,7 @@ void v1_complex()
   fileOut->mkdir("R1/MC");
   fileOut->mkdir("R1/sub3");
   fileOut->mkdir("R1/sub4");
+  fileOut->mkdir("v1/usimQ_R1_MC");
   fileOut->mkdir("v1/uQ_R1_MC");
   fileOut->mkdir("v1/uQ_R1_sub3");
   fileOut->mkdir("v1/uQ_R1_sub4");
@@ -47,11 +49,15 @@ void v1_complex()
   usgnlPsi.Save("v1.u_rec_sgnl.Q_psi");
   
   std::vector<Correlation> R1_MC;
-  R1_MC.resize(subevents.size());
+  R1_MC.resize(subevents.size() + subevents_etacut.size());
   fileOut->cd("R1/MC");
   for(int i=0; i<subevents.size(); i++) {
     R1_MC.at(i) = Correlation(fileIn, "QPsi", {subevents.at(i) + "_RECENTERED", "Q_psi_PLAIN"}, components) * 2.;
     R1_MC.at(i).Save("res_MC." + subevents.at(i));
+  }
+  for(int i=0; i<subevents_etacut.size(); i++) {
+    R1_MC.at(subevents.size() + i) = Correlation(fileIn, "QPsi", {subevents_etacut.at(i) + "_PLAIN", "Q_psi_PLAIN"}, components) * 2.;
+    R1_MC.at(subevents.size() + i).Save("res_MC." + subevents_etacut.at(i));
   }
 
   std::vector<Correlation> QQ;
@@ -86,7 +92,23 @@ void v1_complex()
       R1_sub4.at(j).at(i).Save("res.sub4." + s4 + "." + subevents.at(i));
     }
   }
-  
+
+  for(int i=0; i<subevents.size(); i++) {
+    Correlation uQ(fileIn, "uQ", {"u_sim_PLAIN", subevents.at(i) + "_RECENTERED"}, components);
+
+    fileOut->cd("v1/usimQ_R1_MC");
+    auto uQ_R1_MC = uQ / R1_MC.at(i) * 2.;
+    uQ_R1_MC.Save("v1.u_sim." + subevents.at(i) + "_res_MC");
+  }
+
+  for(int i=0; i<subevents_etacut.size(); i++) {
+    Correlation uQ(fileIn, "uQ", {"u_sim_PLAIN", subevents_etacut.at(i) + "_PLAIN"}, components);
+
+    fileOut->cd("v1/usimQ_R1_MC");
+    auto uQ_R1_MC = uQ / R1_MC.at(subevents.size() + i) * 2.;
+    uQ_R1_MC.Save("v1.u_sim." + subevents_etacut.at(i) + "_res_MC");
+  }
+
   for(int i=0; i<subevents.size(); i++) {
     Correlation uQ(fileIn, "uQ", {"u_rec_RESCALED", subevents.at(i) + "_RECENTERED"}, components);
 

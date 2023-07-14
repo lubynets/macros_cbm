@@ -3,14 +3,12 @@
 void lambda_stf_dv1dy_mod() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  enum DrawOption {
-    kPlain,
-    kDifference,
-    kChi2,
-    kRatio
-  };
-//   DrawOption drawOption = kPlain;
-  DrawOption drawOption = kDifference;
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+  std::string evegen = "urqmd";   std::string pbeam = "12";
+
+  DrawOption drawOption = kPlain;
+//   DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;
 //   DrawOption drawOption = kRatio;
 
@@ -23,23 +21,36 @@ void lambda_stf_dv1dy_mod() {
 //   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+  enum Mode {
+    kModel,
+    kDetector
+  };
+  Mode mode = kModel;
+//   Mode mode = kDetector;
 
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen  + "/" + pbeam + "agev/v1andR1.dv1dy.stf." + evegen + "." + pbeam + "agev.root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen  + "/" + pbeam + "agev/dv1dy.rebinned.stf." + evegen + "." + pbeam + "agev.root";
 
   std::vector<std::string> particles{
                                      "lambda",
                                      "kshort",
                                      "xi",
-                                     "pipos",
-                                     "pineg"
+//                                      "pipos",
+//                                      "pineg"
                                     };
   std::vector<std::string> subevents{
                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"
+//                                      "etacut_1_all", "etacut_2_all", "etacut_3_all",
+                                     "psd1", "psd2", "psd3"
                                     };
+
+  std::vector<std::string> subevents_mod{
+                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
+//                                      "etacut_1_all", "etacut_2_all", "etacut_3_all"
+                                    };
+  std::vector<std::string> subevents_det{"psd1", "psd2", "psd3"};
+
+
   std::string step;
   bool average_comp;
   float y_lo, y_hi;
@@ -59,6 +70,7 @@ void lambda_stf_dv1dy_mod() {
   axes.at(kProjection).reco_name_ = "SimEventHeader_centrality_impactpar";
 
   TFile* fileIn = TFile::Open(fileName.c_str(), "open");
+  if(fileIn==nullptr) throw std::runtime_error("fileIn is nullptr");
   TFile* fileOut{nullptr};
 
   for(auto& particle : particles) {
@@ -73,10 +85,9 @@ void lambda_stf_dv1dy_mod() {
     fileOutText.open((fileOutName + ".txt").c_str());
     fileOutText << evegen << "\n";
 
-    auto* dc = (Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>*)fileIn->Get<Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>>((particle + "/v1sim_intercept.psi.ave").c_str());
-    if(dc==nullptr) {
-      throw std::runtime_error("DataContainer is nullptr");
-    };
+    std::cout << particle << "\n";
+    auto* dc = (Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>*)fileIn->Get<Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>>(("v1/" + particle + "/uPsi/slope/v1.uPsi.ave").c_str());
+    if(dc==nullptr) throw std::runtime_error("DataContainer is nullptr");
     for(auto& ax : axes) {
       if(ax.name_ == "rapidity") continue;
       Qn::Axis<double> qnaxis = dc->GetAxis(ax.sim_name_);
@@ -87,11 +98,26 @@ void lambda_stf_dv1dy_mod() {
     }
     delete dc;
 
-    for(auto& subevent : subevents) {
+    std::vector<std::string> subevents_loop;
+    if(mode == kModel)    subevents_loop = subevents;
+    if(mode == kDetector) subevents_loop = subevents_mod;
+
+    int ise{0};
+    for(auto& subevent : subevents_loop) {
+      if(subevent[0] == 'e') {
+        step = "PLAIN";
+        average_comp = true;
+      }
+      if(subevent[0] == 'p') {
+        step = "RECENTERED";
+        average_comp = true;
+      }
 
       bool is_first_canvas = true;
 
-      std::string fileOutNameSubE  = fileOutName + "." + subevent;
+      std::string fileOutNameSubE;
+      if(mode == kModel)    fileOutNameSubE = fileOutName + ".sub2psi." + subevent;
+      if(mode == kDetector) fileOutNameSubE = fileOutName + ".sub2sub." + subevent;
       if(is_write_rootfile) fileOut = TFile::Open((fileOutNameSubE + ".root").c_str(), "recreate");
 
       for(auto fc : fitcoeffs) {
@@ -138,21 +164,9 @@ void lambda_stf_dv1dy_mod() {
         if(drawOption == kChi2) y_axis_title = "#chi^{2} of " + y_axis_title;
         if(drawOption == kRatio) y_axis_title = "REC / MC of " + y_axis_title;
 
-        auto v1_est = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1rec_" + fc + "." + subevent + ".ave").c_str()} );
-        v1_est.SetMarker(kFullSquare);
-        v1_est.SetErrorType(error_mode);
-        v1_est.SetMeanType(mean_mode);
-        v1_est.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
-        v1_est.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                           kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-        v1_est.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
-        v1_est.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
-        v1_est.ShiftSliceAxis(axes.at(kSlice).shift_);
-        v1_est.ShiftProjectionAxis(axes.at(kProjection).shift_);
-        v1_est.SlightShiftProjectionAxis(1);
-        v1_est.Calculate();
-
-        auto v1_ref = DoubleDifferentialCorrelation( fileName.c_str(), {(particle + "/v1sim_" + fc + ".psi.ave").c_str()} );
+        DoubleDifferentialCorrelation v1_ref;
+        if(mode == kModel)    v1_ref = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uPsi/" + fc + "/v1.uPsi.ave").c_str()} );
+        if(mode == kDetector) v1_ref = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uQ_R1/" + fc + "/v1.uQ_R1." + subevents_mod.at(ise) + "_PLAIN.ave").c_str()} );
         v1_ref.SetErrorType(error_mode);
         v1_ref.SetMeanType(mean_mode);
         v1_ref.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
@@ -165,6 +179,41 @@ void lambda_stf_dv1dy_mod() {
         v1_ref.ShiftSliceAxis(axes.at(kSlice).shift_);
         v1_ref.ShiftProjectionAxis(axes.at(kProjection).shift_);
         v1_ref.Calculate();
+
+        std::vector<DoubleDifferentialCorrelation> v1_est;
+        if(average_comp) {
+          v1_est.resize(1);
+          if(mode == kModel) v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uQ_R1/" + fc + "/v1.uQ_R1." + subevent + "_" + step + ".ave").c_str()} );
+          if(mode == kDetector) v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uQ_R1/" + fc + "/v1.uQ_R1." + subevents_det.at(ise) + "_RECENTERED.ave").c_str()} );
+          v1_est.at(0).SetMarker(kFullSquare);
+          v1_est.at(0).SlightShiftProjectionAxis(1);
+        } else {
+          v1_est.resize(2);
+          if(mode == kModel) {
+            v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uQ_R1/" + fc + "/v1.uQ_R1." + subevent + "_" + step + ".x1x1").c_str()} );
+            v1_est.at(1) = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uQ_R1/" + fc + "/v1.uQ_R1." + subevent + "_" + step + ".y1y1").c_str()} );
+          }
+          if(mode == kDetector) {
+            v1_est.at(0) = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uQ_R1/" + fc + "/v1.uQ_R1." + subevents_det.at(ise) + "_RECENTERED.x1x1").c_str()} );
+            v1_est.at(1) = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uQ_R1/" + fc + "/v1.uQ_R1." + subevents_det.at(ise) + "_RECENTERED.y1y1").c_str()} );
+          }
+          v1_est.at(0).SetMarker(kFullSquare);
+          v1_est.at(1).SetMarker(kOpenSquare);
+          v1_est.at(1).SlightShiftProjectionAxis(1, 0.5);
+        }
+
+        for(auto& vc : v1_est) {
+          vc.SetErrorType(error_mode);
+          vc.SetMeanType(mean_mode);
+          vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+          vc.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
+                          kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+          vc.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
+          vc.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
+          vc.ShiftSliceAxis(axes.at(kSlice).shift_);
+          vc.ShiftProjectionAxis(axes.at(kProjection).shift_);
+          vc.Calculate();
+        }
 
         HeapPicture pic(fc, {1000, 1000});
         pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
@@ -181,14 +230,31 @@ void lambda_stf_dv1dy_mod() {
 
         auto leg1 = new TLegend();
         leg1->SetBorderSize(1);
-        leg1->SetHeader((axes.at(kSlice).title_+axes.at(kSlice).unit_).c_str());
+//         leg1->SetHeader((axes.at(kSlice).title_+axes.at(kSlice).unit_).c_str());
 
         TLegendEntry* entry;
-        entry = leg1->AddEntry("", "REF: #Psi^{RP}, x&y averaged", "L");
+        if(mode == kModel)    entry = leg1->AddEntry("", "REF: #Psi^{RP}, x&y averaged", "F");
+        if(mode == kDetector) entry = leg1->AddEntry("", "REF: eta-cut, R_{MC}, x&y averaged", "F");
         entry->SetMarkerSize(2);
-        entry = leg1->AddEntry("", "EST: eta-cut, R_{MC}, x&y averaged", "P");
-        entry->SetMarkerSize(2);
-        entry->SetMarkerStyle(kFullSquare);
+        entry->SetFillColorAlpha(kBlack, 0.2);
+        entry->SetLineColor(kWhite);
+        entry->SetFillStyle(1000);
+        if(average_comp) {
+          if(mode == kModel)    entry = leg1->AddEntry("", "EST: #Psi^{rec}, R_{MC}, x&y averaged", "P");
+          if(mode == kDetector) entry = leg1->AddEntry("", "EST: PSD, R_{MC}, x&y averaged", "P");
+          entry->SetMarkerSize(2);
+          entry->SetMarkerStyle(kFullSquare);
+        } else {
+          if(mode == kModel)    entry = leg1->AddEntry("", "EST: #Psi^{rec}, R_{MC}, X", "P");
+          if(mode == kDetector) entry = leg1->AddEntry("", "EST: PSD, R_{MC}, x&y averaged", "P");
+          entry->SetMarkerSize(2);
+          entry->SetMarkerStyle(kFullSquare);
+          if(mode == kModel)    entry = leg1->AddEntry("", "EST: #Psi^{rec}, R_{MC}, Y", "P");
+          if(mode == kDetector) entry = leg1->AddEntry("", "EST: PSD, R_{MC}, x&y averaged", "P");
+          entry->SetMarkerSize(2);
+          entry->SetMarkerStyle(kOpenSquare);
+        }
+        leg1->AddEntry("", (axes.at(kSlice).title_+axes.at(kSlice).unit_ + ":").c_str(), "");
 
         if(drawOption != kPlain && drawOption != kDifference) {
           pic.DrawZeroLine(false);
@@ -196,26 +262,29 @@ void lambda_stf_dv1dy_mod() {
         }
         if(drawOption == kChi2) pic.AddHorizontalLine(-1);
 
-        DoubleDifferentialCorrelation vplot;
-        if(drawOption == kPlain) vplot = v1_est;
-        if(drawOption == kDifference || drawOption == kChi2) vplot = Minus(v1_est, v1_ref);
-        if(drawOption == kChi2) vplot.DivideValueByError();
-        if(drawOption == kRatio) vplot = Divide(v1_est, v1_ref);
+        std::vector<DoubleDifferentialCorrelation> vplot;
+        vplot.resize(v1_est.size());
+        for(int iv=0; iv<v1_est.size(); iv++) { // iv: X, Y, ave
+          if(drawOption == kPlain) vplot.at(iv) = v1_est.at(iv);
+          if(drawOption == kDifference || drawOption == kChi2) vplot.at(iv) = Minus(v1_est.at(iv), v1_ref);
+          if(drawOption == kChi2) vplot.at(iv).DivideValueByError();
+          if(drawOption == kRatio) vplot.at(iv) = Divide(v1_est.at(iv), v1_ref);
 
-        int j{0}; // j: slice axis
-        for( auto obj : vplot.GetProjections() ) {
-          std::vector<float> vec_values = obj->GetPointsValues();
-          std::vector<float> vec_errors = obj->GetPointsErrors();
-          pic.AddDrawable(obj);
-          leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
-          fileOutText << subevent << "\t" << fc << "\t" << "pt" << j+1 << "\t" << "AVE" << "\t";
-          for(int iv=0; iv<vec_values.size(); iv++) {
-            fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
-          }
-          fileOutText << "\n";
+          int j{0}; // j: slice axis
+          for( auto obj : vplot.at(iv).GetProjections() ) {
+            std::vector<float> vec_values = obj->GetPointsValues();
+            std::vector<float> vec_errors = obj->GetPointsErrors();
+            pic.AddDrawable(obj);
+            if(iv==0) leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
+            fileOutText << subevent << "\t" << fc << "\t" << "pt" << j+1 << "\t" << "AVE" << "\t";
+            for(int iv=0; iv<vec_values.size(); iv++) {
+              fileOutText << vec_values.at(iv) << "\t" << vec_errors.at(iv) << "\t";
+            }
+            fileOutText << "\n";
 
-          j++;
-        } // j
+            j++;
+          } // j
+        } // iv
         if(drawOption == kPlain) {
           for( auto obj : v1_ref.GetProjections() ){
             pic.AddDrawable( obj );
@@ -250,6 +319,7 @@ void lambda_stf_dv1dy_mod() {
       emptycanvas.Print((fileOutNameSubE + ".pdf]").c_str(), "pdf");
 
       if(is_write_rootfile) fileOut->Close();
+      ise++;
     }
     fileOutText.close();
   }

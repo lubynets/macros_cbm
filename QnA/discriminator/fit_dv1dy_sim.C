@@ -1,13 +1,15 @@
 void fit_dv1dy_sim() {
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   bool is_rebin_centrality = true;
-  bool is_rebin_centrality = false;
+  bool is_rebin_centrality = true;
+//   bool is_rebin_centrality = false;
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/v1andR1.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen  + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
 
   TFile* fileIn = TFile::Open(fileName.c_str());
+  if(fileIn == nullptr) throw std::runtime_error("fileIn == nullptr");
 
   std::vector<std::string> particles{"lambda", "kshort", "xi", "pipos", "pineg"};
   std::vector<std::string> components;
@@ -22,9 +24,9 @@ void fit_dv1dy_sim() {
 
   std::string fileOutName;
   if(!is_rebin_centrality) {
-    fileOutName = "dv1dy.stf." + evegen + ".root";
+    fileOutName = "dv1dy.stf." + evegen + "." + pbeam + "agev.root";
   } else {
-    fileOutName = "dv1dy.rebinned.stf." + evegen + ".root";
+    fileOutName = "dv1dy.rebinned.stf." + evegen + "." + pbeam + "agev.root";
   }
   TFile* fileOut = TFile::Open(fileOutName.c_str(), "recreate");
   fileOut->cd();
@@ -59,7 +61,7 @@ void fit_dv1dy_sim() {
     const int Nsamples = v1sim_in.At(0).GetSampleMeans().size();
     v1sim_in = v1sim_in/2.;
     Qn::DataContainerStatCalculate v1sim = v1sim_in.Rebin({"SimParticles_pT", pt_bin_edges});
-    if(is_rebin_centrality) v1sim = v1sim.Rebin({"SimEventHeader_centrality_impactpar", {0, 15, 40, 70}});
+    if(is_rebin_centrality) v1sim = v1sim.Rebin({"SimEventHeader_centrality_impactpar", {0, 6, 10, 15, 20, 30, 40, 70}});
 
     const double fitaxis_lo = v1sim.GetAxis(axistofit.c_str()).GetFirstBinEdge();
     const double fitaxis_hi = v1sim.GetAxis(axistofit.c_str()).GetLastBinEdge();
@@ -134,7 +136,7 @@ void fit_dv1dy_sim() {
         }
 
         Qn::DataContainerStatCalculate v1rec = v1_rec_in.Rebin({"SimParticles_pT", pt_bin_edges});
-        if(is_rebin_centrality) v1rec = v1rec.Rebin({"SimEventHeader_centrality_impactpar", {0, 15, 40, 70}});
+        if(is_rebin_centrality) v1rec = v1rec.Rebin({"SimEventHeader_centrality_impactpar", {0, 6, 10, 15, 20, 30, 40, 70}});
 
         const double fitaxis_lo = v1rec.GetAxis(axistofit.c_str()).GetFirstBinEdge();
         const double fitaxis_hi = v1rec.GetAxis(axistofit.c_str()).GetLastBinEdge();

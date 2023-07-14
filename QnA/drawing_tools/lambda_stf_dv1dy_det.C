@@ -3,14 +3,12 @@
 void lambda_stf_dv1dy_det() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  enum DrawOption {
-    kPlain,
-    kDifference,
-    kChi2,
-    kRatio
-  };
-//   DrawOption drawOption = kPlain;
-  DrawOption drawOption = kDifference;
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
+
+  DrawOption drawOption = kPlain;
+//   DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;
 //   DrawOption drawOption = kRatio;
 
@@ -23,22 +21,19 @@ void lambda_stf_dv1dy_det() {
 //   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
-
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen  + "/" + pbeam + "agev/dv1dy.stf." + evegen + "." + pbeam + "agev.root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen  + "/" + pbeam + "agev/dv1dy.rebinned.stf." + evegen + "." + pbeam + "agev.root";
 
   std::vector<std::string> particles{
                                      "lambda",
                                      "kshort",
                                      "xi",
-                                     "pipos",
-                                     "pineg"
+//                                      "pipos",
+//                                      "pineg"
                                     };
   std::vector<std::string> subevents_mod{
                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"
+//                                      "etacut_1_all", "etacut_2_all", "etacut_3_all"
                                     };
   std::vector<std::string> subevents_det{"psd1", "psd2", "psd3"};
 
@@ -46,6 +41,7 @@ void lambda_stf_dv1dy_det() {
 //   bool compare_only_corresponding{false};
 
   bool average_comp{false};
+//   bool average_comp{true};
   float y_lo, y_hi;
 
   SetAxis("centrality", "projection");
