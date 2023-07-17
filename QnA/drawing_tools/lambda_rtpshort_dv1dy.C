@@ -1,6 +1,6 @@
 #include "lambda.h"
 
-void lambda_imf_dv1dy() {
+void lambda_rtpshort_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
@@ -9,14 +9,11 @@ void lambda_imf_dv1dy() {
 
 //   std::string particle = "#Lambda"; std::string pdg = "3122";
   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
-//   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
+// //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
 
   std::string cuts = "lc1";
   if(pbeam == "3.3") cuts = "oc1";
   if(pdg == "3312") cuts = "dc";
-
-  bool is_imf = true;
-  if(pdg=="3312" || (pdg=="3122" && pbeam=="3.3")) is_imf = false;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
@@ -25,22 +22,14 @@ void lambda_imf_dv1dy() {
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
   std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
-  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
 
-  DrawOption drawOption = kPlain;
-//   DrawOption drawOption = kDifference;
-//   DrawOption drawOption = kChi2;
-//   DrawOption drawOption = kRatio;
+//   DrawOption drawOption = kPlain;
+  DrawOption drawOption = kChi2;
+// //   DrawOption drawOption = kDifference;
+// //   DrawOption drawOption = kRatio;
 
   SetAxis("centrality", "projection");
   SetAxis("pT", "slice");
-
-  if(!is_imf) {
-    fileRecName = fileMcName;
-    axes.at(0).reco_fit_name_ = axes.at(0).reco_name_;
-    axes.at(1).reco_fit_name_ = axes.at(1).reco_name_;
-    axes.at(2).reco_fit_name_ = axes.at(2).reco_name_;
-  }
 
   std::string y_axis_title;
 
@@ -84,7 +73,7 @@ void lambda_imf_dv1dy() {
     if(drawOption == kChi2) fileOutName = "chi2.";
     if(drawOption == kDifference) fileOutName = "diff.";
     if(drawOption == kRatio) fileOutName = "ratio.";
-    fileOutName += fc + ".imf." + evegen + "." + pbeam + "agev." + pdg;
+    fileOutName += fc + ".rtp." + evegen + "." + pbeam + "agev." + pdg;
     if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
 
     if(fc == "slope") y_axis_title = "dv_{1}/dy";
@@ -97,41 +86,39 @@ void lambda_imf_dv1dy() {
       for(auto& se : ip.subevents_) {
         for(auto& co : components) {
 
-          std::string rec_nofit_name = "v1/" + ip.dirname_ + "/" + fc + "/v1.u_rec_sgnl." + se + ip.resname_ + "." + co;
-          auto v1_rec_nofit = DoubleDifferentialCorrelation( fileMcName.c_str(), {rec_nofit_name.c_str()} );
-          v1_rec_nofit.SetErrorType(error_mode);
-          v1_rec_nofit.SetMeanType(mean_mode);
-          v1_rec_nofit.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
-          v1_rec_nofit.SetMarker(-1);
-          v1_rec_nofit.SetIsFillLine();
-          v1_rec_nofit.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                                   kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-          v1_rec_nofit.SetBiasPalette(false);
-          v1_rec_nofit.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
-          v1_rec_nofit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
-          v1_rec_nofit.ShiftSliceAxis(axes.at(kSlice).shift_);
-          v1_rec_nofit.ShiftProjectionAxis(axes.at(kProjection).shift_);
-          v1_rec_nofit.Calculate();
+          std::string sim_name = "v1/usimPsi/" + fc + "/v1.u_sim.Q_psi." + co;
+          auto v1_sim = DoubleDifferentialCorrelation( fileMcName.c_str(), {sim_name.c_str()} );
+          v1_sim.SetErrorType(error_mode);
+          v1_sim.SetMeanType(mean_mode);
+          v1_sim.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+          v1_sim.SetMarker(-1);
+          v1_sim.SetIsFillLine();
+          v1_sim.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
+                             kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+          v1_sim.SetBiasPalette(false);
+          v1_sim.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
+          v1_sim.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
+          v1_sim.ShiftSliceAxis(axes.at(kSlice).shift_);
+          v1_sim.ShiftProjectionAxis(axes.at(kProjection).shift_);
+          v1_sim.Calculate();
 
-          std::string rec_fit_name;
-          if(is_imf) rec_fit_name = "Pars/" + ip.dirname_ + "/" + se + ip.resname_ + "/" + fc  + "/signal." + co;
-          else       rec_fit_name = "v1/" + ip.dirname_ + "/" + fc + "/v1.u_rec." + se + ip.resname_ + "." + co;
-          auto v1_rec_fit = DoubleDifferentialCorrelation( fileRecName.c_str(), {rec_fit_name.c_str()} );
-          v1_rec_fit.RenameAxis(axes.at(kProjection).reco_fit_name_, axes.at(kProjection).reco_name_);
-          v1_rec_fit.RenameAxis(axes.at(kSlice).reco_fit_name_, axes.at(kSlice).reco_name_);
-          v1_rec_fit.SetErrorType(error_mode);
-          v1_rec_fit.SetMeanType(mean_mode);
-          v1_rec_fit.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
-          v1_rec_fit.SetMarker(kFullSquare);
-          v1_rec_fit.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                                 kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
-          v1_rec_fit.SetBiasPalette(false);
-          v1_rec_fit.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
-          v1_rec_fit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
-          v1_rec_fit.ShiftSliceAxis(axes.at(kSlice).shift_);
-          v1_rec_fit.ShiftProjectionAxis(axes.at(kProjection).shift_);
-          v1_rec_fit.SlightShiftProjectionAxis(1);
-          v1_rec_fit.Calculate();
+          std::string rec_nofit_name = "v1/" + ip.dirname_ + "/" + fc + "/v1.u_rec_sgnl." + se + ip.resname_ + "." + co;
+          auto v1_rec = DoubleDifferentialCorrelation( fileMcName.c_str(), {rec_nofit_name.c_str()} );
+          v1_rec.RenameAxis(axes.at(kProjection).reco_name_, axes.at(kProjection).sim_name_);
+          v1_rec.RenameAxis(axes.at(kSlice).reco_name_, axes.at(kSlice).sim_name_);
+          v1_rec.SetErrorType(error_mode);
+          v1_rec.SetMeanType(mean_mode);
+          v1_rec.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+          v1_rec.SetMarker(kFullSquare);
+          v1_rec.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
+                             kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+          v1_rec.SetBiasPalette(false);
+          v1_rec.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
+          v1_rec.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
+          v1_rec.ShiftSliceAxis(axes.at(kSlice).shift_);
+          v1_rec.ShiftProjectionAxis(axes.at(kProjection).shift_);
+          v1_rec.SlightShiftProjectionAxis(1);
+          v1_rec.Calculate();
 
           HeapPicture pic(fc, {1000, 1000});
 
@@ -152,19 +139,17 @@ void lambda_imf_dv1dy() {
           auto leg1 = new TLegend();
           leg1->SetBorderSize(1);
 
-          std::string ref_title = "REC, MC-match";
-          std::string est_title;
-          if(is_imf) est_title = "REC, inv. mass fit";
-          else       est_title = "REC, all candidates";
+          std::string ref_title = "MC-true tracks";
+          std::string est_title = "Reconstructed tracks";
 
           TLegendEntry* entry;
           if(drawOption == kPlain) {
-            entry = leg1->AddEntry("", est_title.c_str(), "F");
+            entry = leg1->AddEntry("", ref_title.c_str(), "F");
             entry->SetFillColorAlpha(kBlack, 0.2);
             entry->SetLineColor(kWhite);
             entry->SetFillStyle(1000);
 
-            entry = leg1->AddEntry("", ref_title.c_str(), "P");
+            entry = leg1->AddEntry("", est_title.c_str(), "P");
             entry->SetMarkerSize(2);
             entry->SetMarkerStyle(kFullSquare);
           } else {
@@ -181,13 +166,13 @@ void lambda_imf_dv1dy() {
           if(drawOption == kChi2) pic.AddHorizontalLine(-1);
 
           DoubleDifferentialCorrelation vplot;
-          if(drawOption == kPlain) vplot = v1_rec_fit;
-          if(drawOption == kDifference || drawOption == kChi2) vplot = Minus(v1_rec_fit, v1_rec_nofit);
+          if(drawOption == kPlain) vplot = v1_rec;
+          if(drawOption == kDifference || drawOption == kChi2) vplot = Minus(v1_rec, v1_sim);
           if(drawOption == kChi2) vplot.DivideValueByError();
-          if(drawOption == kRatio) vplot = Divide(v1_rec_fit, v1_rec_nofit);
+          if(drawOption == kRatio) vplot = Divide(v1_rec, v1_sim);
 
           if(drawOption == kPlain) {
-            for( auto obj : v1_rec_nofit.GetProjections() ){
+            for( auto obj : v1_sim.GetProjections() ){
               pic.AddDrawable( obj );
             }
           }
