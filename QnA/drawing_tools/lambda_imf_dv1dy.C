@@ -7,9 +7,9 @@ void lambda_imf_dv1dy() {
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   std::string particle = "#Lambda"; std::string pdg = "3122";
-  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
-//   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
+  std::string particle = "#Lambda"; std::string pdg = "3122";
+//   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
+// //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
 
   std::string cuts = "lc1";
   if(pbeam == "3.3") cuts = "oc1";
@@ -159,12 +159,12 @@ void lambda_imf_dv1dy() {
 
           TLegendEntry* entry;
           if(drawOption == kPlain) {
-            entry = leg1->AddEntry("", est_title.c_str(), "F");
+            entry = leg1->AddEntry("", ref_title.c_str(), "F");
             entry->SetFillColorAlpha(kBlack, 0.2);
             entry->SetLineColor(kWhite);
             entry->SetFillStyle(1000);
 
-            entry = leg1->AddEntry("", ref_title.c_str(), "P");
+            entry = leg1->AddEntry("", est_title.c_str(), "P");
             entry->SetMarkerSize(2);
             entry->SetMarkerStyle(kFullSquare);
           } else {

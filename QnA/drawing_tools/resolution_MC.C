@@ -1,12 +1,12 @@
 void resolution_MC() {
-  gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
+  gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style_multipad.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
 //   std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
     
 //   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/v1andR1.stf." + evegen + "." + pbeam + "agev.root";
   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/cl." + evegen + "." + pbeam + "agev." + cuts + ".3122.root";
@@ -18,8 +18,8 @@ void resolution_MC() {
   std::string step;
   bool average_comp;
 
-//   std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
-  std::vector<std::string> components{"cos1x1", "sin1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
+  std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
+//   std::vector<std::string> components{"cos1x1", "sin1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
 //   std::vector<std::string> components{"x1y1", "y1x1"}; std::string L_or_P = "P"; std::string same_or_cross = "res_cross";
 
   std::string fileOutName;
@@ -55,18 +55,25 @@ void resolution_MC() {
   if(components.at(0) == "x1y1") multicor_mc.SlightShiftXAxis(1);
             
   HeapPicture pic("picture", {1000, 1000});
+
+  const float text_size = 20;
+
   if(evegen == "dcmqgsm") {
-    if(pbeam == "12") pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
-    else              pic.AddText({0.18, 0.92, "5.2M Au+Au"}, 0.025);
-    pic.AddText({0.18, 0.89, "DCM-QGSM-SMM"}, 0.025);
+    if(pbeam == "12") pic.AddText("5M Au+Au", text_size, {0.04, 0.96});
+    else              pic.AddText("5.2M Au+Au", text_size, {0.04, 0.96});
+    pic.AddText("DCM-QGSM-SMM", text_size, {0.04, 0.92});
   }
   if(evegen == "urqmd") {
-    pic.AddText({0.18, 0.92, "2M Au+Au"}, 0.025);
-    pic.AddText({0.18, 0.89, "UrQMD"}, 0.025);
+    pic.AddText("2M Au+Au", text_size, {0.04, 0.96});
+    pic.AddText("UrQMD", text_size, {0.04, 0.92});
   }
-  pic.AddText({0.18, 0.86, (pbeam + "A GeV/c").c_str()}, 0.025);
-  pic.AddText({0.18, 0.83, "MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT"}, 0.02);
-  
+  pic.AddText(pbeam + "A GeV/c", text_size, {0.04, 0.88});
+  pic.AddText("MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT",text_size, {0.04, 0.84});
+
+  for(auto& tx : pic.GetTexts()) {
+    tx->SetTextFont(23);
+  }
+
   auto leg1 = new TLegend();
   leg1->SetBorderSize(1);
 
@@ -103,16 +110,18 @@ void resolution_MC() {
   pic.CustomizeXRange();
   pic.CustomizeYRange();  
   pic.AddLegend(leg1);
-  pic.CustomizeLegend(leg1);
-//   pic.SetGridX();
-//   pic.SetGridY();
+//   pic.CustomizeLegend(leg1);
+  pic.SetGridX();
+  pic.SetGridY();
   pic.Draw();
 //   pic.Save("fileOut", "png");
   
   if(is_write_rootfile) {
     TFile* fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
     fileOut->cd();
-    pic.GetCanvas()->Write();
+//     pic.GetCanvas()->Write();
+    pic.Dump();
+    pic.Write("abcd");
     fileOut->Close();
   }
     

@@ -85,3 +85,10 @@ std::string to_string_with_precision(const T a_value, const int n = 6) {
   out << std::fixed << a_value;
   return out.str();
 }
+
+namespace Helper {
+std::vector<int> palette1{kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
+                           kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed};
+};
+
+typedef Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>> QnDcSD;

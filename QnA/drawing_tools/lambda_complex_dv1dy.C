@@ -3,16 +3,20 @@
 void lambda_complex_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
 //   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   std::string particle = "#Lambda"; std::string pdg = "3122"; std::string cuts = "oc1";
-//   std::string particle = "K^{0}_{S}"; std::string pdg = "310"; std::string cuts = "oc1";
-  std::string particle = "#Xi^{-}"; std::string pdg = "3312"; std::string cuts = "dc";
+//   std::string particle = "#Lambda"; std::string pdg = "3122";
+  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
+// //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
 
-//   bool is_imf = true;
-  bool is_imf = false;
+  std::string cuts = "lc1";
+  if(pbeam == "3.3") cuts = "oc1";
+  if(pdg == "3312") cuts = "dc";
+
+  bool is_imf = true;
+  if(pdg=="3312" || (pdg=="3122" && pbeam=="3.3")) is_imf = false;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
@@ -47,10 +51,10 @@ void lambda_complex_dv1dy() {
   };
 
   std::vector<Inputs> inputs {
-    {"uPsi", {"Q_psi"}, ""},
-    {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
-    {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
-    {"uQ_R1_sub4", {"psd1", "psd2", "psd3"}, "_res_sub4_sts_pipos"},
+//     {"uPsi", {"Q_psi"}, ""},
+//     {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
+//     {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
+    {"uQ_R1_sub4", {/*"psd1", */"psd2"/*, "psd3"*/}, "_res_sub4_sts_pipos"},
   };
 
   TFile* fileMc = TFile::Open(fileMcName.c_str(), "open");
@@ -85,8 +89,7 @@ void lambda_complex_dv1dy() {
           v1_sim.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
           v1_sim.SetMarker(-1);
           v1_sim.SetIsFillLine();
-          v1_sim.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                             kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+          v1_sim.SetPalette(Helper::palette1);
           v1_sim.SetBiasPalette(false);
           v1_sim.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
           v1_sim.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
@@ -100,8 +103,7 @@ void lambda_complex_dv1dy() {
           v1_rec_nofit.SetMeanType(mean_mode);
           v1_rec_nofit.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
           v1_rec_nofit.SetMarker(kOpenSquare);
-          v1_rec_nofit.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                                   kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+          v1_rec_nofit.SetPalette(Helper::palette1);
           v1_rec_nofit.SetBiasPalette(false);
           v1_rec_nofit.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
           v1_rec_nofit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
@@ -118,8 +120,7 @@ void lambda_complex_dv1dy() {
           v1_rec_fit.SetMeanType(mean_mode);
           v1_rec_fit.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
           v1_rec_fit.SetMarker(kFullSquare);
-          v1_rec_fit.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
-                                 kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
+          v1_rec_fit.SetPalette(Helper::palette1);
           v1_rec_fit.SetBiasPalette(false);
           v1_rec_fit.SetProjectionAxis({axes.at(kProjection).reco_fit_name_.c_str(), axes.at(kProjection).bin_edges_});
           v1_rec_fit.SetSliceAxis({axes.at(kSlice).reco_fit_name_.c_str(), axes.at(kSlice).bin_edges_});
@@ -147,31 +148,31 @@ void lambda_complex_dv1dy() {
           auto leg1 = new TLegend();
           leg1->SetBorderSize(1);
 
-          auto* entry = leg1->AddEntry("", "MC input", "L");
-          entry->SetLineColor(kBlack);
-          entry->SetLineWidth(2);
+          auto* entry = leg1->AddEntry("", "MC input", "F");
+          entry->SetFillColorAlpha(kBlack, 0.2);
+          entry->SetLineColor(kWhite);
+          entry->SetFillStyle(1000);
 
-          entry = leg1->AddEntry("", "REC, MC-match", "P");
-          entry->SetMarkerSize(2);
-          entry->SetMarkerStyle(kOpenSquare);
+//           entry = leg1->AddEntry("", "REC, MC-match", "P");
+//           entry->SetMarkerSize(2);
+//           entry->SetMarkerStyle(kOpenSquare);
 
-          entry = leg1->AddEntry("", "REC", "P");
+          entry = leg1->AddEntry("", "Reconstructed", "P");
           entry->SetMarkerSize(2);
           entry->SetMarkerStyle(kFullSquare);
 
-          leg1->SetHeader((axes.at(kSlice).title_+axes.at(kSlice).unit_).c_str());
+          leg1->AddEntry("", (axes.at(kSlice).title_+axes.at(kSlice).unit_ + ":").c_str(), "");
 
           for( auto obj : v1_sim.GetProjections() ){
             pic.AddDrawable( obj );
           }
-          for( auto obj : v1_rec_nofit.GetProjections() ){
-            pic.AddDrawable( obj );
-          }
+//           for( auto obj : v1_rec_nofit.GetProjections() ){
+//             pic.AddDrawable( obj );
+//           }
           for( auto obj : v1_rec_fit.GetProjections() ){
             pic.AddDrawable( obj );
             leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
           }
-
 
           pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title.c_str()});
 
