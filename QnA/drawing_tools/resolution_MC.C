@@ -1,8 +1,8 @@
 void resolution_MC() {
-  gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style_multipad.cc" );
+  gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
 //   std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
 
 //   bool is_write_rootfile = false;
@@ -18,8 +18,8 @@ void resolution_MC() {
   std::string step;
   bool average_comp;
 
-  std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
-//   std::vector<std::string> components{"cos1x1", "sin1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
+//   std::vector<std::string> components{"x1x1", "y1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
+  std::vector<std::string> components{"cos1x1", "sin1y1"}; std::string L_or_P = "L"; std::string same_or_cross = "res.mc";
 //   std::vector<std::string> components{"x1y1", "y1x1"}; std::string L_or_P = "P"; std::string same_or_cross = "res_cross";
 
   std::string fileOutName;
@@ -71,7 +71,7 @@ void resolution_MC() {
   pic.AddText("MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT",text_size, {0.04, 0.84});
 
   for(auto& tx : pic.GetTexts()) {
-    tx->SetTextFont(23);
+    tx->SetTextFont(63);
   }
 
   auto leg1 = new TLegend();
@@ -111,8 +111,8 @@ void resolution_MC() {
   pic.CustomizeYRange();  
   pic.AddLegend(leg1);
 //   pic.CustomizeLegend(leg1);
-  pic.SetGridX();
-  pic.SetGridY();
+//   pic.SetGridX();
+//   pic.SetGridY();
   pic.Draw();
 //   pic.Save("fileOut", "png");
   
@@ -121,7 +121,7 @@ void resolution_MC() {
     fileOut->cd();
 //     pic.GetCanvas()->Write();
     pic.Dump();
-    pic.Write("abcd");
+    pic.Write("heap_picture");
     fileOut->Close();
   }
     
