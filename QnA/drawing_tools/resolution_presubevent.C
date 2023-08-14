@@ -1,11 +1,9 @@
 void resolution_presubevent() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm";
-  std::string evegen = "urqmd";
-
-  std::string pbeam = "12";
-//   std::string pbeam = "3.3";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+//   std::string evegen = "urqmd";  std::string pbeam = "12";
 
 //   bool is_write_rootfile = false;
   bool is_write_rootfile = true;
@@ -20,10 +18,10 @@ void resolution_presubevent() {
   bool average_comp;
 
   std::vector<std::string> components{"x1x1", "y1y1"};
-  std::string fileOutName = "fileOut";
+  std::string fileOutName;
 
-  if(correls.at(0)[0] == 'p') { step = "_RECENTERED"; average_comp = false; }
-  if(correls.at(0)[0] == 'e') { step = "_PLAIN"; average_comp = true; }
+  if(correls.at(0)[0] == 'p') { step = "_RECENTERED"; fileOutName = "factoriz_3sub.psd"; average_comp = false; }
+  if(correls.at(0)[0] == 'e') { step = "_PLAIN"; fileOutName = "factoriz_3sub.eta"; average_comp = true; }
 
   MultiCorrelation multicor;
   multicor.SetIsFillSysErrors(false);
@@ -56,16 +54,19 @@ void resolution_presubevent() {
 
   multicor.SlightShiftXAxis(0.);
   HeapPicture pic("picture", {1000, 1000});
+
+  const float text_size = 20;
+  const int text_font = 63;
   if(evegen == "dcmqgsm") {
-    if(pbeam == "12") pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
-    else              pic.AddText({0.18, 0.92, "5.2M Au+Au"}, 0.025);
-    pic.AddText({0.18, 0.89, "DCM-QGSM-SMM"}, 0.025);
+    if(pbeam == "12") pic.AddText("5M Au+Au", {0.04, 0.96}, text_size, text_font);
+    else              pic.AddText("5.2M Au+Au", {0.04, 0.96}, text_size, text_font);
+    pic.AddText("DCM-QGSM-SMM", {0.04, 0.92}, text_size, text_font);
   }
   if(evegen == "urqmd") {
-    pic.AddText({0.18, 0.92, "2M Au+Au"}, 0.025);
-    pic.AddText({0.18, 0.89, "UrQMD"}, 0.025);
+    pic.AddText("2M Au+Au", {0.04, 0.96}, text_size, text_font);
+    pic.AddText("UrQMD", {0.04, 0.92}, text_size, text_font);
   }
-  pic.AddText({0.18, 0.86, (pbeam + "A GeV/c").c_str()}, 0.025);
+  pic.AddText(pbeam + "A GeV/c", {0.04, 0.88}, text_size, text_font);
 
   auto leg1 = new TLegend();
   leg1->SetBorderSize(1);
@@ -80,37 +81,37 @@ void resolution_presubevent() {
     entry->SetLineWidth(3);
     entry->SetLineColor(kBlack);
     entry->SetLineStyle(1);
-    leg1->AddEntry(entry, "#LTQ#Psi#GT#LTQ#Psi#GTxx", "L");
+    leg1->AddEntry(entry, "factorized product, xx", "L");
     entry = new TLegendEntry();
     entry->SetLineStyle(2);
-    leg1->AddEntry(entry, "#LTQ#Psi#GT#LTQ#Psi#GTyy", "L");
+    leg1->AddEntry(entry, "factorized product, yy", "L");
     entry = new TLegendEntry();
     entry->SetMarkerSize(2);
     entry->SetMarkerColor(kBlack);
     entry->SetMarkerStyle(kFullSquare);
-    leg1->AddEntry(entry, "#LTQQ#GTxx", "P");
+    leg1->AddEntry(entry, "plain product, xx", "P");
     entry = new TLegendEntry();
     entry->SetMarkerStyle(kOpenSquare);
-    leg1->AddEntry(entry, "#LTQQ#GTyy", "P");
-    leg1->AddEntry(multicor.GetCorrelations().at(0)->GetPoints(), multicor.GetCorrelations().at(0)->GetTitle().c_str(), "L");
-    leg1->AddEntry(multicor.GetCorrelations().at(4)->GetPoints(), multicor.GetCorrelations().at(4)->GetTitle().c_str(), "L");
-    leg1->AddEntry(multicor.GetCorrelations().at(8)->GetPoints(), multicor.GetCorrelations().at(8)->GetTitle().c_str(), "L");
+    leg1->AddEntry(entry, "plain product, yy", "P");
+    leg1->AddEntry(multicor.GetCorrelations().at(0)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(0)->GetTitle()).c_str(), "L");
+    leg1->AddEntry(multicor.GetCorrelations().at(4)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(4)->GetTitle()).c_str(), "L");
+    leg1->AddEntry(multicor.GetCorrelations().at(8)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(8)->GetTitle()).c_str(), "L");
   } else {
     entry->SetLineWidth(3);
     entry->SetLineColor(kBlack);
     entry->SetLineStyle(1);
-    leg1->AddEntry(entry, "#LTQ#Psi#GT#LTQ#Psi#GT x&y ave", "L");
+    leg1->AddEntry(entry, "factorized product, x&y ave", "L");
     entry = new TLegendEntry();
     entry->SetMarkerSize(2);
     entry->SetMarkerColor(kBlack);
     entry->SetMarkerStyle(kFullSquare);
-    leg1->AddEntry(entry, "#LTQQ#GT x&y ave", "P");
-    leg1->AddEntry(multicor.GetCorrelations().at(0)->GetPoints(), multicor.GetCorrelations().at(0)->GetTitle().c_str(), "L");
-    leg1->AddEntry(multicor.GetCorrelations().at(2)->GetPoints(), multicor.GetCorrelations().at(2)->GetTitle().c_str(), "L");
-    leg1->AddEntry(multicor.GetCorrelations().at(4)->GetPoints(), multicor.GetCorrelations().at(4)->GetTitle().c_str(), "L");
+    leg1->AddEntry(entry, "plain product, x&y ave", "P");
+    leg1->AddEntry(multicor.GetCorrelations().at(0)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(0)->GetTitle()).c_str(), "L");
+    leg1->AddEntry(multicor.GetCorrelations().at(2)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(2)->GetTitle()).c_str(), "L");
+    leg1->AddEntry(multicor.GetCorrelations().at(4)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(4)->GetTitle()).c_str(), "L");
   }
 
-  pic.SetAxisTitles( {"Centrality, %", ""} );
+  pic.SetAxisTitles( {"Centrality, %", "#LTQ_{1}^{A}Q_{1}^{B}#GT"} );
   pic.CustomizeXRange();
   pic.CustomizeYRange();
   pic.AddLegend(leg1);
@@ -121,6 +122,7 @@ void resolution_presubevent() {
     TFile* fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
     fileOut->cd();
     pic.GetCanvas()->Write();
+    pic.Write("heap_picture");
     fileOut->Close();
   }
 

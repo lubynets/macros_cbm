@@ -119,8 +119,8 @@ void resolution_MC() {
   if(is_write_rootfile) {
     TFile* fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
     fileOut->cd();
-//     pic.GetCanvas()->Write();
-    pic.Dump();
+    pic.GetCanvas()->Write();
+//     pic.Dump();
     pic.Write("heap_picture");
     fileOut->Close();
   }

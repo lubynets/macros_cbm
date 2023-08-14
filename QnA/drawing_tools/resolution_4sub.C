@@ -2,11 +2,11 @@ void resolution_4sub() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
-  std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
+//   std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev." + cuts + ".3122.root";
   std::vector<std::string> correls{"psd1", "psd2", "psd3"};
@@ -68,17 +68,19 @@ void resolution_4sub() {
     multicor_sub4.SlightShiftXAxis(0.3);
 
     HeapPicture pic("picture", {1000, 1000});
+    const float text_size = 20;
+    const int text_font = 63;
     if(evegen == "dcmqgsm") {
-      if(pbeam == "12") pic.AddText({0.18, 0.92, "5M Au+Au"}, 0.025);
-      else              pic.AddText({0.18, 0.92, "5.2M Au+Au"}, 0.025);
-      pic.AddText({0.18, 0.89, "DCM-QGSM-SMM"}, 0.025);
+      if(pbeam == "12") pic.AddText("5M Au+Au", {0.04, 0.96}, text_size, text_font);
+      else              pic.AddText("5.2M Au+Au", {0.04, 0.96}, text_size, text_font);
+      pic.AddText("DCM-QGSM-SMM", {0.04, 0.92}, text_size, text_font);
     }
     if(evegen == "urqmd") {
-      pic.AddText({0.18, 0.92, "2M Au+Au"}, 0.025);
-      pic.AddText({0.18, 0.89, "UrQMD"}, 0.025);
+      pic.AddText("2M Au+Au", {0.04, 0.96}, text_size, text_font);
+      pic.AddText("UrQMD", {0.04, 0.92}, text_size, text_font);
     }
-    pic.AddText({0.18, 0.86, (pbeam + "A GeV/c").c_str()}, 0.025);
-    pic.AddText({0.18, 0.83, "MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT"}, 0.02);
+    pic.AddText(pbeam + "A GeV/c", {0.04, 0.88}, text_size, text_font);
+    pic.AddText("MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT", {0.04, 0.84}, text_size, text_font);
 
     auto leg1 = new TLegend();
     leg1->SetBorderSize(1);
@@ -131,6 +133,7 @@ void resolution_4sub() {
     if(is_write_rootfile) {
       fileOut->cd();
       pic.GetCanvas()->Write();
+      pic.Write("heap_picture");
     }
 
     if(is_first_canvas) pic.GetCanvas()->Print((fileOutName + ".pdf(").c_str(), "pdf");
