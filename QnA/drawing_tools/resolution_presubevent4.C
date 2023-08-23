@@ -2,8 +2,8 @@ void resolution_presubevent4() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
-//   std::string evegen = "urqmd";  std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+  std::string evegen = "urqmd";  std::string pbeam = "12";
 
 //   bool is_write_rootfile = false;
   bool is_write_rootfile = true;
@@ -34,10 +34,10 @@ void resolution_presubevent4() {
 
   multicor.Scale(-1);
 
-  for(auto& comp : components) {
-    multicor.AddCorrelation(fileName, {"R1R1/r1r1.psd1_RECENTERED_psd3_RECENTERED." + comp}, "psd1_psd3");
-    multicor.AddCorrelation(fileName, {"QQ/qq.psd1_RECENTERED_psd3_RECENTERED." + comp}, "psd1_psd3");
-  }
+//   for(auto& comp : components) {
+//     multicor.AddCorrelation(fileName, {"R1R1/r1r1.psd1_RECENTERED_psd3_RECENTERED." + comp}, "psd1_psd3");
+//     multicor.AddCorrelation(fileName, {"QQ/qq.psd1_RECENTERED_psd3_RECENTERED." + comp}, "psd1_psd3");
+//   }
 
   multicor.Rebin({{"SimEventHeader_centrality_impactpar", {0, 10, 20, 30, 40, 50, 60, 70}}});
 
@@ -83,7 +83,7 @@ void resolution_presubevent4() {
   leg1->AddEntry(multicor.GetCorrelations().at(0)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(0)->GetTitle()).c_str(), "L");
   leg1->AddEntry(multicor.GetCorrelations().at(4)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(4)->GetTitle()).c_str(), "L");
   leg1->AddEntry(multicor.GetCorrelations().at(8)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(8)->GetTitle()).c_str(), "L");
-  leg1->AddEntry(multicor.GetCorrelations().at(12)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(12)->GetTitle()).c_str(), "L");
+//   leg1->AddEntry(multicor.GetCorrelations().at(12)->GetPoints(), ("A_B: " + multicor.GetCorrelations().at(12)->GetTitle()).c_str(), "L");
 
   pic.SetAxisTitles( {"Centrality, %", "#LTQ_{1}^{A}Q_{1}^{B}#GT"} );
   pic.CustomizeXRange();
