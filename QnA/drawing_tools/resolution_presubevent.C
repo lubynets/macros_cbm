@@ -1,8 +1,8 @@
 void resolution_presubevent() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
 //   std::string evegen = "urqmd";  std::string pbeam = "12";
 
 //   bool is_write_rootfile = false;

@@ -4,8 +4,8 @@ void lambda_complex_syst() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   gStyle->SetEndErrorSize(4);
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
 //   std::string evegen = "urqmd";   std::string pbeam = "12";
 
   std::string particle = "#Lambda"; std::string pdg = "3122";
@@ -19,8 +19,8 @@ void lambda_complex_syst() {
   bool is_imf = true;
   if(pdg=="3312" || (pdg=="3122" && pbeam=="3.3")) is_imf = false;
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
@@ -46,9 +46,9 @@ void lambda_complex_syst() {
   };
 
   std::vector<Inputs> inputs {
-    {"uPsi", {"Q_psi"}, ""},
-    {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
-    {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
+//     {"uPsi", {"Q_psi"}, ""},
+//     {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
+//     {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
     {"uQ_R1_sub4", {"psd1", "psd2", "psd3"}, "_res_sub4_sts_pipos"},
   };
 
@@ -211,6 +211,7 @@ void lambda_complex_syst() {
         fileOut->cd();
 //         pic.GetCanvas()->SaveAs((fileOutName + ".C").c_str());
         pic.GetCanvas()->Write();
+        pic.Write(("heap_picture_" + (std::string)pic.GetCanvas()->GetName()).c_str());
       }
 
       if(is_first_canvas)

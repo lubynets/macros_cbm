@@ -52,7 +52,7 @@ void resolution_3sub() {
   }
 
 //   multicor_mc.SlightShiftXAxis(0.);
-            
+
   HeapPicture pic("picture", {1000, 1000});
   const float text_size = 20;
   const int text_font = 63;
@@ -67,7 +67,7 @@ void resolution_3sub() {
   }
   pic.AddText(pbeam + "A GeV/c", {0.04, 0.88}, text_size, text_font);
   pic.AddText("MC: R^{A}_{x} = 2#LTQ^{A}_{x}Q^{#Psi}_{x}#GT", {0.04, 0.84}, text_size, text_font);
-  
+
   auto leg1 = new TLegend();
   leg1->SetBorderSize(1);
   
