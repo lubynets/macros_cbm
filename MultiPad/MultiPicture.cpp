@@ -26,6 +26,9 @@ void MultiPicture::Run() {
     MergeLine(j);
   }
   MergeAll();
+  if(!save_intermediate_pictures_) {
+    ExeBash("rm cropped_* merged_*");
+  }
 }
 
 std::pair<int, int> MultiPicture::DeterminePicturesWH(const std::string& name) {
