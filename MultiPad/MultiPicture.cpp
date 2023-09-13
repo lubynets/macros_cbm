@@ -8,9 +8,8 @@
 #include <sstream>
 #include <utility>
 
-MultiPicture::MultiPicture(int nx, int ny) {
-  nx_ = nx;
-  ny_ = ny;
+MultiPicture::MultiPicture(int nx, int ny) : nx_{nx},
+                                             ny_{ny} {
   pad_names_.resize(nx_ * ny_);
   left_margins_.resize(nx_);
   right_margins_.resize(nx_);

@@ -32,8 +32,8 @@ public:
   void Run();
 
 protected:
-  int nx_{};
-  int ny_{};
+  const int nx_{};
+  const int ny_{};
   std::vector<std::string> pad_names_{};
   std::vector<float> left_margins_{};
   std::vector<float> right_margins_{};
