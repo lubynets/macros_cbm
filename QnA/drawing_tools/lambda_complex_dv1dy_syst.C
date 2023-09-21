@@ -2,7 +2,9 @@
 
 void lambda_complex_dv1dy_syst() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
-  gStyle->SetEndErrorSize(5);
+//   gStyle->SetPadLeftMargin(0.11);
+  gStyle->SetPadRightMargin(0.01);
+//   gStyle->SetEndErrorSize(5);
 
   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
@@ -19,8 +21,8 @@ void lambda_complex_dv1dy_syst() {
   bool is_imf = true;
   if(pdg=="3312" || (pdg=="3122" && pbeam=="3.3")) is_imf = false;
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
@@ -145,18 +147,24 @@ void lambda_complex_dv1dy_syst() {
 
       HeapPicture pic(fc, {1000, 1000});
 
-      pic.AddText({0.2, 0.90, particle.c_str()}, 0.03);
-      if(evegen == "dcmqgsm") {
-        if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
-        else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
-        pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+      const float text_size = 24;
+      const int text_font = 63;
+      float text_X = 0.04;
+      float text_Y = 0.96;
+      if(fc == "slope") {
+        pic.AddText(particle.c_str(), {text_X, text_Y}, text_size+8, text_font);
+        if(evegen == "dcmqgsm") {
+          if(pbeam == "12") pic.AddText("5M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
+          else              pic.AddText("5.2M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
+          pic.AddText("DCM-QGSM-SMM", {text_X, text_Y - 0.08}, text_size, text_font);
+        }
+        if(evegen == "urqmd") {
+          pic.AddText("2M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
+          pic.AddText("UrQMD", {text_X, text_Y - 0.08}, text_size, text_font);
+        }
+        pic.AddText((pbeam + "A GeV/c").c_str(), {text_X, text_Y - 0.12}, text_size, text_font);
+        if(ip.resname_ != "") pic.AddText(ip.resname_.substr(1, ip.resname_.size()).c_str(), {text_X, text_Y - 0.16}, text_size, text_font);
       }
-      if(evegen == "urqmd") {
-        pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
-        pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
-      }
-      pic.AddText({0.2, 0.81, (pbeam + "A GeV/c").c_str()}, 0.025);
-      if(ip.resname_ != "") pic.AddText({0.2, 0.78, ip.resname_.substr(1, ip.resname_.size()).c_str()}, 0.025);
 
       auto leg1 = new TLegend();
       leg1->SetBorderSize(1);
@@ -192,13 +200,16 @@ void lambda_complex_dv1dy_syst() {
   //     pic.SetXRange({-0.05, 0.95});
       pic.CustomizeXRange();
       pic.CustomizeYRange();
-      pic.AddLegend(leg1);
+      if(fc == "slope") pic.SetYRange({-0.079, 0.46});
+      else              pic.SetYRange({-0.075, 0.019});
+      if(fc == "slope") pic.AddLegend(leg1);
       pic.CustomizeLegend(leg1);
       pic.Draw();
 
       if(is_write_rootfile) {
         fileOut->cd();
-        pic.GetCanvas()->Write();
+        pic.Write(("heap_picture_" + ip.dirname_).c_str());
+        pic.GetCanvas()->Write(("canvas_" + ip.dirname_).c_str());
       }
 
       if(is_first_canvas)
