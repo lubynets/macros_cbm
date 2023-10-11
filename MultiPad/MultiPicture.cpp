@@ -47,7 +47,14 @@ std::pair<int, int> MultiPicture::DeterminePicturesWH(const std::string& name) {
   return std::make_pair(W, H);
 }
 
-void MultiPicture::CropPicture(const std::string& inname, float left, float right, float bottom, float top, const std::string& outname) const {
+void MultiPicture::CropPicture(std::string inname, float left, float right, float bottom, float top, const std::string& outname) const {
+  bool need_remove_png{false};
+  if(inname.substr(inname.size()-3) == "pdf") {
+    Pdf2Png(inname);
+    inname.erase(inname.size()-3);
+    inname += "png";
+    need_remove_png = true;
+  }
   const std::pair<int, int> aspect_ratio = DeterminePicturesWH(inname);
   const float fNpixL = left * (float)aspect_ratio.first;
   const float fNpixB = bottom * (float)aspect_ratio.second;
@@ -58,7 +65,7 @@ void MultiPicture::CropPicture(const std::string& inname, float left, float righ
   const std::string sNpixR = to_string_with_precision(fNpixR, 0);
   const std::string sNpixT = to_string_with_precision(fNpixT, 0);
 
-  const std::string command = (std::string)"convert " + inname +
+  std::string command = (std::string)"convert " + inname +
                               " -gravity north -chop 0x" + sNpixT +
                               " -gravity east -chop " + sNpixR + "x0" +
                               " -gravity south -chop 0x" + sNpixB +
@@ -66,6 +73,10 @@ void MultiPicture::CropPicture(const std::string& inname, float left, float righ
                               " " + outname;
 
   ExeBash(command);
+  if(need_remove_png) {
+    command = "rm " + inname;
+    ExeBash(command);
+  }
 }
 
 void MultiPicture::CropPicture(int i, int j) const {
@@ -75,6 +86,15 @@ void MultiPicture::CropPicture(int i, int j) const {
   const float b = j == 0 ? 0 : bottom_margins_.at(j);
   const float t = j == ny_-1 ? 0 : top_margins_.at(j);
   CropPicture(pad_names_.at(TransformCoordinates(i, j)), l, r, b, t, outname);
+}
+
+void MultiPicture::Pdf2Png(const std::string& inname) const {
+  if(inname.substr(inname.size()-3) != "pdf") {
+    throw std::runtime_error("MultiPicture::Pdf2Png() - requires pdf file as input");
+  }
+  const std::string command = "pdftoppm -png -cropbox -singlefile " + inname + " " + inname.substr(0, inname.size()-4);
+
+  ExeBash(command);
 }
 
 void MultiPicture::MergeLine(int j) const {

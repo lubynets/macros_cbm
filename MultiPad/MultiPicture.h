@@ -43,8 +43,9 @@ protected:
   bool save_intermediate_pictures_{false};
 
   static std::pair<int, int> DeterminePicturesWH(const std::string& name) ;
-  void CropPicture(const std::string& inname, float left, float right, float bottom, float top, const std::string& outname) const;
+  void CropPicture(std::string inname, float left, float right, float bottom, float top, const std::string& outname) const;
   void CropPicture(int i, int j) const;
+  void Pdf2Png(const std::string& inname) const;
   void MergeLine(int j) const;
   void MergeAll() const;
   void ExeBash(const std::string& command) const;
