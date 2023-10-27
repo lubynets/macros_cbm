@@ -19,7 +19,7 @@ struct Axis
 std::vector<Axis> axes // 3122, 310
 {
   {"pT", "SimParticles_pT", "ReconstructedParticles_pT", "pT", "p_{T}", ", GeV/c", {}, 0., 1},
-  {"rapidity", "SimParticles_rapidity", "ReconstructedParticles_rapidity", "y", "y_{CM}", "", {}, -1.62179, 1},
+  {"rapidity", "SimParticles_rapidity", "ReconstructedParticles_rapidity", "y", "y_{CM}", "", {}, -1.62179, 2},
 //   {"rapidity", "SimParticles_rapidity", "ReconstructedParticles_rapidity", "y", "y_{CM}", "", {}, -0.985344, 1},
   {"centrality", "RecEventHeader_centrality_tracks", "RecEventHeader_centrality_tracks", "centrality", "centrality", ", %", {}, 0., 0}
 };

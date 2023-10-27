@@ -12,7 +12,10 @@ void v1_complex()
 //   std::string cut = "dc";
 //   std::string cut = "oc1";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/cl." + evegen + "." + pbeam + "agev." + cut + "." + pdg + ".root";
+  //   std::string is_fine_pt = "";
+  std::string is_fine_pt = "_finept";
+
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/cl." + evegen + "." + pbeam + "agev." + cut + "." + pdg + is_fine_pt + ".root";
 
   TFile* fileIn = TFile::Open(fileName.c_str());
   

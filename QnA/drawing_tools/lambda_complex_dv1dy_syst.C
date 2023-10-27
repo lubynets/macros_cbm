@@ -14,6 +14,9 @@ void lambda_complex_dv1dy_syst() {
 //   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
 // //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
 
+  //   std::string is_fine_pt = "";
+  std::string is_fine_pt = "_finept";
+
   std::string cuts = "lc1";
   if(pbeam == "3.3") cuts = "oc1";
   if(pdg == "3312") cuts = "dc";
@@ -27,11 +30,13 @@ void lambda_complex_dv1dy_syst() {
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
-  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
+  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
 
-  SetAxis("centrality", "projection");
-  SetAxis("pT", "slice");
+//   SetAxis("centrality", "projection");
+//   SetAxis("pT", "slice");
+  SetAxis("centrality", "slice");
+  SetAxis("pT", "projection");
 
   if(!is_imf) {
     fileRecName = fileMcName;
@@ -101,6 +106,7 @@ void lambda_complex_dv1dy_syst() {
       v1_sim.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
       v1_sim.ShiftSliceAxis(axes.at(kSlice).shift_);
       v1_sim.ShiftProjectionAxis(axes.at(kProjection).shift_);
+      v1_sim.SetSliceAxisPrecision(axes.at(kSlice).precision_);
       v1_sim.Calculate();
 
       std::vector<std::string> v1_rec_nofit_names;
@@ -120,7 +126,8 @@ void lambda_complex_dv1dy_syst() {
       v1_rec_nofit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
       v1_rec_nofit.ShiftSliceAxis(axes.at(kSlice).shift_);
       v1_rec_nofit.ShiftProjectionAxis(axes.at(kProjection).shift_);
-      v1_rec_nofit.SlightShiftProjectionAxis(1, 0.5);
+//       v1_rec_nofit.SlightShiftProjectionAxis(1, 0.5);
+      v1_rec_nofit.SetSliceAxisPrecision(axes.at(kSlice).precision_);
       v1_rec_nofit.Calculate();
 
       std::vector<std::string> v1_rec_fit_names;
@@ -142,7 +149,8 @@ void lambda_complex_dv1dy_syst() {
       v1_rec_fit.SetSliceAxis({axes.at(kSlice).reco_fit_name_.c_str(), axes.at(kSlice).bin_edges_});
       v1_rec_fit.ShiftSliceAxis(axes.at(kSlice).shift_);
       v1_rec_fit.ShiftProjectionAxis(axes.at(kProjection).shift_);
-      v1_rec_fit.SlightShiftProjectionAxis(1);
+//       v1_rec_fit.SlightShiftProjectionAxis(1);
+      v1_rec_fit.SetSliceAxisPrecision(axes.at(kSlice).precision_);
       v1_rec_fit.Calculate();
 
       HeapPicture pic(fc, {1000, 1000});
@@ -203,7 +211,7 @@ void lambda_complex_dv1dy_syst() {
       if(fc == "slope") pic.SetYRange({-0.079, 0.46});
       else              pic.SetYRange({-0.075, 0.019});
       if(fc == "slope") pic.AddLegend(leg1);
-      pic.CustomizeLegend(leg1);
+      pic.SetIsCustomizeLegend();
       pic.Draw();
 
       if(is_write_rootfile) {

@@ -5,15 +5,18 @@ void fit_flow() {
 
   gROOT->Macro("/home/oleksii/cbmdir/flow_drawing_tools/example/style_1.cc");
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-  std::string evegen = "urqmd"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "urqmd"; std::string pbeam = "12";
 
-//   const float mu = 1.115683; std::string particle = "lambda"; std::string pdg = "3122";
+  const float mu = 1.115683; std::string particle = "lambda"; std::string pdg = "3122";
 
-  const float mu = 0.497611; std::string particle = "kshort"; std::string pdg = "310";
+//   const float mu = 0.497611; std::string particle = "kshort"; std::string pdg = "310";
 
-  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
-  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/shape." + evegen + "." + pbeam + "agev.lc1." + pdg + ".root";
+//   std::string is_fine_pt = "";
+  std::string is_fine_pt = "_finept";
+
+  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev.lc1." + pdg + is_fine_pt + ".root";
+  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/shape." + evegen + "." + pbeam + "agev.lc1." + pdg + is_fine_pt + ".root";
 
   TFile* shapefile = TFile::Open(shapefilename.c_str(), "read");
   Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>* shcntr = (Qn::DataContainer<Qn::ShapeContainer, Qn::Axis<double>>*) shapefile->Get(/*"ReFit"*/"PreFit" );

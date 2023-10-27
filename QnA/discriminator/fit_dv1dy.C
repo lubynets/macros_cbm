@@ -25,11 +25,13 @@ void fit_dv1dy() {
 //   std::string pdg = "310"; std::string cuts = "oc1";
 //   std::string pdg = "3312"; std::string cuts = "dc";
 
+  //   std::string is_fine_pt = "";
+  std::string is_fine_pt = "_finept";
 
   //**** aXmass
   fileInPath = "/home/oleksii/cbmdir/working/qna/aXmass";
-  fileInName = "vR." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
-//   fileInName = "of." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+//   fileInName = "vR." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
+  fileInName = "of." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
 
 
 //   //**** stf
