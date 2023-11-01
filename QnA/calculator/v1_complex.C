@@ -4,8 +4,8 @@ void v1_complex()
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
 //   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-  std::string pdg = "3122";
-//   std::string pdg = "310";
+//   std::string pdg = "3122";
+  std::string pdg = "310";
 //   std::string pdg = "3312";
 
   std::string cut = "lc1";
@@ -22,6 +22,7 @@ void v1_complex()
   std::vector<std::string> components{"x1x1", "y1y1"/*, "x1y1", "y1x1"*/};
   std::vector<std::string> subevents{"psd1", "psd2", "psd3"};
   std::vector<std::string> subevents_etacut{"etacut_1_all", "etacut_2_all", "etacut_3_all", "etacut_1_charged", "etacut_2_charged", "etacut_3_charged"};
+  if(cut == "oc1") subevents_etacut.clear();
   std::vector<std::string> sub4th{"sts_pipos"};
   
   TFile* fileOut = TFile::Open("v1andR1.root", "recreate");
@@ -96,20 +97,22 @@ void v1_complex()
     }
   }
 
-  for(int i=0; i<subevents.size(); i++) {
-    Correlation uQ(fileIn, "uQ", {"u_sim_PLAIN", subevents.at(i) + "_RECENTERED"}, components);
+  if(cut != "oc1") {
+    for(int i=0; i<subevents.size(); i++) {
+      Correlation uQ(fileIn, "uQ", {"u_sim_PLAIN", subevents.at(i) + "_RECENTERED"}, components);
 
-    fileOut->cd("v1/usimQ_R1_MC");
-    auto uQ_R1_MC = uQ / R1_MC.at(i) * 2.;
-    uQ_R1_MC.Save("v1.u_sim." + subevents.at(i) + "_res_MC");
-  }
+      fileOut->cd("v1/usimQ_R1_MC");
+      auto uQ_R1_MC = uQ / R1_MC.at(i) * 2.;
+      uQ_R1_MC.Save("v1.u_sim." + subevents.at(i) + "_res_MC");
+    }
 
-  for(int i=0; i<subevents_etacut.size(); i++) {
-    Correlation uQ(fileIn, "uQ", {"u_sim_PLAIN", subevents_etacut.at(i) + "_PLAIN"}, components);
+    for(int i=0; i<subevents_etacut.size(); i++) {
+      Correlation uQ(fileIn, "uQ", {"u_sim_PLAIN", subevents_etacut.at(i) + "_PLAIN"}, components);
 
-    fileOut->cd("v1/usimQ_R1_MC");
-    auto uQ_R1_MC = uQ / R1_MC.at(subevents.size() + i) * 2.;
-    uQ_R1_MC.Save("v1.u_sim." + subevents_etacut.at(i) + "_res_MC");
+      fileOut->cd("v1/usimQ_R1_MC");
+      auto uQ_R1_MC = uQ / R1_MC.at(subevents.size() + i) * 2.;
+      uQ_R1_MC.Save("v1.u_sim." + subevents_etacut.at(i) + "_res_MC");
+    }
   }
 
   for(int i=0; i<subevents.size(); i++) {

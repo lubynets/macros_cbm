@@ -17,13 +17,15 @@ void fit_dv1dy() {
 //   rangestoslice.resize(axestoslice.size());
 //   rangestoslice.at(0) = {0, 6, 10, 15, 20, 30, 40, 70};
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12"; midrapidity = 1.6217901;
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; midrapidity = 0.985344;
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; midrapidity = 1.6217901;
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; midrapidity = 0.985344;
 //   std::string evegen = "urqmd"; std::string pbeam = "12"; midrapidity = 1.6217901;
 
-  std::string pdg = "3122"; std::string cuts = "lc1";
-//   std::string pdg = "310"; std::string cuts = "oc1";
+//   std::string pdg = "3122"; std::string cuts = "lc1";
+  std::string pdg = "310"; std::string cuts = "lc1";
 //   std::string pdg = "3312"; std::string cuts = "dc";
+
+  if(pdg!="3312" && pbeam=="3.3") cuts = "oc1";
 
   //   std::string is_fine_pt = "";
   std::string is_fine_pt = "_finept";
@@ -32,7 +34,6 @@ void fit_dv1dy() {
   fileInPath = "/home/oleksii/cbmdir/working/qna/aXmass";
 //   fileInName = "vR." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
   fileInName = "of." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
-
 
 //   //**** stf
 //   fileInPath = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen  + "/" + pbeam + "agev";

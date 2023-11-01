@@ -11,15 +11,18 @@ void fit_shape() {
 //   std::string evegen = "urqmd"; std::string pbeam = "12";
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.lc1.3122_finept.root";
-  const float mu = 1.115683;
-  const float sigma = 0.00145786;
-  std::string particle = "#Lambda";
+  //   std::string is_fine_pt = "";
+  std::string is_fine_pt = "_finept";
 
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.lc1.310.root";
-//   const float mu = 0.497611;
-//   const float sigma = 0.0037;
-//   std::string particle = "K^{0}_{S}";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.lc1.3122" + is_fine_pt + ".root";
+//   const float mu = 1.115683;
+//   const float sigma = 0.00145786;
+//   std::string particle = "#Lambda";
+
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.lc1.310" + is_fine_pt + ".root";
+  const float mu = 0.497611;
+  const float sigma = 0.0037;
+  std::string particle = "K^{0}_{S}";
 
 //   std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.dc1.3312.root";
 //   const float mu = 1.32171;

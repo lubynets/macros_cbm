@@ -5,8 +5,8 @@ void fit_flow() {
 
   gROOT->Macro("/home/oleksii/cbmdir/flow_drawing_tools/example/style_1.cc");
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-//   std::string evegen = "urqmd"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "urqmd"; std::string pbeam = "12";
 
   const float mu = 1.115683; std::string particle = "lambda"; std::string pdg = "3122";
 

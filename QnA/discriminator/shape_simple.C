@@ -5,7 +5,10 @@ void shape_simple() {
 
   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
 
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.oc1.310.root";
+  //   std::string is_fine_pt = "";
+  std::string is_fine_pt = "_finept";
+
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/massDC." + evegen + "." + pbeam + "agev.oc1.310" + is_fine_pt + ".root";
   const float mu = 0.497611;
   const float shift = 0.0476;
   const float tail_width = 0.02;

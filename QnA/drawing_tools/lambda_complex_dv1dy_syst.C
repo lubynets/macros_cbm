@@ -6,12 +6,12 @@ void lambda_complex_dv1dy_syst() {
   gStyle->SetPadRightMargin(0.01);
 //   gStyle->SetEndErrorSize(5);
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
-//   std::string evegen = "urqmd";   std::string pbeam = "12";
+  std::string evegen = "urqmd";   std::string pbeam = "12";
 
-  std::string particle = "#Lambda"; std::string pdg = "3122";
-//   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
+//   std::string particle = "#Lambda"; std::string pdg = "3122";
+  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
 // //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
 
   //   std::string is_fine_pt = "";
@@ -24,8 +24,8 @@ void lambda_complex_dv1dy_syst() {
   bool is_imf = true;
   if(pdg=="3312" || (pdg=="3122" && pbeam=="3.3")) is_imf = false;
 
-//   bool is_write_rootfile = false;
-  bool is_write_rootfile = true;
+  bool is_write_rootfile = false;
+//   bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
@@ -77,6 +77,15 @@ void lambda_complex_dv1dy_syst() {
     }
   }
 
+  float slightprojshift;
+  if(axes.at(kSlice).name_ == "centrality") {
+    if(pbeam == "12") SetSliceAxisBinEdges({0, 5, 20, 40, 70});
+    else              SetSliceAxisBinEdges({0, 20, 40, 70});
+    slightprojshift = 0.015;
+  } else {
+    slightprojshift = 1;
+  }
+
   TFile* fileOut;
 
   for(auto& fc : fitcoeffs) {
@@ -126,7 +135,7 @@ void lambda_complex_dv1dy_syst() {
       v1_rec_nofit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
       v1_rec_nofit.ShiftSliceAxis(axes.at(kSlice).shift_);
       v1_rec_nofit.ShiftProjectionAxis(axes.at(kProjection).shift_);
-//       v1_rec_nofit.SlightShiftProjectionAxis(1, 0.5);
+      v1_rec_nofit.SlightShiftProjectionAxis(slightprojshift, slightprojshift/2);
       v1_rec_nofit.SetSliceAxisPrecision(axes.at(kSlice).precision_);
       v1_rec_nofit.Calculate();
 
@@ -149,7 +158,7 @@ void lambda_complex_dv1dy_syst() {
       v1_rec_fit.SetSliceAxis({axes.at(kSlice).reco_fit_name_.c_str(), axes.at(kSlice).bin_edges_});
       v1_rec_fit.ShiftSliceAxis(axes.at(kSlice).shift_);
       v1_rec_fit.ShiftProjectionAxis(axes.at(kProjection).shift_);
-//       v1_rec_fit.SlightShiftProjectionAxis(1);
+      v1_rec_fit.SlightShiftProjectionAxis(slightprojshift);
       v1_rec_fit.SetSliceAxisPrecision(axes.at(kSlice).precision_);
       v1_rec_fit.Calculate();
 
@@ -208,8 +217,8 @@ void lambda_complex_dv1dy_syst() {
   //     pic.SetXRange({-0.05, 0.95});
       pic.CustomizeXRange();
       pic.CustomizeYRange();
-      if(fc == "slope") pic.SetYRange({-0.079, 0.46});
-      else              pic.SetYRange({-0.075, 0.019});
+//       if(fc == "slope") pic.SetYRange({-0.079, 0.46});
+//       else              pic.SetYRange({-0.075, 0.019});
       if(fc == "slope") pic.AddLegend(leg1);
       pic.SetIsCustomizeLegend();
       pic.Draw();

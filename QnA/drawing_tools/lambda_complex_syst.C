@@ -7,12 +7,12 @@ void lambda_complex_syst() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   gStyle->SetEndErrorSize(4);
 
-  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
 //   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-  std::string particle = "#Lambda"; std::string pdg = "3122";
-//   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
+//   std::string particle = "#Lambda"; std::string pdg = "3122";
+  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
 // //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
 
 //     std::string is_fine_pt = "";
@@ -54,8 +54,8 @@ void lambda_complex_syst() {
   };
 
   std::vector<Inputs> inputs {
-//     {"uPsi", {"Q_psi"}, ""},
-//     {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
+    {"uPsi", {"Q_psi"}, ""},
+    {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
 //     {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
     {"uQ_R1_sub4", {"psd1", "psd2", "psd3"}, "_res_sub4_sts_pipos"},
   };
@@ -82,6 +82,18 @@ void lambda_complex_syst() {
 //                               0.5-axes.at(kProjection).shift_,
 //                               0.7-axes.at(kProjection).shift_});
 
+  if(axes.at(kProjection).name_ == "pT") {
+    const float midrap = -axes.at(kSlice).shift_ ;
+    if(pbeam == "12") {
+      if(pdg == "3122") SetSliceAxisBinEdges({-0.75+midrap, -0.15+midrap, 0.15+midrap, 1.05+midrap});
+      if(pdg == "310") SetSliceAxisBinEdges({-0.45+midrap, -0.15+midrap, 0.15+midrap, 1.05+midrap});
+    }
+    if(pbeam == "3.3") {
+      if(pdg == "3122") SetSliceAxisBinEdges({-0.3+midrap, 0.3+midrap, 0.7+midrap, 1.1+midrap});
+      if(pdg == "310") SetSliceAxisBinEdges({-0.1+midrap, 0.1+midrap, 0.5+midrap, 1.3+midrap});
+    }
+  }
+
   TFile* fileOut;
 
   for(auto& ip : inputs) {
@@ -93,6 +105,9 @@ void lambda_complex_syst() {
 
     for(int iEdge=0; iEdge<axes.at(kSelect).bin_edges_.size()-1; iEdge++) {
       if(verbose) std::cout << "iEdge = " << iEdge << "\n";
+
+      // ad. hoc.
+//       if(iEdge==3 && axes.at(kProjection).name_ == "pT" && pbeam == "3.3" && pdg == "310")
 
       std::vector<std::string> v1_sim_names;
       for(auto& co : components) {
@@ -162,7 +177,7 @@ void lambda_complex_syst() {
                         {axes.at(kSelect).bin_edges_.at(iEdge), axes.at(kSelect).bin_edges_.at(iEdge+1)}}});
       v1_rec_fit.SetProjectionAxis({axes.at(kProjection).reco_fit_name_.c_str(), axes.at(kProjection).bin_edges_});
       v1_rec_fit.SetSliceAxis({axes.at(kSlice).reco_fit_name_.c_str(), axes.at(kSlice).bin_edges_});
-      v1_rec_fit.ShiftSliceAxis(axes.at(kSlice).shift_);  // produces problems when slice along rapidity and project along pt
+      v1_rec_fit.ShiftSliceAxis(axes.at(kSlice).shift_);
       v1_rec_fit.ShiftProjectionAxis(axes.at(kProjection).shift_);
       v1_rec_fit.SlightShiftProjectionAxis(0.025);
       v1_rec_fit.SetSliceAxisPrecision(axes.at(kSlice).precision_);

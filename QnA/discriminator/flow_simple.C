@@ -3,8 +3,11 @@ void flow_simple() {
   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
   const float mu = 0.497611; std::string particle = "kshort"; std::string pdg = "310";
 
-  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev.oc1." + pdg + ".root";
-  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/shapesimple." + evegen + "." + pbeam + "agev.oc1." + pdg + ".root";
+  //   std::string is_fine_pt = "";
+  std::string is_fine_pt = "_finept";
+
+  std::string v1filename = "/home/oleksii/cbmdir/working/qna/aXmass/vR." + evegen + "." + pbeam + "agev.oc1." + pdg + is_fine_pt + ".root";
+  std::string shapefilename = "/home/oleksii/cbmdir/working/qna/aXmass/shapes/shapesimple." + evegen + "." + pbeam + "agev.oc1." + pdg + is_fine_pt + ".root";
 
   TFile* shapefile = TFile::Open(shapefilename.c_str(), "read");
   Qn::DataContainerStatDiscriminator* shcntr = (Qn::DataContainerStatDiscriminator*) shapefile->Get( "Purities" );
