@@ -3,12 +3,12 @@
 void lambda_rtpshort() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
-  std::string evegen = "urqmd";   std::string pbeam = "12";
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-  std::string particle = "#Lambda"; std::string pdg = "3122";
-//   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
+//   std::string particle = "#Lambda"; std::string pdg = "3122";
+  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
 // //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
 
   std::string cuts = "lc1";
@@ -78,11 +78,13 @@ void lambda_rtpshort() {
 
       auto* sim_slope = (QnDcSD*)fileDv1Dy->Get<QnDcSD>("v1/usimPsi/slope/v1.u_sim.Q_psi.ave");
       auto* sim_offset = (QnDcSD*)fileDv1Dy->Get<QnDcSD>("v1/usimPsi/intercept/v1.u_sim.Q_psi.ave");
-      if(sim_slope==nullptr || sim_offset==nullptr) throw std::runtime_error("sim_slope==nullptr || sim_offset==nullptr");
+      auto* sim_third = (QnDcSD*)fileDv1Dy->Get<QnDcSD>("v1/usimPsi/third/v1.u_sim.Q_psi.ave");
+      if(sim_slope==nullptr || sim_offset==nullptr || sim_third==nullptr) throw std::runtime_error("sim_slope==nullptr || sim_offset==nullptr || sim_third==nullptr");
 
       auto* rec_slope = (QnDcSD*)fileDv1Dy->Get<QnDcSD>(("v1/" + ip.dirname_ + "/slope/v1.u_rec_sgnl." + se + ip.resname_ + ".ave").c_str());
       auto* rec_offset = (QnDcSD*)fileDv1Dy->Get<QnDcSD>(("v1/" + ip.dirname_ + "/intercept/v1.u_rec_sgnl." + se + ip.resname_ + ".ave").c_str());
-      if(rec_slope==nullptr || rec_offset==nullptr) throw std::runtime_error("rec_slope==nullptr || rec_offset==nullptr");
+      auto* rec_third = (QnDcSD*)fileDv1Dy->Get<QnDcSD>(("v1/" + ip.dirname_ + "/third/v1.u_rec_sgnl." + se + ip.resname_ + ".ave").c_str());
+      if(rec_slope==nullptr || rec_offset==nullptr || rec_third==nullptr) throw std::runtime_error("rec_slope==nullptr || rec_offset==nullptr || rec_third==nullptr");
 
       bool select_then_slice;
       if(sim_slope->GetAxes().at(0).Name() == axes.at(kSelect).sim_name_.c_str() &&
@@ -104,7 +106,7 @@ void lambda_rtpshort() {
         v1_sim.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         v1_sim.SetMarker(-1);
         v1_sim.SetIsFillLine();
-        v1_sim.SetPalette(palette1);
+        v1_sim.SetPalette(Helper::palette1);
         v1_sim.SetBiasPalette(false);
         v1_sim.Rebin({{axes.at(kSelect).sim_name_.c_str(),
                       {axes.at(kSelect).bin_edges_.at(iEdge), axes.at(kSelect).bin_edges_.at(iEdge+1)}}});
@@ -122,7 +124,7 @@ void lambda_rtpshort() {
         v1_rec.SetMeanType(mean_mode);
         v1_rec.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
         v1_rec.SetMarker(kFullSquare);
-        v1_rec.SetPalette(palette1);
+        v1_rec.SetPalette(Helper::palette1);
         v1_rec.SetBiasPalette(false);
         v1_rec.Rebin({{axes.at(kSelect).reco_name_.c_str(),
                       {axes.at(kSelect).bin_edges_.at(iEdge), axes.at(kSelect).bin_edges_.at(iEdge+1)}}});
@@ -177,31 +179,25 @@ void lambda_rtpshort() {
           leg1->AddEntry( obj->GetPoints(), obj->GetTitle().c_str(), "P" );
         }
         for(unsigned long iSlice=0; iSlice<v1_sim.GetProjections().size(); iSlice++) {
-          float k, b;
-          if(select_then_slice) {
-            k = sim_slope->At({iEdge, iSlice}).Mean();
-            b = sim_offset->At({iEdge, iSlice}).Mean();
-          } else {
-            k = sim_slope->At({iSlice, iEdge}).Mean();
-            b = sim_offset->At({iSlice, iEdge}).Mean();
-          }
-          TF1* fsim = new TF1("fsim", "[0]+[1]*x", -10, 10);
-          fsim->SetParameters(b, k);
+          float k, b, p3;
+          const unsigned long i1 = select_then_slice ? iEdge : iSlice;
+          const unsigned long i2 = select_then_slice ? iSlice : iEdge;
+          k = sim_slope->At({i1, i2}).Mean();
+          b = sim_offset->At({i1, i2}).Mean();
+          p3 = sim_third->At({i1, i2}).Mean();
+          TF1* fsim = new TF1("fsim", "[0]+[1]*x+[2]*x*x*x", -10, 10);
+          fsim->SetParameters(b, k, p3);
           fsim->SetLineStyle(2);
-          fsim->SetLineColor(palette1.at(iSlice));
+          fsim->SetLineColor(Helper::palette1.at(iSlice));
           pic.AddFunction(fsim);
 
-          if(select_then_slice) {
-            k = rec_slope->At({iEdge, iSlice}).Mean();
-            b = rec_offset->At({iEdge, iSlice}).Mean();
-          } else {
-            k = rec_slope->At({iSlice, iEdge}).Mean();
-            b = rec_offset->At({iSlice, iEdge}).Mean();
-          }
-          TF1* frec = new TF1("frec", "[0]+[1]*x", -10, 10);
-          frec->SetParameters(b, k);
+          k = rec_slope->At({i1, i2}).Mean();
+          b = rec_offset->At({i1, i2}).Mean();
+          p3 = rec_third->At({i1, i2}).Mean();
+          TF1* frec = new TF1("frec", "[0]+[1]*x+[2]*x*x*x", -10, 10);
+          frec->SetParameters(b, k, p3);
           frec->SetLineStyle(1);
-          frec->SetLineColor(palette1.at(iSlice));
+          frec->SetLineColor(Helper::palette1.at(iSlice));
           pic.AddFunction(frec);
         }
 
@@ -212,7 +208,7 @@ void lambda_rtpshort() {
         pic.CustomizeXRange();
         pic.CustomizeYRangeWithLimits(-0.3, 0.6);
         pic.AddLegend(leg1);
-        pic.CustomizeLegend(leg1);
+        pic.SetIsCustomizeLegend();
 //         pic.SetGridXY();
         pic.Draw();
 

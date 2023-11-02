@@ -1,5 +1,7 @@
 #include "Helper.hpp"
 
+typedef Qn::DataContainerStatDiscriminator QnDcSD;
+
 std::string fileInPath;
 std::string fileInName;
 std::vector <TString> object_paths;
@@ -16,14 +18,14 @@ std::vector<std::vector<double>> rangestoslice;
 std::vector<std::string> axestoignore;
 float midrapidity;
 TString fileOutName;
+bool is_pol3{false};
 
 void BuildObjectList(TDirectory *folder, int depth = 0);
 bool CheckAxes(Qn::DataContainer<Qn::StatDiscriminator,Qn::Axis<double>>* obj);
-std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn);
-// std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn_1, Qn::DataContainerStatDiscriminator dcIn_2);
+std::vector<QnDcSD> Fit(QnDcSD dcIn);
 
-std::pair<Qn::DataContainerStatDiscriminator, Qn::DataContainerStatDiscriminator> Fit(Qn::DataContainerStatDiscriminator dcIn_1, Qn::DataContainerStatDiscriminator dcIn_2) {
-  Qn::DataContainerStatDiscriminator dcIn = (dcIn_1 + dcIn_2)/2;
+std::vector<QnDcSD> Fit(QnDcSD dcIn_1, QnDcSD dcIn_2) {
+  QnDcSD dcIn = (dcIn_1 + dcIn_2)/2;
 
   return Fit(dcIn);
 }

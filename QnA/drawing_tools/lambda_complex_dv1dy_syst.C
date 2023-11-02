@@ -1,21 +1,19 @@
 #include "lambda.h"
 
-void lambda_complex_dv1dy_syst() {
+void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1) {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   gStyle->SetPadLeftMargin(0.11);
   gStyle->SetPadRightMargin(0.01);
-//   gStyle->SetEndErrorSize(5);
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
-  std::string evegen = "urqmd";   std::string pbeam = "12";
+  std::string evegen, pbeam, pdg, particle;
 
-//   std::string particle = "#Lambda"; std::string pdg = "3122";
-  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
-// //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
+  if(iSetup==1) {evegen = "dcmqgsm"; pbeam = "12"; }
+  if(iSetup==2) {evegen = "dcmqgsm"; pbeam = "3.3"; axes.at(1).shift_ = -0.985344;}
+  if(iSetup==3) {evegen = "urqmd";   pbeam = "12"; }
 
-  //   std::string is_fine_pt = "";
-  std::string is_fine_pt = "_finept";
+  if(iPdg==1) {pdg = "3122"; particle = "#Lambda";  }
+  if(iPdg==2) {pdg = "310";  particle = "K^{0}_{S}";}
+  if(iPdg==3) {pdg = "3312"; particle = "#Xi^{-}";  }
 
   std::string cuts = "lc1";
   if(pbeam == "3.3") cuts = "oc1";
@@ -24,19 +22,24 @@ void lambda_complex_dv1dy_syst() {
   bool is_imf = true;
   if(pdg=="3312" || (pdg=="3122" && pbeam=="3.3")) is_imf = false;
 
+//   pdg += "_finept";
+
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
-  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
+//   std::string pol = "pol1";
+  std::string pol = "pol3";
 
-//   SetAxis("centrality", "projection");
-//   SetAxis("pT", "slice");
-  SetAxis("centrality", "slice");
-  SetAxis("pT", "projection");
+  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy_" + pol + "." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy_" + pol + "." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+
+  SetAxis("centrality", "projection");
+  SetAxis("pT", "slice");
+//   SetAxis("centrality", "slice");
+//   SetAxis("pT", "projection");
 
   if(!is_imf) {
     fileRecName = fileMcName;
