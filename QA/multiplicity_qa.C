@@ -7,10 +7,13 @@ void multiplicity_qa(std::vector<std::string> filelist)
   auto* conf = treeIn->GetConfiguration();
   auto* sim_event_header = new AnalysisTree::EventHeader();
   auto* vtx_tracks = new AnalysisTree::TrackDetector();
+  auto* rec_event_header = new AnalysisTree::EventHeader();
   treeIn->SetBranchAddress("SimEventHeader.", &sim_event_header);
+  treeIn->SetBranchAddress("RecEventHeader.", &rec_event_header);
   treeIn->SetBranchAddress("VtxTracks.", &vtx_tracks);
   
   const int b_id = conf->GetBranchConfig("SimEventHeader").GetFieldId("b");
+  const int epsd_id = conf->GetBranchConfig("RecEventHeader").GetFieldId("Epsd");
   
 //------------------- CbmGoodVertexTrack ------------------------------------------------------------  
   AnalysisTree::SimpleCut vtx_chi2_track_cut = AnalysisTree::RangeCut("VtxTracks.vtx_chi2", 0, 3);
@@ -33,13 +36,21 @@ void multiplicity_qa(std::vector<std::string> filelist)
   const int Nevents = treeIn->GetEntries();
   TFile* fileOut = TFile::Open("multiplicity_qa.root", "recreate");
   TH1F hMult("hMult", "", 1001, -0.5, 1000.5);
+  TH1F hE("hE", "", 600, 0, 60);
   TH1F hB("hB", "", 600, 0, 20);
-  TH2F hCorr("hCorr", "", 601, -0.5, 600.5, 600, 0, 20);
+  TH2F hB_Mult("hB_Mult", "", 600, 0, 20, 601, -0.5, 600.5);
+  TH2F hB_E("hB_E", "", 600, 0, 20, 600, 0, 60);
+  hB.GetXaxis()->SetTitle("b, fm");
+  hB.GetYaxis()->SetTitle("Entries");
+  hE.GetXaxis()->SetTitle("E_{PSD}, GeV");
+  hE.GetYaxis()->SetTitle("Entries");
   hMult.GetXaxis()->SetTitle("Multiplicity");
   hMult.GetYaxis()->SetTitle("Entries");
-  hCorr.GetXaxis()->SetTitle("Multiplicity");
-  hCorr.GetYaxis()->SetTitle("b, fm");
-  
+  hB_Mult.GetXaxis()->SetTitle("b, fm");
+  hB_Mult.GetYaxis()->SetTitle("Multiplicity");
+  hB_E.GetXaxis()->SetTitle("b, fm");
+  hB_E.GetYaxis()->SetTitle("E_{PSD}, GeV");
+
   
   for(int i=0; i<Nevents; i++)
   {
@@ -54,13 +65,20 @@ void multiplicity_qa(std::vector<std::string> filelist)
     }
     
     hMult.Fill(m);
-    hCorr.Fill(m, b);
+    hB_Mult.Fill(b, m);
     hB.Fill(b);
+
+    const float e = rec_event_header->GetField<float>(epsd_id);
+
+    hE.Fill(e);
+    hB_E.Fill(b, e);
   }
   
   hMult.Write();
   hB.Write();
-  hCorr.Write();
+  hB_Mult.Write();
+  hE.Write();
+  hB_E.Write();
   fileOut->Close();  
   
   std::cout << "Macro finished successfully" << std::endl;

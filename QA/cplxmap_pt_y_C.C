@@ -7,22 +7,23 @@ void cplxmap_pt_y_C(std::string filelist_sim, std::string filelist_rec, float pb
   const TString y_name = "y_{LAB}";
   const TString pT_name = "p_{T}, GeV/c";
   const TString C_name = "Centrality, %";
-  const int y_nbins = 22;
-  const int pT_nbins = 26;
-//   const int y_nbins = 11;
-//   const int pT_nbins = 13;
+//   const int y_nbins = 50;
+//   const int pT_nbins = 26;
+  std::vector<float> C_edges{0, 5, 10, 20, 30, 40, 70, 100};
+  const int y_nbins = 25;
+  const int pT_nbins = 13;
+//   std::vector<float> C_edges{0, 100};
+  const int C_nbins = C_edges.size() - 1;
   const float midrapidity = MidRapidityByPbeam(pbeam);
-  const float y_low = midrapidity - 0.8;
-  const float y_up = midrapidity + 1.4;
+  const float y_low = midrapidity - 2.0;
+  const float y_up = midrapidity + 3.0;
   const float pT_low = 0.;
   const float pT_up = 2.6;
-  std::vector<float> C_edges{0, 5, 10, 20, 30, 40, 70, 100};
-  const int C_nbins = C_edges.size() - 1;
 
   std::cout << midrapidity << std::endl;
   
-  std::vector<int> pdgs{3122, 310}; std::string recotree = "pTree";
-//   std::vector<int> pdgs{3312, 3334}; std::string recotree = "aTree";
+//   std::vector<int> pdgs{3122, 310}; std::string recotree = "pTree";
+  std::vector<int> pdgs{3312, 3334}; std::string recotree = "aTree";
   
   float* y_bins = new float[y_nbins+1];
   for(int i=0; i<y_nbins+1; i++)

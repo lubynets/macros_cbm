@@ -12,42 +12,96 @@ void massDC(std::string filelist_eve, std::string filelist_pfs, int pdg=3122)
   int centrality_id_ = config->GetBranchConfig("RecEventHeader").GetFieldId("centrality_tracks");
   int is_signal_id_ = config->GetBranchConfig("Candidates").GetFieldId("generation");
   
-  const float y_beam = 1.62179;
-//   const float y_beam = 0.985344;
+//   const float y_beam = 1.62179;
+  const float y_beam = 0.985344;
   
-//   const int   y_nbins = 4;
-//   const float y_low = y_beam-0.15;
-//   const float y_up = y_beam+1.05;
-  const int   y_nbins = 5;
-  const float y_low = y_beam-0.45;
-  const float y_up = y_beam+1.05;
-
-//   const int   pT_nbins = 3;
-//   const float pT_low = 0;
-//   const float pT_up = 1;
-
-  std::vector<double> pT_binranges {0, 0.8, 1.2, 1.6}; // lambda, kshort
-  const int pT_nbins = pT_binranges.size()-1;
-
   int mass_nbins;
   float mass_low;
   float mass_up;
 
-  if(pdg == 3122) {
-    mass_nbins = 1200;  // Lambda
-    mass_low = 1.045;
-    mass_up = 1.185;
-  } else if(pdg == 310) {
-    mass_nbins = 1200;  // Kshort
-    mass_low = 0.277;
-    mass_up = 0.717;
+  int   y_nbins;
+  float y_low;
+  float y_up;
+  int   pT_nbins;
+  float pT_low;
+  float pT_up;
+  std::vector<double> C_binranges;
+
+  if(std::fabs(y_beam - 1.62179)<0.01) {
+    C_binranges = {0, 5, 10, 15, 20, 30, 40, 70};
+    if(pdg == 3122) {
+      mass_nbins = 1200;
+      mass_low = 1.045;
+      mass_up = 1.185;
+      y_nbins = 6;
+      y_low = y_beam-0.75;
+      y_up = y_beam+1.05;
+      pT_nbins = 3;
+      pT_low = 0.2;
+      pT_up = 1.4;
+    } else if(pdg == 310) {
+      mass_nbins = 1200;
+      mass_low = 0.277;
+      mass_up = 0.717;
+      y_nbins = 5;
+      y_low = y_beam-0.45;
+      y_up = y_beam+1.05;
+      pT_nbins = 3;
+      pT_low = 0;
+      pT_up = 1.5;
+    } else if(pdg == 3312) {
+      mass_nbins = 1200;
+      mass_low = 1.251;
+      mass_up = 1.391;
+      y_nbins = 5;
+      y_low = y_beam-0.3;
+      y_up = y_beam+0.7;
+      pT_nbins = 3;
+      pT_low = 0.2;
+      pT_up = 1.4;
+    }
+  } else if(std::fabs(y_beam - 0.985344)<0.01) {
+    C_binranges = {0, 10, 20, 30, 40, 70};
+    if(pdg == 3122) {
+      mass_nbins = 1200;
+      mass_low = 1.045;
+      mass_up = 1.185;
+      y_nbins = 7;
+      y_low = y_beam-0.3;
+      y_up = y_beam+1.1;
+      pT_nbins = 3;
+      pT_low = 0;
+      pT_up = 1.2;
+    } else if(pdg == 310) {
+      mass_nbins = 1200;
+      mass_low = 0.277;
+      mass_up = 0.717;
+      y_nbins = 7;
+      y_low = y_beam-0.1;
+      y_up = y_beam+1.3;
+      pT_nbins = 3;
+      pT_low = 0;
+      pT_up = 0.9;
+    } else if(pdg == 3312) {
+      mass_nbins = 1200;
+      mass_low = 1.251;
+      mass_up = 1.391;
+      y_nbins = 5;
+      y_low = y_beam-0.1;
+      y_up = y_beam+0.9;
+      pT_nbins = 3;
+      pT_low = 0;
+      pT_up = 0.9;
+    }
   }
 
-  std::vector<double> C_binranges {0, 15, 40, 70};
+  pT_nbins *= 2;
+
   const int C_nbins = C_binranges.size()-1;
   
   Qn::Axis<double> C_axis("centrality", C_binranges);
-  Qn::Axis<double> pT_axis("pT", pT_binranges);
+  Qn::Axis<double> pT_axis("pT", pT_nbins, pT_low, pT_up);
+//   Qn::Axis<double> pT_axis("pT", pT_binranges);
   Qn::Axis<double> y_axis("y", y_nbins, y_low, y_up);
   
   Qn::DataContainer<TH1F, Qn::Axis<double>> dcmass_all, dcmass_sgnl, dcmass_bckgr;
