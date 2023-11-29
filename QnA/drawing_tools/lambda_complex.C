@@ -299,4 +299,7 @@ void lambda_complex(int iSetup=1, int iPdg=1) {
       if(is_write_rootfile) fileOut->Close();
     }
   }
+  fileRec->Close();
+  fileMc_Dv1Dy->Close();
+  fileRec_Dv1Dy->Close();
 }

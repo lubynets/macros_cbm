@@ -12,6 +12,7 @@ std::vector <TString> excludedObjects;
 int maxDepth{100};
 std::vector<std::string> axestofit;
 std::string axistofit;
+std::pair<float, float> fitrange{99, -99};
 std::vector<std::string> axestoslice;
 std::string axistoslice;
 std::vector<std::vector<double>> rangestoslice;

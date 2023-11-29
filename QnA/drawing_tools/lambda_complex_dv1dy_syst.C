@@ -1,11 +1,11 @@
 #include "lambda.h"
 
-void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1) {
+void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   gStyle->SetPadLeftMargin(0.11);
   gStyle->SetPadRightMargin(0.01);
 
-  std::string evegen, pbeam, pdg, particle;
+  std::string evegen, pbeam, pdg, particle, pol;
 
   if(iSetup==1) {evegen = "dcmqgsm"; pbeam = "12"; }
   if(iSetup==2) {evegen = "dcmqgsm"; pbeam = "3.3"; axes.at(1).shift_ = -0.985344;}
@@ -30,8 +30,8 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1) {
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-//   std::string pol = "pol1";
-  std::string pol = "pol3";
+  if(iPol==1) pol = "pol1";
+  if(iPol==2) pol = "pol3";
 
   std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy_" + pol + "." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
   std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy_" + pol + "." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
@@ -62,9 +62,9 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1) {
   };
 
   std::vector<Inputs> inputs {
-    {"uPsi", {"Q_psi"}, ""},
-    {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
-    {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
+//     {"uPsi", {"Q_psi"}, ""},
+//     {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
+//     {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
     {"uQ_R1_sub4", {"psd1", "psd2", "psd3"}, "_res_sub4_sts_pipos"},
   };
 
@@ -94,7 +94,7 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1) {
   for(auto& fc : fitcoeffs) {
 
     bool is_first_canvas{true};
-    std::string fileOutName = fc + "." + evegen + "." + pbeam + "agev." + pdg;
+    std::string fileOutName = fc + "." + evegen + "." + pbeam + "agev." + pdg + "." + pol;
     if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
 
     if(fc == "slope") y_axis_title = "dv_{1}/dy";
@@ -184,6 +184,8 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1) {
         }
         pic.AddText((pbeam + "A GeV/c").c_str(), {text_X, text_Y - 0.12}, text_size, text_font);
         if(ip.resname_ != "") pic.AddText(ip.resname_.substr(1, ip.resname_.size()).c_str(), {text_X, text_Y - 0.16}, text_size, text_font);
+        else                  pic.AddText("Q_psi", {text_X, text_Y - 0.16}, text_size, text_font);
+        pic.AddText(pol, {text_X, text_Y - 0.20}, text_size, text_font);
       }
 
       auto leg1 = new TLegend();
@@ -220,6 +222,7 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1) {
   //     pic.SetXRange({-0.05, 0.95});
       pic.CustomizeXRange();
       pic.CustomizeYRange();
+      pic.SetIsPullMarkersOnTop();
 //       if(fc == "slope") pic.SetYRange({-0.079, 0.46});
 //       else              pic.SetYRange({-0.075, 0.019});
       if(fc == "slope") pic.AddLegend(leg1);

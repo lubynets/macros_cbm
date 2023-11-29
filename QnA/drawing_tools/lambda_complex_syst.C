@@ -1,8 +1,8 @@
 #include "lambda.h"
 
 void lambda_complex_syst() {
-  bool verbose{false};
-//   bool verbose{true};
+//   bool verbose{false};
+  bool verbose{true};
 
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   gStyle->SetEndErrorSize(4);
