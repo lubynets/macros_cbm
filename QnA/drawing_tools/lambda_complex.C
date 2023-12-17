@@ -1,9 +1,9 @@
 #include "lambda.h"
 
-void lambda_complex(int iSetup=1, int iPdg=1) {
+void lambda_complex(int iSetup=1, int iPdg=1, int iPol=0) {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen, pbeam, pdg, particle;
+  std::string evegen, pbeam, pdg, particle, pol;
 
   if(iSetup==1) {evegen = "dcmqgsm"; pbeam = "12"; }
   if(iSetup==2) {evegen = "dcmqgsm"; pbeam = "3.3"; axes.at(1).shift_ = -0.985344;}
@@ -23,9 +23,9 @@ void lambda_complex(int iSetup=1, int iPdg=1) {
 //   pdg += "_finept";
 
   bool draw_fit{true};
-//   bool draw_fit{false};
-//   std::string pol = "pol1";
-  std::string pol = "pol3";
+  if(iPol==0) draw_fit = false;
+  if(iPol==1) pol = "pol1";
+  if(iPol==2) pol = "pol3";
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
@@ -59,8 +59,8 @@ void lambda_complex(int iSetup=1, int iPdg=1) {
   };
 
   std::vector<Inputs> inputs {
-    {"uPsi", {"Q_psi"}, ""},
-    {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
+//     {"uPsi", {"Q_psi"}, ""},
+//     {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
 //     {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
     {"uQ_R1_sub4", {"psd1", "psd2", "psd3"}, "_res_sub4_sts_pipos"},
   };
@@ -103,6 +103,7 @@ void lambda_complex(int iSetup=1, int iPdg=1) {
 
       bool is_first_canvas = true;
       std::string fileOutName = "v1." + evegen + "." + pbeam + "agev." + pdg + "." + se + ip.resname_;
+      if(iPol!=0) fileOutName += "." + pol;
 
       if(is_write_rootfile) fileOut = TFile::Open((fileOutName + ".root").c_str(), "recreate");
 

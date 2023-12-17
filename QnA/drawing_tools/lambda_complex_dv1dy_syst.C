@@ -80,6 +80,11 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
     }
   }
 
+  if(pdg=="310") {
+    if(pbeam=="3.3") SetSliceAxisBinEdges({0, 0.6, 0.9});
+    if(evegen=="dcmqgsm" && pbeam=="12")  SetSliceAxisBinEdges({0, 0.5, 1});
+  }
+
   float slightprojshift;
   if(axes.at(kSlice).name_ == "centrality") {
     if(pbeam == "12") SetSliceAxisBinEdges({0, 5, 20, 40, 70});
