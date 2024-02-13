@@ -1,8 +1,8 @@
 void resolution_3sub() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12"; std::string cuts = "lc1";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; std::string cuts = "oc1";
 //   std::string evegen = "urqmd";  std::string pbeam = "12"; std::string cuts = "lc1";
 
 //   bool is_write_rootfile = false;
@@ -92,7 +92,8 @@ void resolution_3sub() {
   gry->SetLineColor(kBlack);
 
   leg1->AddEntry(grx, "     R{MC}        ", "L");
-  leg1->AddEntry(grx, "     R{3-subevent}", "P");
+  leg1->AddEntry(grx, "     R{REC}", "P");
+  pic.AddText("3-subevent", {0.07, 0.07}, text_size, text_font);
   
   if(!average_comp) {
     leg1->AddEntry(grx, ("     " + components.at(0)).c_str(), "LP");
@@ -108,10 +109,12 @@ void resolution_3sub() {
   }
   
   pic.SetAxisTitles( {"Centrality, %", "R_{1}"} );
+  pic.DrawZeroLine(false);
   pic.CustomizeXRange();
-  pic.CustomizeYRange();  
+  pic.CustomizeYRange();
+  pic.SetYRange({0, 0.26});
   pic.AddLegend(leg1);
-  pic.CustomizeLegend(leg1);
+  pic.SetIsCustomizeLegend();
 //   pic.SetGridX();
 //   pic.SetGridY();
   pic.Draw();

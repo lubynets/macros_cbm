@@ -3,10 +3,10 @@
 void lambda_stf_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   DrawOption drawOption = kPlain;
+  DrawOption drawOption = kPlain;
 //   DrawOption drawOption = kDifference;
 //   DrawOption drawOption = kChi2;
-  DrawOption drawOption = kRatio;
+//   DrawOption drawOption = kRatio;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
@@ -17,23 +17,24 @@ void lambda_stf_dv1dy() {
 //   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string evegen = "dcmqgsm";
-//   std::string evegen = "urqmd";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3";
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.stf." + evegen + ".root";
-  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/dv1dy.rebinned.stf." + evegen + ".root";
+  std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/dv1dy.stf." + evegen + ".root";
+//   std::string fileName = "/home/oleksii/cbmdir/working/qna/simtracksflow/" + evegen + "/" + pbeam + "agev/dv1dy.rebinned.stf." + evegen + ".root";
 
   std::vector<std::string> particles{
                                      "lambda",
-                                     "kshort",
-                                     "xi",
-                                     "pipos",
-                                     "pineg"
+//                                      "kshort",
+//                                      "xi",
+//                                      "pipos",
+//                                      "pineg"
                                     };
   std::vector<std::string> subevents{
-                                     "psd1", "psd2", "psd3",
-                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"
+                                     /*"psd1", "psd2", */"psd3",
+//                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
+//                                      "etacut_1_all", "etacut_2_all", "etacut_3_all"
                                     };
   std::string step;
   bool average_comp;
@@ -58,6 +59,9 @@ void lambda_stf_dv1dy() {
   TFile* fileOut{nullptr};
 
   for(auto& particle : particles) {
+
+    std::string greek_particle = "PARTICLE";
+    if(particle == "lambda") greek_particle = "#Lambda";
 
     std::string fileOutName;
     if(drawOption == kPlain) fileOutName = "dv1dy." + particle;
@@ -103,8 +107,8 @@ void lambda_stf_dv1dy() {
 
         if(evegen == "dcmqgsm") {
           if(particle == "lambda") {
-            if(fc == "slope")     { y_lo = -0.2; y_hi = 0.4; }
-            if(fc == "intercept") { y_lo = -0.1; y_hi = 0.05; }
+            if(fc == "slope")     { y_lo = -0.2; y_hi = 0.399; }
+            if(fc == "intercept") { y_lo = -0.1; y_hi = 0.0499; }
           }
           if(particle == "kshort") {
             if(fc == "slope")     { y_lo = -0.1; y_hi = 0.1; }
@@ -191,17 +195,17 @@ void lambda_stf_dv1dy() {
         v1_PsiRP.ShiftProjectionAxis(axes.at(kProjection).shift_);
 
         HeapPicture pic(fc, {1000, 1000});
-        pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
-        if(evegen == "dcmqgsm") {
-          pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
-          pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
-        }
-        if(evegen == "urqmd") {
-          pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
-          pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
-        }
-        pic.AddText({0.2, 0.81, "12A GeV/c"}, 0.025);
-        pic.AddText({0.2, 0.78, subevent.c_str()}, 0.025);
+//         pic.AddText({0.2, 0.90, greek_particle.c_str()}, 0.035);
+//         if(evegen == "dcmqgsm") {
+//           pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
+//           pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+//         }
+//         if(evegen == "urqmd") {
+//           pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
+//           pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
+//         }
+//         pic.AddText({0.2, 0.81, "12A GeV/c"}, 0.025);
+//         pic.AddText({0.2, 0.78, subevent.c_str()}, 0.025);
 
         auto leg1 = new TLegend();
         leg1->SetBorderSize(1);
@@ -268,13 +272,14 @@ void lambda_stf_dv1dy() {
         pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), y_axis_title});
 
         pic.CustomizeXRange();
+        pic.SetXRange({-2, 72});
         if(drawOption != kPlain) {
           pic.CustomizeYRange();
         } else {
           pic.SetYRange({y_lo, y_hi});
         }
-        pic.AddLegend(leg1);
-        pic.CustomizeLegend(leg1);
+//         pic.AddLegend(leg1);
+        pic.SetIsCustomizeLegend();
         pic.Draw();
 
         if(is_write_rootfile) {

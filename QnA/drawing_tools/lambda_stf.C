@@ -3,8 +3,8 @@
 void lambda_stf() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm";
-  std::string evegen = "urqmd";
+  std::string evegen = "dcmqgsm";
+//   std::string evegen = "urqmd";
 
   std::string pbeam = "12";
 //   std::string pbeam = "3.3";
@@ -16,14 +16,16 @@ void lambda_stf() {
   
   std::vector<std::string> particles{
                                      "lambda",
-                                     "kshort",
+//                                      "kshort",
 // //                                      "xi",
 //                                      "pipos",
 //                                      "pineg"
                                     };
-  std::vector<std::string> subevents{"psd1", "psd2", "psd3",
-                                     "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
-                                     "etacut_1_all", "etacut_2_all", "etacut_3_all"};
+  std::vector<std::string> subevents{
+                                     /*"psd1", "psd2",*/ "psd3",
+//                                      "etacut_1_charged", "etacut_2_charged", "etacut_3_charged",
+//                                      "etacut_1_all", "etacut_2_all", "etacut_3_all"
+                                    };
   std::string step;
   bool average_comp;
   float y_lo, y_hi;
@@ -63,6 +65,11 @@ void lambda_stf() {
 //                               1.0-axes.at(kProjection).shift_});
 
   for(auto& particle : particles) {
+
+    std::string greek_particle = "PARTICLE";
+    if(particle == "lambda") greek_particle = "#Lambda";
+
+
     if(evegen == "dcmqgsm" && pbeam == "12") {
       if(particle == "lambda") {
         SetSliceAxisBinEdges({0, 0.4, 0.8, 1.2, 1.6});
@@ -163,6 +170,7 @@ void lambda_stf() {
 
         for(auto& vc : v1_R_MC) {
           vc.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+          vc.SetSliceAxisPrecision(axes.at(kSlice).precision_);
           vc.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
                          kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed});
           vc.SetBiasPalette(false);
@@ -178,6 +186,7 @@ void lambda_stf() {
         auto v1_PsiRP = DoubleDifferentialCorrelation( fileName.c_str(), {("v1/" + particle + "/uPsi/v1.uPsi.x1x1").c_str(),
                                                                           ("v1/" + particle + "/uPsi/v1.uPsi.y1y1").c_str()} );
         v1_PsiRP.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+        v1_PsiRP.SetSliceAxisPrecision(axes.at(kSlice).precision_);
         v1_PsiRP.SetMarker(-1);
         v1_PsiRP.SetIsFillLine();
         v1_PsiRP.SetPalette({kOrange+1, kBlue, kGreen+2, kAzure-4, kGray+2, kViolet, kRed,
@@ -192,9 +201,9 @@ void lambda_stf() {
         v1_PsiRP.Calculate();
 
         HeapPicture pic( (axes.at(kSelect).name_ + "_" + std::to_string(iEdge)).c_str(), {1000, 1000});
-//         pic.SetRelErrorThreshold(0.2);
+        pic.SetRelErrorThreshold(0.2);
 
-        pic.AddText({0.2, 0.90, particle.c_str()}, 0.025);
+        pic.AddText({0.2, 0.90, greek_particle.c_str()}, 0.035);
         if(evegen == "dcmqgsm") {
           if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
           else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
@@ -209,8 +218,8 @@ void lambda_stf() {
                                 " - " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge+1) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) + axes.at(kSelect).unit_).c_str()}, 0.025);
         pic.AddText({0.2, 0.75, subevent.c_str()}, 0.025);
 
-        auto leg1 = new TLegend();
-        leg1->SetBorderSize(1);
+        auto leg1 = new TLegend(0.44, 0.7, 0.69, 0.98);
+        leg1->SetBorderSize(0);
         leg1->SetHeader((axes.at(kSlice).title_+axes.at(kSlice).unit_).c_str());
 
         TLegendEntry* entry;
@@ -244,7 +253,7 @@ void lambda_stf() {
 //         pic.CustomizeYRange();
         pic.SetYRange({y_lo, y_hi});
         pic.AddLegend(leg1);
-        pic.CustomizeLegend(leg1);
+//         pic.SetIsCustomizeLegend();
         pic.Draw();
 
         if(is_write_rootfile) {

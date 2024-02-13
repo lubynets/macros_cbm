@@ -23,12 +23,15 @@ void lambda_complex(int iSetup=1, int iPdg=1, int iPol=0) {
 //   pdg += "_finept";
 
   bool draw_fit{true};
-  if(iPol==0) draw_fit = false;
+  if(iPol==0) {
+    draw_fit = false;
+    pol = "pol1";
+  }
   if(iPol==1) pol = "pol1";
   if(iPol==2) pol = "pol3";
 
-  bool is_write_rootfile = false;
-//   bool is_write_rootfile = true;
+//   bool is_write_rootfile = false;
+  bool is_write_rootfile = true;
 
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
@@ -62,7 +65,7 @@ void lambda_complex(int iSetup=1, int iPdg=1, int iPol=0) {
 //     {"uPsi", {"Q_psi"}, ""},
 //     {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
 //     {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
-    {"uQ_R1_sub4", {"psd1", "psd2", "psd3"}, "_res_sub4_sts_pipos"},
+    {"uQ_R1_sub4", {/*"psd1", */"psd2"/*, "psd3"*/}, "_res_sub4_sts_pipos"},
   };
 
   TFile* fileMc = TFile::Open(fileMcName.c_str(), "open");
@@ -87,8 +90,8 @@ void lambda_complex(int iSetup=1, int iPdg=1, int iPol=0) {
   if(draw_fit && fileRec_Dv1Dy == nullptr) throw std::runtime_error("fileRec_Dv1Dy == nullptr");
 
 
-//   SetSelectAxisBinEdges({10, 30});
-//   SetSliceAxisBinEdges({0.2, 1.0});
+  SetSelectAxisBinEdges({10, 30});
+  SetSliceAxisBinEdges({0.5, 1.5});
 //   IntegrateSliceAxis();
 //   SetProjectionAxisBinEdges({-0.5-axes.at(kProjection).shift_,
 //                              -0.1-axes.at(kProjection).shift_,

@@ -57,16 +57,16 @@ void resolution_presubevent() {
 
   const float text_size = 20;
   const int text_font = 63;
-  if(evegen == "dcmqgsm") {
-    if(pbeam == "12") pic.AddText("5M Au+Au", {0.04, 0.96}, text_size, text_font);
-    else              pic.AddText("5.2M Au+Au", {0.04, 0.96}, text_size, text_font);
-    pic.AddText("DCM-QGSM-SMM", {0.04, 0.92}, text_size, text_font);
-  }
-  if(evegen == "urqmd") {
-    pic.AddText("2M Au+Au", {0.04, 0.96}, text_size, text_font);
-    pic.AddText("UrQMD", {0.04, 0.92}, text_size, text_font);
-  }
-  pic.AddText(pbeam + "A GeV/c", {0.04, 0.88}, text_size, text_font);
+//   if(evegen == "dcmqgsm") {
+//     if(pbeam == "12") pic.AddText("5M Au+Au", {0.04, 0.96}, text_size, text_font);
+//     else              pic.AddText("5.2M Au+Au", {0.04, 0.96}, text_size, text_font);
+//     pic.AddText("DCM-QGSM-SMM", {0.04, 0.92}, text_size, text_font);
+//   }
+//   if(evegen == "urqmd") {
+//     pic.AddText("2M Au+Au", {0.04, 0.96}, text_size, text_font);
+//     pic.AddText("UrQMD", {0.04, 0.92}, text_size, text_font);
+//   }
+//   pic.AddText(pbeam + "A GeV/c", {0.04, 0.88}, text_size, text_font);
 
   auto leg1 = new TLegend();
   leg1->SetBorderSize(1);
@@ -115,7 +115,7 @@ void resolution_presubevent() {
   pic.CustomizeXRange();
   pic.CustomizeYRange();
   pic.AddLegend(leg1);
-  pic.CustomizeLegend(leg1);
+  pic.SetIsCustomizeLegend();
   pic.Draw();
 
   if(is_write_rootfile) {

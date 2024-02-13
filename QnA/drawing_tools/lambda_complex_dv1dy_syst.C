@@ -1,6 +1,9 @@
 #include "lambda.h"
 
 void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
+//   bool verbose{true};
+  bool verbose{false};
+
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   gStyle->SetPadLeftMargin(0.11);
   gStyle->SetPadRightMargin(0.01);
@@ -94,6 +97,8 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
     slightprojshift = 1;
   }
 
+//   SetProjectionAxisBinEdges({0, 10, 40, 70});
+
   TFile* fileOut;
 
   for(auto& fc : fitcoeffs) {
@@ -112,6 +117,7 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
         v1_sim_names.emplace_back("v1/usimPsi/" + fc + "/v1.u_sim.Q_psi." + co);
       }
       auto v1_sim = DoubleDifferentialCorrelation( fileMcName.c_str(), v1_sim_names );
+      v1_sim.SetIsVerbose(verbose);
       v1_sim.SetErrorType(error_mode);
       v1_sim.SetMeanType(mean_mode);
       v1_sim.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
@@ -133,6 +139,7 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
         }
       }
       auto v1_rec_nofit = DoubleDifferentialCorrelation( fileMcName.c_str(), v1_rec_nofit_names );
+      v1_rec_nofit.SetIsVerbose(verbose);
       v1_rec_nofit.SetErrorType(error_mode);
       v1_rec_nofit.SetMeanType(mean_mode);
       v1_rec_nofit.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
@@ -155,6 +162,7 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
         }
       }
       auto v1_rec_fit = DoubleDifferentialCorrelation( fileRecName.c_str(), v1_rec_fit_names );
+      v1_rec_fit.SetIsVerbose(verbose);
       v1_rec_fit.SetErrorType(error_mode);
       v1_rec_fit.SetMeanType(mean_mode);
       v1_rec_fit.SetCalculateSystematicsFromVariation();
@@ -174,23 +182,23 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
 
       const float text_size = 24;
       const int text_font = 63;
-      float text_X = 0.04;
-      float text_Y = 0.96;
-      if(fc == "slope") {
-        pic.AddText(particle.c_str(), {text_X, text_Y}, text_size+8, text_font);
+      float text_X = 0.72;
+      float text_Y = 0.28;
+      if(fc == "intercept") {
+//         pic.AddText(particle.c_str(), {text_X, text_Y}, text_size+8, text_font);
         if(evegen == "dcmqgsm") {
           if(pbeam == "12") pic.AddText("5M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
           else              pic.AddText("5.2M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
-          pic.AddText("DCM-QGSM-SMM", {text_X, text_Y - 0.08}, text_size, text_font);
+//           pic.AddText("DCM-QGSM-SMM", {text_X, text_Y - 0.08}, text_size, text_font);
         }
         if(evegen == "urqmd") {
           pic.AddText("2M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
           pic.AddText("UrQMD", {text_X, text_Y - 0.08}, text_size, text_font);
         }
         pic.AddText((pbeam + "A GeV/c").c_str(), {text_X, text_Y - 0.12}, text_size, text_font);
-        if(ip.resname_ != "") pic.AddText(ip.resname_.substr(1, ip.resname_.size()).c_str(), {text_X, text_Y - 0.16}, text_size, text_font);
-        else                  pic.AddText("Q_psi", {text_X, text_Y - 0.16}, text_size, text_font);
-        pic.AddText(pol, {text_X, text_Y - 0.20}, text_size, text_font);
+//         if(ip.resname_ != "") pic.AddText(ip.resname_.substr(1, ip.resname_.size()).c_str(), {text_X, text_Y - 0.16}, text_size, text_font);
+//         else                  pic.AddText("Q_psi", {text_X, text_Y - 0.16}, text_size, text_font);
+//         pic.AddText(pol, {text_X, text_Y - 0.20}, text_size, text_font);
       }
 
       auto leg1 = new TLegend();

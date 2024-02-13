@@ -3,13 +3,16 @@
 void lambda_rtpshort_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
-  std::string evegen = "urqmd";   std::string pbeam = "12";
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   std::string particle = "#Lambda"; std::string pdg = "3122";
-  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
+  std::string particle = "#Lambda"; std::string pdg = "3122";
+//   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
 // //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
+
+  const std::string pol = "pol1";
+//   const std::string pol = "pol3";
 
   std::string cuts = "lc1";
   if(pbeam == "3.3") cuts = "oc1";
@@ -18,15 +21,18 @@ void lambda_rtpshort_dv1dy() {
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;
 
+  bool verbose{true};
+//   bool verbose{false};
+
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy_" + pol + "." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
 
-//   DrawOption drawOption = kPlain;
-  DrawOption drawOption = kChi2;
+  DrawOption drawOption = kPlain;
+//   DrawOption drawOption = kChi2;
 // //   DrawOption drawOption = kDifference;
-// //   DrawOption drawOption = kRatio;
+//   DrawOption drawOption = kRatio;
 
   SetAxis("centrality", "projection");
   SetAxis("pT", "slice");
@@ -88,6 +94,7 @@ void lambda_rtpshort_dv1dy() {
 
           std::string sim_name = "v1/usimPsi/" + fc + "/v1.u_sim.Q_psi." + co;
           auto v1_sim = DoubleDifferentialCorrelation( fileMcName.c_str(), {sim_name.c_str()} );
+          v1_sim.SetIsVerbose(verbose);
           v1_sim.SetErrorType(error_mode);
           v1_sim.SetMeanType(mean_mode);
           v1_sim.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
@@ -98,12 +105,14 @@ void lambda_rtpshort_dv1dy() {
           v1_sim.SetBiasPalette(false);
           v1_sim.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
           v1_sim.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
+          v1_sim.SetSliceAxisPrecision(axes.at(kSlice).precision_);
           v1_sim.ShiftSliceAxis(axes.at(kSlice).shift_);
           v1_sim.ShiftProjectionAxis(axes.at(kProjection).shift_);
           v1_sim.Calculate();
 
           std::string rec_nofit_name = "v1/" + ip.dirname_ + "/" + fc + "/v1.u_rec_sgnl." + se + ip.resname_ + "." + co;
           auto v1_rec = DoubleDifferentialCorrelation( fileMcName.c_str(), {rec_nofit_name.c_str()} );
+          v1_rec.SetIsVerbose(verbose);
           v1_rec.RenameAxis(axes.at(kProjection).reco_name_, axes.at(kProjection).sim_name_);
           v1_rec.RenameAxis(axes.at(kSlice).reco_name_, axes.at(kSlice).sim_name_);
           v1_rec.SetErrorType(error_mode);
@@ -116,25 +125,27 @@ void lambda_rtpshort_dv1dy() {
           v1_rec.SetProjectionAxis({axes.at(kProjection).sim_name_.c_str(), axes.at(kProjection).bin_edges_});
           v1_rec.SetSliceAxis({axes.at(kSlice).sim_name_.c_str(), axes.at(kSlice).bin_edges_});
           v1_rec.ShiftSliceAxis(axes.at(kSlice).shift_);
+          v1_rec.SetSliceAxisPrecision(axes.at(kSlice).precision_);
           v1_rec.ShiftProjectionAxis(axes.at(kProjection).shift_);
           v1_rec.SlightShiftProjectionAxis(1);
           v1_rec.Calculate();
 
           HeapPicture pic(fc, {1000, 1000});
 
-          pic.AddText({0.2, 0.90, particle.c_str()}, 0.03);
+          const float text_y = 0.96;
+          pic.AddText({0.5, text_y, particle.c_str()}, 0.03);
           if(evegen == "dcmqgsm") {
-            if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
-            else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
-            pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+            if(pbeam == "12") pic.AddText({0.5, text_y-0.03, "5M Au+Au"}, 0.025);
+            else              pic.AddText({0.5, text_y-0.03, "5.2M Au+Au"}, 0.025);
+            pic.AddText({0.5, text_y-0.06, "DCM-QGSM-SMM"}, 0.025);
           }
           if(evegen == "urqmd") {
-            pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
-            pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
+            pic.AddText({0.5, text_y-0.03, "2M Au+Au"}, 0.025);
+            pic.AddText({0.5, text_y-0.06, "UrQMD"}, 0.025);
           }
-          pic.AddText({0.2, 0.81, (pbeam + "A GeV/c").c_str()}, 0.025);
-          pic.AddText({0.2, 0.78, se.c_str()}, 0.025);
-          if(ip.resname_ != "") pic.AddText({0.2, 0.75, ip.resname_.substr(1, ip.resname_.size()).c_str()}, 0.025);
+          pic.AddText({0.5, text_y-0.09, (pbeam + "A GeV/c").c_str()}, 0.025);
+          pic.AddText({0.5, text_y-0.12, se.c_str()}, 0.025);
+          if(ip.resname_ != "") pic.AddText({0.5, text_y-0.15, ip.resname_.substr(1, ip.resname_.size()).c_str()}, 0.025);
 
           auto leg1 = new TLegend();
           leg1->SetBorderSize(1);
@@ -187,8 +198,9 @@ void lambda_rtpshort_dv1dy() {
       //     pic.SetXRange({-0.05, 0.95});
           pic.CustomizeXRange();
           pic.CustomizeYRange();
+          if(drawOption == kRatio) pic.SetYRange({0.5, 1.5});
           pic.AddLegend(leg1);
-          pic.CustomizeLegend(leg1);
+          pic.SetIsCustomizeLegend();
           pic.Draw();
 
           if(is_write_rootfile) {

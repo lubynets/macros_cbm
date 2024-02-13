@@ -3,16 +3,16 @@
 void lambda_imf() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "12";
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
-  std::string evegen = "urqmd";   std::string pbeam = "12";
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
 
-//   std::string particle = "#Lambda"; std::string pdg = "3122"; std::string cuts = "lc1";
+  std::string particle = "#Lambda"; std::string pdg = "3122"; std::string cuts = "lc1";
 //   std::string particle = "K^{0}_{S}"; std::string pdg = "310"; std::string cuts = "lc1";
-  std::string particle = "#Xi^{-}"; std::string pdg = "3312"; std::string cuts = "dc";
+//   std::string particle = "#Xi^{-}"; std::string pdg = "3312"; std::string cuts = "dc";
 
-//   bool is_imf = true;
-  bool is_imf = false;
+  bool is_imf = true;
+//   bool is_imf = false;
 
   bool is_write_rootfile = false;
 //   bool is_write_rootfile = true;

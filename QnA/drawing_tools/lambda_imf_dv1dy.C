@@ -4,8 +4,8 @@ void lambda_imf_dv1dy() {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
 //   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
-  std::string evegen = "urqmd";   std::string pbeam = "12";
+  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
+//   std::string evegen = "urqmd";   std::string pbeam = "12";
 
   std::string particle = "#Lambda"; std::string pdg = "3122";
 //   std::string particle = "K^{0}_{S}"; std::string pdg = "310";
@@ -24,8 +24,8 @@ void lambda_imf_dv1dy() {
   Qn::Stat::ErrorType mean_mode{Qn::Stat::ErrorType::PROPAGATION};
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
-  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
-  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+  std::string fileMcName = "/home/oleksii/cbmdir/working/qna/aXmass/vR.dv1dy_pol1." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
+  std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of.dv1dy_pol1." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + ".root";
 
   DrawOption drawOption = kPlain;
 //   DrawOption drawOption = kDifference;
@@ -110,6 +110,7 @@ void lambda_imf_dv1dy() {
           v1_rec_nofit.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
           v1_rec_nofit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
           v1_rec_nofit.ShiftSliceAxis(axes.at(kSlice).shift_);
+          v1_rec_nofit.SetSliceAxisPrecision(axes.at(kSlice).precision_);
           v1_rec_nofit.ShiftProjectionAxis(axes.at(kProjection).shift_);
           v1_rec_nofit.Calculate();
 
@@ -129,25 +130,28 @@ void lambda_imf_dv1dy() {
           v1_rec_fit.SetProjectionAxis({axes.at(kProjection).reco_name_.c_str(), axes.at(kProjection).bin_edges_});
           v1_rec_fit.SetSliceAxis({axes.at(kSlice).reco_name_.c_str(), axes.at(kSlice).bin_edges_});
           v1_rec_fit.ShiftSliceAxis(axes.at(kSlice).shift_);
+          v1_rec_fit.SetSliceAxisPrecision(axes.at(kSlice).precision_);
           v1_rec_fit.ShiftProjectionAxis(axes.at(kProjection).shift_);
           v1_rec_fit.SlightShiftProjectionAxis(1);
           v1_rec_fit.Calculate();
 
           HeapPicture pic(fc, {1000, 1000});
 
-          pic.AddText({0.2, 0.90, particle.c_str()}, 0.03);
+          const float text_x = 0.18;
+          const float text_y = 0.95;
+//           pic.AddText({text_x, text_y, particle.c_str()}, 0.03);
           if(evegen == "dcmqgsm") {
-            if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
-            else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
-            pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+            if(pbeam == "12") pic.AddText({text_x, text_y-0.03, "5M Au+Au"}, 0.025);
+            else              pic.AddText({text_x, text_y-0.03, "5.2M Au+Au"}, 0.025);
+            pic.AddText({text_x, text_y-0.06, "DCM-QGSM-SMM"}, 0.025);
           }
           if(evegen == "urqmd") {
-            pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
-            pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
+            pic.AddText({text_x, text_y-0.03, "2M Au+Au"}, 0.025);
+            pic.AddText({text_x, text_y-0.06, "UrQMD"}, 0.025);
           }
-          pic.AddText({0.2, 0.81, (pbeam + "A GeV/c").c_str()}, 0.025);
-          pic.AddText({0.2, 0.78, se.c_str()}, 0.025);
-          if(ip.resname_ != "") pic.AddText({0.2, 0.75, ip.resname_.substr(1, ip.resname_.size()).c_str()}, 0.025);
+          pic.AddText({text_x, text_y-0.09, (pbeam + "A GeV/c").c_str()}, 0.025);
+//           pic.AddText({text_x, text_y-0.12, se.c_str()}, 0.025);
+          if(ip.resname_ != "") pic.AddText({text_x, text_y-0.15, ip.resname_.substr(1, ip.resname_.size()).c_str()}, 0.025);
 
           auto leg1 = new TLegend();
           leg1->SetBorderSize(1);
@@ -203,7 +207,7 @@ void lambda_imf_dv1dy() {
           pic.CustomizeXRange();
           pic.CustomizeYRange();
           pic.AddLegend(leg1);
-          pic.CustomizeLegend(leg1);
+          pic.SetIsCustomizeLegend();
           pic.Draw();
 
           if(is_write_rootfile) {
