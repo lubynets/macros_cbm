@@ -83,10 +83,10 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
     }
   }
 
-  if(pdg=="310") {
-    if(pbeam=="3.3") SetSliceAxisBinEdges({0, 0.6, 0.9});
-    if(evegen=="dcmqgsm" && pbeam=="12")  SetSliceAxisBinEdges({0, 0.5, 1});
-  }
+//   if(pdg=="310") {
+//     if(pbeam=="3.3") SetSliceAxisBinEdges({0, 0.6, 0.9});
+//     if(evegen=="dcmqgsm" && pbeam=="12")  SetSliceAxisBinEdges({0, 0.5, 1});
+//   }
 
   float slightprojshift;
   if(axes.at(kSlice).name_ == "centrality") {
@@ -182,14 +182,15 @@ void lambda_complex_dv1dy_syst(int iSetup=1, int iPdg=1, int iPol=1) {
 
       const float text_size = 24;
       const int text_font = 63;
-      float text_X = 0.72;
+      float text_X = 0.62;
       float text_Y = 0.28;
+      if(fc == "slope" && evegen == "urqmd") pic.AddText(particle.c_str(), {0.5, 0.9}, text_size+35, text_font);
       if(fc == "intercept") {
 //         pic.AddText(particle.c_str(), {text_X, text_Y}, text_size+8, text_font);
         if(evegen == "dcmqgsm") {
           if(pbeam == "12") pic.AddText("5M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
           else              pic.AddText("5.2M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);
-//           pic.AddText("DCM-QGSM-SMM", {text_X, text_Y - 0.08}, text_size, text_font);
+          pic.AddText("DCM-QGSM-SMM", {text_X, text_Y - 0.08}, text_size, text_font);
         }
         if(evegen == "urqmd") {
           pic.AddText("2M Au+Au", {text_X, text_Y - 0.04}, text_size, text_font);

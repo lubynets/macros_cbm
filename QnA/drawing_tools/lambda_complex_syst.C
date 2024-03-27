@@ -1,22 +1,24 @@
 #include "lambda.h"
 
-void lambda_complex_syst() {
-//   bool verbose{false};
-  bool verbose{true};
+void lambda_complex_syst(int iSetup=1, int iParticle=1) {
+  bool verbose{false};
+//   bool verbose{true};
 
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 //   gStyle->SetEndErrorSize(4);
 
-//   std::string evegen = "dcmqgsm"; std::string pbeam = "12";
-  std::string evegen = "dcmqgsm"; std::string pbeam = "3.3"; axes.at(1).shift_ = -0.985344;
-//   std::string evegen = "urqmd";   std::string pbeam = "12";
+  std::string evegen, pbeam, particle, pdg;
 
-//   std::string particle = "#Lambda"; std::string pdg = "3122";
-  std::string particle = "K^{0}_{S}"; std::string pdg = "310";
-// //   std::string particle = "#Xi^{-}"; std::string pdg = "3312";
+  if(iSetup==1) {evegen = "dcmqgsm"; pbeam = "12";}
+  if(iSetup==2) {evegen = "dcmqgsm"; pbeam = "3.3"; axes.at(1).shift_ = -0.985344;}
+  if(iSetup==3) {evegen = "urqmd";   pbeam = "12";}
 
-//     std::string is_fine_pt = "";
-  std::string is_fine_pt = "_finept";
+  if(iParticle==1) {particle = "#Lambda";   pdg = "3122";}
+  if(iParticle==2) {particle = "K^{0}_{S}"; pdg = "310"; }
+  if(iParticle==3) {particle = "#Xi^{-}";   pdg = "3312";}
+
+  std::string is_fine_pt = "";
+//   std::string is_fine_pt = "_finept";
 
   std::string cuts = "lc1";
   if(pbeam == "3.3") cuts = "oc1";
@@ -35,10 +37,10 @@ void lambda_complex_syst() {
   std::string fileRecName = "/home/oleksii/cbmdir/working/qna/aXmass/of." + evegen + "." + pbeam + "agev." + cuts + "." + pdg + is_fine_pt + ".root";
 
   SetAxis("centrality", "select");
-//   SetAxis("rapidity", "projection");
-//   SetAxis("pT", "slice");
-  SetAxis("rapidity", "slice");
-  SetAxis("pT", "projection");
+  SetAxis("rapidity", "projection");
+  SetAxis("pT", "slice");
+//   SetAxis("rapidity", "slice");
+//   SetAxis("pT", "projection");
 
   if(!is_imf) {
     fileRecName = fileMcName;
@@ -54,8 +56,8 @@ void lambda_complex_syst() {
   };
 
   std::vector<Inputs> inputs {
-    {"uPsi", {"Q_psi"}, ""},
-    {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
+//     {"uPsi", {"Q_psi"}, ""},
+//     {"uQ_R1_MC", {"psd1", "psd2", "psd3"}, "_res_MC"},
 //     {"uQ_R1_sub3", {"psd1", "psd2", "psd3"}, "_res_sub3"},
     {"uQ_R1_sub4", {"psd1", "psd2", "psd3"}, "_res_sub4_sts_pipos"},
   };
@@ -186,23 +188,27 @@ void lambda_complex_syst() {
 
       HeapPicture pic( (axes.at(kSelect).name_ + "_" + std::to_string(iEdge)).c_str(), {1000, 1000});
 
-      pic.AddText({0.2, 0.90, particle.c_str()}, 0.03);
-      if(evegen == "dcmqgsm") {
-        if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
-        else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
-        pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+      if(evegen == "urqmd") pic.AddText({0.85, 0.90, particle.c_str()}, 0.06);
+      if(pdg == "3122") {
+        if(evegen == "dcmqgsm") {
+          if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
+          else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
+          pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+        }
+        if(evegen == "urqmd") {
+          pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
+          pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
+        }
+        pic.AddText({0.2, 0.81, (pbeam + "A GeV/c").c_str()}, 0.025);
+        if(evegen == "urqmd") {
+          pic.AddText({0.2, 0.78, (axes.at(kSelect).title_ + ": " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) +
+                                  " - " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge+1) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) + axes.at(kSelect).unit_).c_str()}, 0.025);
+          if(ip.resname_ != "") pic.AddText({0.2, 0.75, ip.resname_.substr(1, ip.resname_.size()).c_str()}, 0.025);
+        }
       }
-      if(evegen == "urqmd") {
-        pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
-        pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
-      }
-      pic.AddText({0.2, 0.81, (pbeam + "A GeV/c").c_str()}, 0.025);
-      pic.AddText({0.2, 0.78, (axes.at(kSelect).title_ + ": " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) +
-                              " - " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge+1) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) + axes.at(kSelect).unit_).c_str()}, 0.025);
-      if(ip.resname_ != "") pic.AddText({0.2, 0.75, ip.resname_.substr(1, ip.resname_.size()).c_str()}, 0.025);
 
-      auto leg1 = new TLegend();
-      leg1->SetBorderSize(1);
+      auto leg1 = new TLegend(0.5, 0.8, 0.65, 0.95);
+      leg1->SetBorderSize(0);
 
       auto* entry = leg1->AddEntry("", "MC input", "F");
       entry->SetFillColorAlpha(kBlack, 0.2);
@@ -232,11 +238,18 @@ void lambda_complex_syst() {
 
       pic.SetAxisTitles({(axes.at(kProjection).title_ + axes.at(kProjection).unit_).c_str(), "v_{1}"});
 
-  //     pic.SetXRange({-0.05, 0.95});
-      pic.CustomizeXRange();
-      pic.CustomizeYRangeWithLimits(-0.3, 0.6);
+      if(pdg == "3122") pic.SetXRange({-0.75, 1.15});
+      else              pic.SetXRange({-0.45, 1.35});
+
+      if(evegen == "urqmd") {
+        pic.SetYRange({-0.09, 0.14});
+      } else {
+        if(pbeam == "12") pic.SetYRange({-0.17, 0.25});
+        else              pic.SetYRange({-0.3, 0.599});
+      }
+
       pic.AddLegend(leg1);
-//       pic.CustomizeLegend(leg1);
+//       pic.SetIsCustomizeLegend();
 //       pic.SetGridXY();
       pic.Draw();
 

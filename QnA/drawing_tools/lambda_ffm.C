@@ -3,14 +3,14 @@
 void lambda_ffm(int iSetup=1, int iParticle=1, int iFit=1) {
   gROOT->Macro( "/home/oleksii/cbmdir/flow_drawing_tools/example/style.cc" );
 
-  std::string evegen, pbeam, setup, particle;
+  std::string evegen, pbeam, setup, particle, greek_particle;
 
   if(iSetup==1) {evegen = "dcmqgsm"; pbeam = "12";  setup = "d12";}
   if(iSetup==2) {evegen = "dcmqgsm"; pbeam = "3.3"; setup = "d3";  axes.at(1).shift_ = -0.985344;}
   if(iSetup==3) {evegen = "urqmd";   pbeam = "12";  setup = "u12";}
 
-  if(iParticle==1) particle = "lambda";
-  if(iParticle==2) particle = "kshort";
+  if(iParticle==1) {particle = "lambda"; greek_particle = "#Lambda";}
+  if(iParticle==2) {particle = "kshort"; greek_particle = "K^{0}_{S}";}
 
   bool draw_fit;
   std::string pol;
@@ -24,7 +24,7 @@ void lambda_ffm(int iSetup=1, int iParticle=1, int iFit=1) {
   Qn::Stat::ErrorType error_mode{Qn::Stat::ErrorType::BOOTSTRAP};
 
   std::string fileName = "/home/oleksii/cbmdir/working/qna/flowfrommodel/cl.ffm." + setup + ".root";
-  std::string fileDv1DyName = "/home/oleksii/cbmdir/working/qna/flowfrommodel/cl.dv1dy_" + pol + ".ffm." + setup + ".root";
+  std::string fileDv1DyName = "/home/oleksii/cbmdir/working/qna/flowfrommodel/cl.dv1dy_" + pol + ".pm2.ffm." + setup + ".root";
 
   SetAxis("centrality", "select");
 
@@ -107,6 +107,7 @@ void lambda_ffm(int iSetup=1, int iParticle=1, int iFit=1) {
     v1_sim.SetErrorType(error_mode);
     v1_sim.SetMeanType(mean_mode);
     v1_sim.SetSliceVariable(axes.at(kSlice).title_.c_str(), axes.at(kSlice).unit_.c_str());
+    v1_sim.SetSliceAxisPrecision(1);
     v1_sim.SetMarker(-1);
     v1_sim.SetIsFillLine(0.4);
     v1_sim.SetPalette(Helper::palette1);
@@ -121,19 +122,21 @@ void lambda_ffm(int iSetup=1, int iParticle=1, int iFit=1) {
 
     HeapPicture pic( (axes.at(kSelect).name_ + "_" + std::to_string(iEdge)).c_str(), {1000, 1000});
 
-    pic.AddText({0.2, 0.90, particle.c_str()}, 0.03);
-    if(evegen == "dcmqgsm") {
-      if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
-      else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
-      pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+    if(evegen == "urqmd") pic.AddText({0.5, 0.90, greek_particle.c_str()}, 0.06);
+    if(particle == "lambda") {
+      if(evegen == "dcmqgsm") {
+        if(pbeam == "12") pic.AddText({0.2, 0.87, "5M Au+Au"}, 0.025);
+        else              pic.AddText({0.2, 0.87, "5.2M Au+Au"}, 0.025);
+        pic.AddText({0.2, 0.84, "DCM-QGSM-SMM"}, 0.025);
+      }
+      if(evegen == "urqmd") {
+        pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
+        pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
+      }
+      pic.AddText({0.2, 0.81, (pbeam + "A GeV/c").c_str()}, 0.025);
+      if(evegen == "urqmd") pic.AddText({0.2, 0.78, (axes.at(kSelect).title_ + ": " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) +
+                              " - " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge+1) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) + axes.at(kSelect).unit_).c_str()}, 0.025);
     }
-    if(evegen == "urqmd") {
-      pic.AddText({0.2, 0.87, "2M Au+Au"}, 0.025);
-      pic.AddText({0.2, 0.84, "UrQMD"}, 0.025);
-    }
-    pic.AddText({0.2, 0.81, (pbeam + "A GeV/c").c_str()}, 0.025);
-    pic.AddText({0.2, 0.78, (axes.at(kSelect).title_ + ": " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) +
-                            " - " + to_string_with_precision(axes.at(kSelect).bin_edges_.at(iEdge+1) + axes.at(kSelect).shift_, axes.at(kSelect).precision_) + axes.at(kSelect).unit_).c_str()}, 0.025);
 
     auto leg1 = new TLegend(/*0.4, 0.8, 0.6, 0.95*/);
 
@@ -164,9 +167,17 @@ void lambda_ffm(int iSetup=1, int iParticle=1, int iFit=1) {
 
 //     pic.SetXRange({-1.05, 1.05});
     pic.CustomizeXRange();
-    pic.CustomizeYRange();
+//     pic.CustomizeYRange();
 //     pic.CustomizeYRangeWithLimits(-y_lim, y_lim);
-    pic.AddLegend(leg1);
+    if(axes.at(kProjection).name_ == "rapidity") {
+      pic.SetXRange({-2.1, 2.1});
+      pic.SetYRange({-0.39, 0.39});
+    } else {
+      if(particle == "lambda") pic.SetXRange({0, 2.1});
+      else                     pic.SetXRange({0.0001, 2.1});
+      pic.SetYRange({-0.07, 0.399});
+    }
+    if(particle=="lambda" && evegen=="urqmd") pic.AddLegend(leg1);
     pic.SetIsCustomizeLegend();
 //         pic.SetGridXY();
     pic.Draw();
