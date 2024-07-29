@@ -36,10 +36,11 @@ void multiplicity_qa(std::vector<std::string> filelist)
   const int Nevents = treeIn->GetEntries();
   TFile* fileOut = TFile::Open("multiplicity_qa.root", "recreate");
   TH1F hMult("hMult", "", 1001, -0.5, 1000.5);
-  TH1F hE("hE", "", 600, 0, 60);
+  TH1F hE("hE", "", 600, 0, 120);
   TH1F hB("hB", "", 600, 0, 20);
   TH2F hB_Mult("hB_Mult", "", 600, 0, 20, 601, -0.5, 600.5);
-  TH2F hB_E("hB_E", "", 600, 0, 20, 600, 0, 60);
+  TH2F hB_E("hB_E", "", 600, 0, 20, 600, 0, 120);
+  TH2F hMult_E("hMult_E", "", 601, -0.5, 600.5, 600, 0, 120);
   hB.GetXaxis()->SetTitle("b, fm");
   hB.GetYaxis()->SetTitle("Entries");
   hE.GetXaxis()->SetTitle("E_{PSD}, GeV");
@@ -50,8 +51,9 @@ void multiplicity_qa(std::vector<std::string> filelist)
   hB_Mult.GetYaxis()->SetTitle("Multiplicity");
   hB_E.GetXaxis()->SetTitle("b, fm");
   hB_E.GetYaxis()->SetTitle("E_{PSD}, GeV");
+  hMult_E.GetXaxis()->SetTitle("Multiplicity");
+  hMult_E.GetYaxis()->SetTitle("E_{PSD}, GeV");
 
-  
   for(int i=0; i<Nevents; i++)
   {
     treeIn -> GetEntry(i);
@@ -72,6 +74,7 @@ void multiplicity_qa(std::vector<std::string> filelist)
 
     hE.Fill(e);
     hB_E.Fill(b, e);
+    hMult_E.Fill(m, e);
   }
   
   hMult.Write();
@@ -79,6 +82,7 @@ void multiplicity_qa(std::vector<std::string> filelist)
   hB_Mult.Write();
   hE.Write();
   hB_E.Write();
+  hMult_E.Write();
   fileOut->Close();  
   
   std::cout << "Macro finished successfully" << std::endl;
