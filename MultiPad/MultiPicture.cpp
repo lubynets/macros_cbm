@@ -88,8 +88,8 @@ void MultiPicture::CropPicture(int i, int j) const {
   const std::string outname = "cropped_" + std::to_string(i) + "_" + std::to_string(j) + ".png";
   const float l = i == 0 ? 0 : left_margins_.at(i);
   const float r = i == nx_-1 ? 0 : right_margins_.at(i);
-  const float b = j == ny_-1 ? 0 : top_margins_.at(j);
-  const float t = j == 0 ? 0 : bottom_margins_.at(j);
+  const float t = j == 0 ? 0 : top_margins_.at(j);
+  const float b = j == ny_-1 ? 0 : bottom_margins_.at(j);
   CropPicture(pad_names_.at(TransformCoordinates(i, j)), l, r, b, t, outname);
 }
 
