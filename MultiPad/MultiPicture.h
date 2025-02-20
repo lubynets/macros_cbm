@@ -19,6 +19,7 @@ public:
 
   void SetVerbose(bool value = true) { verbose_ = value; }
   void SetSaveIntermediatePictures(bool value = true) { save_intermediate_pictures_ = value; }
+  void SetRemoveOriginalPictures(bool value = true) { remove_original_pictures_ = value; }
 
   void SetLeftMargins(const std::vector<float>& margins);
   void SetLeftMargins(float margins);
@@ -28,6 +29,7 @@ public:
   void SetTopMargins(float margins);
   void SetBottomMargins(const std::vector<float>& margins);
   void SetBottomMargins(float margins);
+  void ZeroAllMargins();
 
   void Run();
 
@@ -41,6 +43,7 @@ protected:
   std::vector<float> bottom_margins_{};
   bool verbose_{false};
   bool save_intermediate_pictures_{false};
+  bool remove_original_pictures_{false};
 
   static std::pair<int, int> DeterminePicturesWH(const std::string& name) ;
   void CropPicture(std::string inname, float left, float right, float bottom, float top, const std::string& outname) const;

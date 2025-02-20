@@ -28,6 +28,11 @@ void MultiPicture::Run() {
   if(!save_intermediate_pictures_) {
     ExeBash("rm cropped_* merged_*");
   }
+  if(remove_original_pictures_) {
+    for(auto& pn : pad_names_) {
+      ExeBash(("rm " + pn).c_str());
+    }
+  }
 }
 
 std::pair<int, int> MultiPicture::DeterminePicturesWH(const std::string& name) {
@@ -168,6 +173,13 @@ void MultiPicture::SetBottomMargins(const std::vector<float>& margins) {
     throw std::runtime_error("MultiPicture::SetBottomMargins() - margins.size() != nx_");
   }
   bottom_margins_ = margins;
+}
+
+void MultiPicture::ZeroAllMargins() {
+  SetBottomMargins(0.f);
+  SetTopMargins(0.f);
+  SetLeftMargins(0.f);
+  SetRightMargins(0.f);
 }
 
 void MultiPicture::SetBottomMargins(float margins) {
