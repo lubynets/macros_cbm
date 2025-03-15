@@ -1,4 +1,3 @@
-#include <iostream>
 #include "MultiPicture.h"
 
 // Compile this code using g++ cropAndMerge.cpp ~/path-to-MultiPad/MultiPicture.cpp -I ~/path-to-MultiPad
@@ -21,8 +20,11 @@ int main() {
 
   mpic.SetLeftMargins({0.14, 0.14, 0.14}); // Set margins as they are in root TCanvas
   mpic.SetTopMargins({0.07, 0.07}); // Set margins as they are in root TCanvas
-  mpic.SetRightMargins(0.02); // if all margins are equal call function with a single argument
+  mpic.SetRightMargins(0.03); // if all margins are equal call function with a single argument
   mpic.SetBottomMargins(0.12); // if all margins are equal call function with a single argument
+
+  mpic.SetLeftMarginShifts(0.03);
+  mpic.SetBottomMarginShifts(0.01);
 
   mpic.Run();
 
