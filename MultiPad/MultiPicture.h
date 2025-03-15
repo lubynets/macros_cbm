@@ -29,6 +29,10 @@ public:
   void SetTopMargins(float margins);
   void SetBottomMargins(const std::vector<float>& margins);
   void SetBottomMargins(float margins);
+  void SetLeftMarginShifts(const std::vector<float>& shifts);
+  void SetLeftMarginShifts(float shifts);
+  void SetBottomMarginShifts(const std::vector<float>& shifts);
+  void SetBottomMarginShifts(float shifts);
   void ZeroAllMargins();
 
   void Run();
@@ -41,6 +45,8 @@ protected:
   std::vector<float> right_margins_{};
   std::vector<float> top_margins_{};
   std::vector<float> bottom_margins_{};
+  std::vector<float> left_margin_shifts_{};
+  std::vector<float> bottom_margin_shifts_{};
   bool verbose_{false};
   bool save_intermediate_pictures_{false};
   bool remove_original_pictures_{false};
@@ -48,8 +54,14 @@ protected:
   static std::pair<int, int> DeterminePicturesWH(const std::string& name) ;
   void CropPicture(std::string inname, float left, float right, float bottom, float top, const std::string& outname) const;
   void CropPicture(int i, int j) const;
+  void CropLeftMargin(int j) const;
+  void CropBottomMargin(int i) const;
   void Pdf2Png(const std::string& inname) const;
   void MergeLine(int j) const;
+  void MergeAllWoMargins() const;
+  void MergeLeftMargins() const;
+  void MergeBottomMargins() const;
+  void MergeLeftMarginsToAllWoMargins() const;
   void MergeAll() const;
   void ExeBash(const std::string& command) const;
 
