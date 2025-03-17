@@ -4,6 +4,7 @@
 
 #include "MultiPicture.h"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <utility>
@@ -11,12 +12,14 @@
 MultiPicture::MultiPicture(int nx, int ny) : nx_{nx},
                                              ny_{ny} {
   pad_names_.resize(nx_ * ny_);
-  left_margins_.resize(nx_);
-  right_margins_.resize(nx_);
-  top_margins_.resize(ny_);
-  bottom_margins_.resize(ny_);
-  left_margin_shifts_.resize(ny_-1);
-  bottom_margin_shifts_.resize(nx_-1);
+  left_margins_.resize(nx_, 0.f);
+  right_margins_.resize(nx_, 0.f);
+  top_margins_.resize(ny_, 0.f);
+  bottom_margins_.resize(ny_, 0.f);
+  pixel_sizes_x_.resize(nx_, 0);
+  pixel_sizes_y_.resize(ny_, 0);
+  left_margin_shifts_.resize(ny_-1, 0.f);
+  bottom_margin_shifts_.resize(nx_-1, 0.f);
 }
 
 void MultiPicture::Run() {
@@ -27,16 +30,20 @@ void MultiPicture::Run() {
     MergeLine(j);
   }
   MergeAllWoMargins();
-  for(int j=0; j<ny_; j++) {
-    CropLeftMargin(j);
+  if(!(left_margins_.at(0) == 0.f && bottom_margins_.at(ny_-1) == 0.f)) {
+    for (int j = 0; j < ny_; j++) {
+      CropLeftMargin(j);
+    }
+    for (int i = 0; i < nx_; i++) {
+      CropBottomMargin(i);
+    }
+    MergeLeftMargins();
+    MergeBottomMargins();
+    MergeLeftMarginsToAllWoMargins();
+    MergeAll();
+  } else {
+    ExeBash("mv out.womargins.png out.png");
   }
-  for(int i=0; i<nx_; i++) {
-    CropBottomMargin(i);
-  }
-  MergeLeftMargins();
-  MergeBottomMargins();
-  MergeLeftMarginsToAllWoMargins();
-  MergeAll();
   if(!save_intermediate_pictures_) {
     ExeBash("rm cropped_* merged_* bottom_margin* left_margin* out.*margins.png");
   }
@@ -47,7 +54,7 @@ void MultiPicture::Run() {
   }
 }
 
-std::pair<int, int> MultiPicture::DeterminePicturesWH(const std::string& name) {
+std::pair<int, int> MultiPicture::DeterminePicturesWH(const std::string& name) const {
   FILE* pFile;
   char line[1024];
 
@@ -60,6 +67,11 @@ std::pair<int, int> MultiPicture::DeterminePicturesWH(const std::string& name) {
   fgets(line, sizeof(line), pFile);
   int H;
   sscanf(line, "%d", &H);
+
+  const int k = std::distance(pad_names_.begin(), std::find_if(pad_names_.begin(), pad_names_.end(), [&name] (const std::string& s) { return s.substr(0, s.size()-4) == name.substr(0, name.size()-4); }));
+  auto [i, j] = TransformCoordinates(k);
+  if(pixel_sizes_x_.at(i) != 0 && pixel_sizes_x_.at(i) != W) std::cout << "Warning: DeterminePicturesWH() - pixel_sizes_x_ != W\n";
+  if(pixel_sizes_y_.at(j) != 0 && pixel_sizes_y_.at(j) != H) std::cout << "Warning: DeterminePicturesWH() - pixel_sizes_y_ != H\n";
 
   return std::make_pair(W, H);
 }
@@ -107,6 +119,8 @@ void MultiPicture::CropPicture(int i, int j) const {
 
 void MultiPicture::CropLeftMargin(int j) const {
   const std::string outname = "left_margin_" + std::to_string(j) + ".png";
+  if(j != 0 && top_margins_.at(j) + left_margin_shifts_.at(j-1) < 0) throw std::runtime_error("CropLeftMargin() - top_margins_.at(j) + left_margin_shifts_.at(j-1) < 0");
+  if(j != ny_-1 && bottom_margins_.at(j) - left_margin_shifts_.at(j) < 0) throw std::runtime_error("CropLeftMargin() - bottom_margins_.at(j) - left_margin_shifts_.at(j) < 0");
   const float l = 0;
   const float r = 1 - left_margins_.at(0);
   const float t = j == 0 ? 0 : top_margins_.at(j) + left_margin_shifts_.at(j-1);
@@ -116,6 +130,8 @@ void MultiPicture::CropLeftMargin(int j) const {
 
 void MultiPicture::CropBottomMargin(int i) const {
   const std::string outname = "bottom_margin_" + std::to_string(i) + ".png";
+  if(i != 0 && left_margins_.at(i) - bottom_margin_shifts_.at(i-1) < 0) throw std::runtime_error("CropBottomMargin() - left_margins_.at(i) - bottom_margin_shifts_.at(i-1) < 0");
+  if(i != nx_-1 && right_margins_.at(i) + bottom_margin_shifts_.at(i) < 0) throw std::runtime_error("CropBottomMargin() - right_margins_.at(i) + bottom_margin_shifts_.at(i) < 0");
   const float l = i == 0 ? 0 : left_margins_.at(i) - bottom_margin_shifts_.at(i-1);
   const float r = i == nx_-1 ? 0 : right_margins_.at(i) + bottom_margin_shifts_.at(i);
   const float t = 1 - bottom_margins_.at(ny_-1);
@@ -127,7 +143,10 @@ void MultiPicture::Pdf2Png(const std::string& inname) const {
   if(inname.substr(inname.size()-3) != "pdf") {
     throw std::runtime_error("MultiPicture::Pdf2Png() - requires pdf file as input");
   }
-  const std::string command = "pdftoppm -png -cropbox -singlefile " + inname + " " + inname.substr(0, inname.size()-4);
+  const int k = std::distance(pad_names_.begin(), std::find(pad_names_.begin(), pad_names_.end(), inname.c_str()));
+  auto [i, j] = TransformCoordinates(k);
+  const std::string scaleTo = (pixel_sizes_x_.at(i) != 0 && pixel_sizes_y_.at(j) != 0) ? "-scale-to-x " + std::to_string(pixel_sizes_y_.at(j)) + " -scale-to-y " + std::to_string(pixel_sizes_x_.at(i)) + " " : "";
+  const std::string command = "pdftoppm -png " + scaleTo + " -cropbox -singlefile " + inname + " " + inname.substr(0, inname.size()-4);
 
   ExeBash(command);
 }
@@ -188,6 +207,18 @@ int MultiPicture::TransformCoordinates(int i, int j) const {
   return k;
 }
 
+std::pair<int, int> MultiPicture::TransformCoordinates(int k) const {
+  if(k<0 || k>=nx_*ny_) {
+    std::cout << "Error: MultiPicture::TransformCoordinates() - k<0 || k>=nx_*ny_\n";
+    std::cout << "k = " << k << ", nx_ = " << nx_ << ", ny_ = " << ny_ << "\n";
+    throw;
+  }
+  const int I = k%nx_;
+  const int J = k/nx_;
+
+  return std::make_pair(I, J);
+}
+
 void MultiPicture::SetPictureName(int i, int j, std::string name) {
   pad_names_.at(TransformCoordinates(i, j)) = std::move(name);
 }
@@ -235,16 +266,40 @@ void MultiPicture::SetBottomMargins(const std::vector<float>& margins) {
   bottom_margins_ = margins;
 }
 
-void MultiPicture::ZeroAllMargins() {
-  SetBottomMargins(0.f);
-  SetTopMargins(0.f);
-  SetLeftMargins(0.f);
-  SetRightMargins(0.f);
-}
+//void MultiPicture::ZeroAllMargins() {
+//  SetBottomMargins(0.f);
+//  SetTopMargins(0.f);
+//  SetLeftMargins(0.f);
+//  SetRightMargins(0.f);
+//}
 
 void MultiPicture::SetBottomMargins(float margins) {
   std::vector<float> vec = std::vector<float>(ny_, margins);
   SetBottomMargins(vec);
+}
+
+void MultiPicture::SetPixelSizesX(const std::vector<int>& sizes) {
+  if(sizes.size() != nx_) {
+    throw std::runtime_error("MultiPicture::SetPixelSizesX() - sizes.size() != nx_");
+  }
+  pixel_sizes_x_ = sizes;
+}
+
+void MultiPicture::SetPixelSizesX(int sizes) {
+  std::vector<int> vec = std::vector<int>(nx_, sizes);
+  SetPixelSizesX(vec);
+}
+
+void MultiPicture::SetPixelSizesY(const std::vector<int>& sizes) {
+  if(sizes.size() != ny_) {
+    throw std::runtime_error("MultiPicture::SetPixelSizesY() - sizes.size() != ny_");
+  }
+  pixel_sizes_y_ = sizes;
+}
+
+void MultiPicture::SetPixelSizesY(int sizes) {
+  std::vector<int> vec = std::vector<int>(ny_, sizes);
+  SetPixelSizesY(vec);
 }
 
 void MultiPicture::SetLeftMarginShifts(const std::vector<float>& shifts) {

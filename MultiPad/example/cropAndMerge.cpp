@@ -17,7 +17,7 @@ int main() {
   mpic.SetPictureName(1, 1, "bottomMid.pdf");
   mpic.SetPictureName(2, 0, "topRight.pdf");
   mpic.SetPictureName(2, 1, "bottomRight.pdf");
-
+  
   mpic.SetLeftMargins({0.14, 0.14, 0.14}); // Set margins as they are in root TCanvas
   mpic.SetTopMargins({0.07, 0.07}); // Set margins as they are in root TCanvas
   mpic.SetRightMargins(0.03); // if all margins are equal call function with a single argument
@@ -25,6 +25,11 @@ int main() {
 
   mpic.SetLeftMarginShifts(0.03);
   mpic.SetBottomMarginShifts(0.01);
+
+  // When using this functions, in the macro which produces input pdf or png
+  // there must be explicit call of TCanvas::SetCanvasSize(1200, 800);
+  mpic.SetPixelSizesX(1200);
+  mpic.SetPixelSizesY(800);
 
   mpic.Run();
 

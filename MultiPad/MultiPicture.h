@@ -29,11 +29,15 @@ public:
   void SetTopMargins(float margins);
   void SetBottomMargins(const std::vector<float>& margins);
   void SetBottomMargins(float margins);
+  void SetPixelSizesX(const std::vector<int>& sizes);
+  void SetPixelSizesX(int sizes);
+  void SetPixelSizesY(const std::vector<int>& sizes);
+  void SetPixelSizesY(int sizes);
   void SetLeftMarginShifts(const std::vector<float>& shifts);
   void SetLeftMarginShifts(float shifts);
   void SetBottomMarginShifts(const std::vector<float>& shifts);
   void SetBottomMarginShifts(float shifts);
-  void ZeroAllMargins();
+//  void ZeroAllMargins();
 
   void Run();
 
@@ -45,13 +49,15 @@ protected:
   std::vector<float> right_margins_{};
   std::vector<float> top_margins_{};
   std::vector<float> bottom_margins_{};
+  std::vector<int> pixel_sizes_x_{};
+  std::vector<int> pixel_sizes_y_{};
   std::vector<float> left_margin_shifts_{};
   std::vector<float> bottom_margin_shifts_{};
   bool verbose_{false};
   bool save_intermediate_pictures_{false};
   bool remove_original_pictures_{false};
 
-  static std::pair<int, int> DeterminePicturesWH(const std::string& name) ;
+  std::pair<int, int> DeterminePicturesWH(const std::string& name) const;
   void CropPicture(std::string inname, float left, float right, float bottom, float top, const std::string& outname) const;
   void CropPicture(int i, int j) const;
   void CropLeftMargin(int j) const;
@@ -66,6 +72,7 @@ protected:
   void ExeBash(const std::string& command) const;
 
   int TransformCoordinates(int i, int j) const;
+  std::pair<int, int> TransformCoordinates(int k) const;
 
   template <typename T>
   static std::string to_string_with_precision(T a_value, int n = 6);
