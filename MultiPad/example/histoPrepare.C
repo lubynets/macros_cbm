@@ -1,6 +1,9 @@
 void histoPrepare() {
   gROOT->Macro("/home/oleksii/alidir/macros_on_git/qa2/exe_based/styles/mc_qa2.style.cc");
 
+  const std::string extension = "pdf";
+//   const std::string extension = "png";
+
   const std::vector<std::pair<Color_t, std::string>> histos {
     {kBlue, "topLeft"},
     {kRed, "topMid"},
@@ -14,6 +17,7 @@ void histoPrepare() {
   for(auto& h : histos) {
     TCanvas cc("cc", "", 1200, 800);
     cc.SetRightMargin(0.03);
+    cc.SetCanvasSize(1200, 800);
     TH1F histo("histo", "", 100, 0, 100);
     histo.GetXaxis()->SetTitle("X, a.u.");
     histo.GetYaxis()->SetTitle("Entries");
@@ -32,7 +36,7 @@ void histoPrepare() {
       histo.Fill(gRandom->Gaus(50, 10));
     }
     histo.Draw();
-    cc.Print((h.second + ".pdf").c_str(), "pdf");
+    cc.Print((h.second + "." + extension).c_str(), extension.c_str());
     iH++;
   }
 }
