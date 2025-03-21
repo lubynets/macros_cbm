@@ -32,14 +32,18 @@ void MultiPicture::Run() {
   MergeAllWoMargins();
   if(!(left_margins_.at(0) == 0.f && bottom_margins_.at(ny_-1) == 0.f)) {
     for (int j = 0; j < ny_; j++) {
-      CropLeftMargin(j);
+      if(left_margins_.at(0) != 0.f) CropLeftMargin(j);
     }
     for (int i = 0; i < nx_; i++) {
-      CropBottomMargin(i);
+      if(bottom_margins_.at(ny_-1) != 0.f) CropBottomMargin(i);
     }
-    MergeLeftMargins();
-    MergeBottomMargins();
-    MergeLeftMarginsToAllWoMargins();
+    if(left_margins_.at(0) != 0) {
+      MergeLeftMargins();
+    } else {
+      ExeBash("mv out.womargins.png out.withleftmargins.png");
+    }
+    if(bottom_margins_.at(ny_-1) != 0.f) MergeBottomMargins();
+    if(left_margins_.at(0) != 0) MergeLeftMarginsToAllWoMargins();
     MergeAll();
   } else {
     ExeBash("mv out.womargins.png out.png");
