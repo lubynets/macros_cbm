@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <vector>
+#include <sstream>
 #include <string>
 
 class MultiPicture {
@@ -37,7 +38,6 @@ public:
   void SetLeftMarginShifts(float shifts);
   void SetBottomMarginShifts(const std::vector<float>& shifts);
   void SetBottomMarginShifts(float shifts);
-//  void ZeroAllMargins();
 
   void Run();
 
@@ -75,8 +75,14 @@ protected:
   std::pair<int, int> TransformCoordinates(int k) const;
 
   template <typename T>
-  static std::string to_string_with_precision(T a_value, int n = 6);
+  static std::string to_string_with_precision(T a_value, int n = 6) {
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << a_value;
+    return out.str();
+  }
 
+  static std::string to_string_with_forward_zero(int value);
 };
 
 

@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <iostream>
-#include <sstream>
 #include <utility>
 
 MultiPicture::MultiPicture(int nx, int ny) : nx_{nx},
@@ -113,7 +112,7 @@ void MultiPicture::CropPicture(std::string inname, float left, float right, floa
 }
 
 void MultiPicture::CropPicture(int i, int j) const {
-  const std::string outname = "cropped_" + std::to_string(i) + "_" + std::to_string(j) + ".png";
+  const std::string outname = "cropped_" + to_string_with_forward_zero(i) + "_" + to_string_with_forward_zero(j) + ".png";
   const float l = left_margins_.at(i);
   const float r = i == nx_-1 ? 0 : right_margins_.at(i);
   const float t = j == 0 ? 0 : top_margins_.at(j);
@@ -122,7 +121,7 @@ void MultiPicture::CropPicture(int i, int j) const {
 }
 
 void MultiPicture::CropLeftMargin(int j) const {
-  const std::string outname = "left_margin_" + std::to_string(j) + ".png";
+  const std::string outname = "left_margin_" + to_string_with_forward_zero(j) + ".png";
   if(j != 0 && top_margins_.at(j) + left_margin_shifts_.at(j-1) < 0) throw std::runtime_error("CropLeftMargin() - top_margins_.at(j) + left_margin_shifts_.at(j-1) < 0");
   if(j != ny_-1 && bottom_margins_.at(j) - left_margin_shifts_.at(j) < 0) throw std::runtime_error("CropLeftMargin() - bottom_margins_.at(j) - left_margin_shifts_.at(j) < 0");
   const float l = 0;
@@ -133,7 +132,7 @@ void MultiPicture::CropLeftMargin(int j) const {
 }
 
 void MultiPicture::CropBottomMargin(int i) const {
-  const std::string outname = "bottom_margin_" + std::to_string(i) + ".png";
+  const std::string outname = "bottom_margin_" + to_string_with_forward_zero(i) + ".png";
   if(i != 0 && left_margins_.at(i) - bottom_margin_shifts_.at(i-1) < 0) throw std::runtime_error("CropBottomMargin() - left_margins_.at(i) - bottom_margin_shifts_.at(i-1) < 0");
   if(i != nx_-1 && right_margins_.at(i) + bottom_margin_shifts_.at(i) < 0) throw std::runtime_error("CropBottomMargin() - right_margins_.at(i) + bottom_margin_shifts_.at(i) < 0");
   const float l = i == 0 ? 0 : left_margins_.at(i) - bottom_margin_shifts_.at(i-1);
@@ -156,7 +155,7 @@ void MultiPicture::Pdf2Png(const std::string& inname) const {
 }
 
 void MultiPicture::MergeLine(int j) const {
-  const std::string command = "convert +append cropped_*_" + std::to_string(j) + ".png merged_" + std::to_string(j) + ".png";
+  const std::string command = "convert +append cropped_*_" + to_string_with_forward_zero(j) + ".png merged_" + to_string_with_forward_zero(j) + ".png";
 
   ExeBash(command);
 }
@@ -164,7 +163,7 @@ void MultiPicture::MergeLine(int j) const {
 void MultiPicture::MergeAllWoMargins() const {
   std::string command = "convert -append ";
   for(int j=0; j<ny_; j++) {
-    command += "merged_" + std::to_string(j) + ".png ";
+    command += "merged_" + to_string_with_forward_zero(j) + ".png ";
   }
   command += "out.womargins.png";
 
@@ -174,7 +173,7 @@ void MultiPicture::MergeAllWoMargins() const {
 void MultiPicture::MergeLeftMargins() const {
   std::string command = "convert -append ";
   for(int j=0; j<ny_; j++) {
-    command += "left_margin_" + std::to_string(j) + ".png ";
+    command += "left_margin_" + to_string_with_forward_zero(j) + ".png ";
   }
   command += "out.leftmargins.png";
 
@@ -184,7 +183,7 @@ void MultiPicture::MergeLeftMargins() const {
 void MultiPicture::MergeBottomMargins() const {
   std::string command = "convert +append ";
   for(int i=0; i<nx_; i++) {
-    command += "bottom_margin_" + std::to_string(i) + ".png ";
+    command += "bottom_margin_" + to_string_with_forward_zero(i) + ".png ";
   }
   command += "out.bottommargins.png";
 
@@ -270,13 +269,6 @@ void MultiPicture::SetBottomMargins(const std::vector<float>& margins) {
   bottom_margins_ = margins;
 }
 
-//void MultiPicture::ZeroAllMargins() {
-//  SetBottomMargins(0.f);
-//  SetTopMargins(0.f);
-//  SetLeftMargins(0.f);
-//  SetRightMargins(0.f);
-//}
-
 void MultiPicture::SetBottomMargins(float margins) {
   std::vector<float> vec = std::vector<float>(ny_, margins);
   SetBottomMargins(vec);
@@ -335,10 +327,6 @@ void MultiPicture::ExeBash(const std::string& command) const {
   std::system(command.c_str());
 }
 
-template<typename T>
-std::string MultiPicture::to_string_with_precision(const T a_value, int n) {
-  std::ostringstream out;
-  out.precision(n);
-  out << std::fixed << a_value;
-  return out.str();
+std::string MultiPicture::to_string_with_forward_zero(int value) {
+  return (value > 9 ? "" : "0") + std::to_string(value);
 }
