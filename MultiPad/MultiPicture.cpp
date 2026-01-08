@@ -155,39 +155,72 @@ void MultiPicture::Pdf2Png(const std::string& inname) const {
 }
 
 void MultiPicture::MergeLine(int j) const {
-  const std::string command = "convert +append cropped_*_" + to_string_with_forward_zero(j) + ".png merged_" + to_string_with_forward_zero(j) + ".png";
-
-  ExeBash(command);
+  if(merge_one_by_one_) {
+    ExeBash("mv cropped_00_" + to_string_with_forward_zero(j) + ".png cropped_merge_base.png");
+    for(int i=1; i<nx_; ++i) {
+      const std::string command = "convert +append cropped_merge_base.png cropped_" + to_string_with_forward_zero(i) + "_" + to_string_with_forward_zero(j) + ".png cropped_merge_result.png";
+      ExeBash(command);
+      ExeBash("mv cropped_merge_result.png cropped_merge_base.png");
+    }
+    ExeBash("mv cropped_merge_base.png merged_" + to_string_with_forward_zero(j) + ".png");
+  } else {
+    const std::string command = "convert +append cropped_*_" + to_string_with_forward_zero(j) + ".png merged_" + to_string_with_forward_zero(j) + ".png";
+    ExeBash(command);
+  }
 }
 
 void MultiPicture::MergeAllWoMargins() const {
-  std::string command = "convert -append ";
-  for(int j=0; j<ny_; j++) {
-    command += "merged_" + to_string_with_forward_zero(j) + ".png ";
+  if(merge_one_by_one_) {
+    ExeBash("mv merged_00.png merged_merge_base.png");
+    for(int j=1; j<ny_; j++) {
+      ExeBash("convert -append merged_merge_base.png merged_" + to_string_with_forward_zero(j) + ".png merged_merge_result.png");
+      ExeBash("mv merged_merge_result.png merged_merge_base.png");
+    }
+    ExeBash("mv merged_merge_base.png out.womargins.png");
+  } else {
+    std::string command = "convert -append ";
+    for(int j=0; j<ny_; j++) {
+      command += "merged_" + to_string_with_forward_zero(j) + ".png ";
+    }
+    command += "out.womargins.png";
+    ExeBash(command);
   }
-  command += "out.womargins.png";
-
-  ExeBash(command);
 }
 
 void MultiPicture::MergeLeftMargins() const {
-  std::string command = "convert -append ";
-  for(int j=0; j<ny_; j++) {
-    command += "left_margin_" + to_string_with_forward_zero(j) + ".png ";
+  if(merge_one_by_one_) {
+    ExeBash("mv left_margin_00.png left_margin_merge_base.png");
+    for(int j=1; j<ny_; j++) {
+      ExeBash("convert -append left_margin_merge_base.png left_margin_" + to_string_with_forward_zero(j) + ".png left_margin_merge_result.png");
+      ExeBash("mv left_margin_merge_result.png left_margin_merge_base.png");
+    }
+    ExeBash("mv left_margin_merge_base.png out.leftmargins.png");
+  } else {
+    std::string command = "convert -append ";
+    for(int j=0; j<ny_; j++) {
+      command += "left_margin_" + to_string_with_forward_zero(j) + ".png ";
+    }
+    command += "out.leftmargins.png";
+    ExeBash(command);
   }
-  command += "out.leftmargins.png";
-
-  ExeBash(command);
 }
 
 void MultiPicture::MergeBottomMargins() const {
-  std::string command = "convert +append ";
-  for(int i=0; i<nx_; i++) {
-    command += "bottom_margin_" + to_string_with_forward_zero(i) + ".png ";
+  if(merge_one_by_one_) {
+    ExeBash("mv bottom_margin_00.png bottom_margin_merge_base.png");
+    for(int i=1; i<nx_; i++) {
+      ExeBash("convert +append bottom_margin_merge_base.png bottom_margin_" + to_string_with_forward_zero(i) + ".png bottom_margin_merge_result.png");
+      ExeBash("mv bottom_margin_merge_result.png bottom_margin_merge_base.png");
+    }
+    ExeBash("mv bottom_margin_merge_base.png out.bottommargins.png");
+  } else {
+    std::string command = "convert +append ";
+    for(int i=0; i<nx_; i++) {
+      command += "bottom_margin_" + to_string_with_forward_zero(i) + ".png ";
+    }
+    command += "out.bottommargins.png";
+    ExeBash(command);
   }
-  command += "out.bottommargins.png";
-
-  ExeBash(command);
 }
 
 void MultiPicture::MergeLeftMarginsToAllWoMargins() const {
