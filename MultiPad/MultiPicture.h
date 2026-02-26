@@ -39,6 +39,7 @@ public:
   void SetLeftMarginShifts(float shifts);
   void SetBottomMarginShifts(const std::vector<float>& shifts);
   void SetBottomMarginShifts(float shifts);
+  void SetOutputFileName(std::string name);
 
   void Run();
 
@@ -54,6 +55,7 @@ protected:
   std::vector<int> pixel_sizes_y_{};
   std::vector<float> left_margin_shifts_{};
   std::vector<float> bottom_margin_shifts_{};
+  std::string outfile_name_{"out.png"};
   bool verbose_{false};
   bool save_intermediate_pictures_{false};
   bool remove_original_pictures_{false};

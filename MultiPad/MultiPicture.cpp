@@ -45,7 +45,7 @@ void MultiPicture::Run() {
     if(left_margins_.at(0) != 0) MergeLeftMarginsToAllWoMargins();
     MergeAll();
   } else {
-    ExeBash("mv out.womargins.png out.png");
+    ExeBash("mv out.womargins.png " + outfile_name_);
   }
   if(!save_intermediate_pictures_) {
     ExeBash("rm cropped_* merged_* bottom_margin* left_margin* out.*margins.png");
@@ -362,4 +362,9 @@ void MultiPicture::ExeBash(const std::string& command) const {
 
 std::string MultiPicture::to_string_with_forward_zero(int value) {
   return (value > 9 ? "" : "0") + std::to_string(value);
+}
+
+void MultiPicture::SetOutputFileName(std::string name) {
+  outfile_name_ = std::move(name);
+  if (outfile_name_.size() < 4 || outfile_name_.compare(outfile_name_.size() - 4, 4, ".png") != 0) outfile_name_ += ".png";
 }
