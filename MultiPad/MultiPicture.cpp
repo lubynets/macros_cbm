@@ -44,6 +44,7 @@ void MultiPicture::Run() {
     if(bottom_margins_.at(ny_-1) != 0.f) MergeBottomMargins();
     if(left_margins_.at(0) != 0) MergeLeftMarginsToAllWoMargins();
     MergeAll();
+    ExeBash("mv out.png " + outfile_name_);
   } else {
     ExeBash("mv out.womargins.png " + outfile_name_);
   }
